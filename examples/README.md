@@ -69,3 +69,4 @@ Follow these simple steps in the web interface (at `http://localhost:8000`):
 7. **Download Result:**
    - Download the generated ZIP package containing 5 individually personalized DOCX certificates, or download individual documents directly.
    - View the execution audit record in **History**.
+

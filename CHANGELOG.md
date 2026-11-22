@@ -52,3 +52,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Zero-secret `.env.example` template.
   - GitHub Actions CI pipeline testing code quality (`ruff check`, `ruff format`) and test suite (`pytest`) on Python 3.12.
   - Ready-to-use sample files and 60-second walkthrough in `examples/`.
+

@@ -93,3 +93,4 @@ ruff format .
 3. Ensure all tests pass (`pytest`) and Ruff checks succeed (`ruff check . && ruff format --check .`).
 4. If your change alters database schemas, include a new Django migration. Never modify already committed migrations.
 5. Submit a pull request to `main` with a clear description of the problem solved and test coverage added.
+
