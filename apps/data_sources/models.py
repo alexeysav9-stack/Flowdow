@@ -109,7 +109,8 @@ class DataSource(TimeStampedModel):
         ordering = ["-created_at"]
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.format.upper()}, {self.row_count} строк)"
+        rows_label = _("строк")
+        return f"{self.name} ({self.format.upper()}, {self.row_count} {rows_label})"
 
     # Backwards compatibility properties
     @property

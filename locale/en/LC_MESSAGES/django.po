@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flowdow 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 19:40+0300\n"
+"POT-Creation-Date: 2026-11-22 22:25+0300\n"
 "PO-Revision-Date: 2026-11-22 19:24+0300\n"
 "Last-Translator: Flowdow Team\n"
 "Language-Team: English\n"
@@ -28,27 +28,368 @@ msgstr "Operator"
 msgid "Наблюдатель"
 msgstr "Viewer"
 
-#: apps/data_sources/models.py:10
+#: apps/data_sources/forms.py:17
+msgid "Наименование источника"
+msgstr "Source Name"
+
+#: apps/data_sources/forms.py:21
+msgid "Например: Список сотрудников 2024"
+msgstr "e.g. Employee Roster 2024"
+
+#: apps/data_sources/forms.py:24
+msgid "Если не заполнено, будет использовано исходное имя файла."
+msgstr "If left blank, the original filename will be used."
+
+#: apps/data_sources/forms.py:28
+msgid "Файл таблицы (CSV или XLSX)"
+msgstr "Spreadsheet File (CSV or XLSX)"
+
+#: apps/data_sources/forms.py:35
+msgid "Максимальный размер: 20 МБ. Поддерживаются форматы .csv и .xlsx."
+msgstr "Maximum size: 20 MB. Supported formats: .csv and .xlsx."
+
+#: apps/data_sources/forms.py:40 apps/data_sources/models.py:67
+msgid "Имя листа таблицы"
+msgstr "Worksheet Name"
+
+#: apps/data_sources/forms.py:44
+msgid "Оставьте пустым для первого активного листа"
+msgstr "Leave empty for the first active sheet"
+
+#: apps/data_sources/forms.py:47
+msgid "Применяется только для файлов Excel (.xlsx)."
+msgstr "Applies only to Excel (.xlsx) files."
+
+#: apps/data_sources/forms.py:52
+msgid "Описание источника данных"
+msgstr "Data Source Description"
+
+#: apps/data_sources/forms.py:57
+msgid "Краткое пояснение содержимого набора данных..."
+msgstr "Brief summary of the dataset contents..."
+
+#: apps/data_sources/forms.py:65
+msgid "Файл таблицы не выбран."
+msgstr "No spreadsheet file selected."
+
+#: apps/data_sources/forms.py:75
+msgid "Набор данных"
+msgstr "Dataset"
+
+#: apps/data_sources/models.py:25
 msgid "Значения через запятую (CSV)"
 msgstr "Comma-Separated Values (CSV)"
 
-#: apps/data_sources/models.py:11
+#: apps/data_sources/models.py:26
 msgid "Электронная таблица Excel (XLSX)"
 msgstr "Microsoft Excel Spreadsheet (XLSX)"
 
+#: apps/data_sources/models.py:34
+msgid "В ожидании"
+msgstr "Pending"
+
+#: apps/data_sources/models.py:35 apps/generation/models.py:35
+#: templates/data_sources/detail.html:79 templates/data_sources/list.html:69
+#: templates/generation/list.html:86
+msgid "Обработка"
+msgstr "Processing"
+
+#: apps/data_sources/models.py:36 templates/data_sources/detail.html:77
+#: templates/data_sources/list.html:65
+msgid "Готов"
+msgstr "Ready"
+
+#: apps/data_sources/models.py:37 apps/generation/models.py:37
+#: apps/generation/models.py:42 templates/data_sources/list.html:73
+#: templates/generation/detail.html:26 templates/generation/detail.html:155
+#: templates/generation/list.html:82
+msgid "Ошибка"
+msgstr "Failed"
+
+#: apps/data_sources/models.py:45
+msgid "Наименование набора данных"
+msgstr "Dataset Name"
+
+#: apps/data_sources/models.py:49
+msgid "Файл данных"
+msgstr "Data File"
+
+#: apps/data_sources/models.py:55
+msgid "Формат файла"
+msgstr "File Format"
+
+#: apps/data_sources/models.py:61
+msgid "Статус обработки"
+msgstr "Processing Status"
+
+#: apps/data_sources/models.py:68
+msgid "Имя листа для файлов Excel (XLSX)."
+msgstr "Worksheet name for Excel files (XLSX)."
+
+#: apps/data_sources/models.py:73
+msgid "Заголовки колонок"
+msgstr "Column Headers"
+
+#: apps/data_sources/models.py:74
+msgid "Список извлеченных заголовков колонок."
+msgstr "List of extracted column headers."
+
+#: apps/data_sources/models.py:78
+msgid "Количество строк"
+msgstr "Row Count"
+
+#: apps/data_sources/models.py:79
+msgid "Общее количество строк данных (без заголовка)."
+msgstr "Total data row count (excluding header)."
+
+#: apps/data_sources/models.py:83
+msgid "Количество колонок"
+msgstr "Columns Count"
+
+#: apps/data_sources/models.py:84
+msgid "Количество валидных распознанных колонок."
+msgstr "Number of valid detected columns."
+
+#: apps/data_sources/models.py:89 apps/mapping/models.py:37
+#: apps/templates_manager/models.py:69 templates/documents/list.html:26
+msgid "Описание"
+msgstr "Description"
+
+#: apps/data_sources/models.py:94 apps/generation/models.py:109
+#: templates/generation/detail.html:134
+msgid "Диагностика ошибок"
+msgstr "Error Diagnostics"
+
+#: apps/data_sources/models.py:95
+msgid "Сообщение об ошибке, если импорт завершился со сбоем."
+msgstr "Error message if the import failed."
+
+#: apps/data_sources/models.py:103
+msgid "Кем загружен"
+msgstr "Uploaded By"
+
+#: apps/data_sources/models.py:107 apps/data_sources/models.py:140
+#: apps/generation/models.py:60 apps/mapping/forms.py:24
+#: apps/mapping/models.py:32 templates/generation/list.html:37
+#: templates/mapping/list.html:37
+msgid "Источник данных"
+msgstr "Data Source"
+
+#: apps/data_sources/models.py:108 apps/data_sources/views.py:32
+#: templates/components/sidebar.html:28 templates/core/dashboard.html:27
+#: templates/data_sources/detail.html:4 templates/data_sources/detail.html:9
+#: templates/data_sources/list.html:4 templates/data_sources/list.html:9
+#: templates/data_sources/upload.html:9
+msgid "Источники данных"
+msgstr "Data Sources"
+
+#: apps/data_sources/models.py:112 templates/generation/wizard.html:131
+msgid "строк"
+msgstr "rows"
+
+#: apps/data_sources/models.py:143
+msgid "Номер строки"
+msgstr "Row Number"
+
+#: apps/data_sources/models.py:144
+msgid "Порядковый номер строки в исходном файле (1-based, без заголовка)."
+msgstr "Row number in source file (1-based, excluding header)."
+
+#: apps/data_sources/models.py:148
+msgid "Данные строки"
+msgstr "Row Data"
+
+#: apps/data_sources/models.py:149
+msgid "Динамический словарь {имя_колонки: значение}."
+msgstr "Dynamic dictionary {column_name: value}."
+
+#: apps/data_sources/models.py:153 apps/generation/models.py:142
+#: templates/generation/detail.html:143
+msgid "Запись данных"
+msgstr "Data Record"
+
+#: apps/data_sources/models.py:154
+msgid "Записи данных"
+msgstr "Data Records"
+
+#: apps/data_sources/services.py:67
+msgid ""
+"У вашей роли недостаточно прав для загрузки или удаления источников данных."
+msgstr "Your role does not have permission to upload or delete data sources."
+
+#: apps/data_sources/services.py:87
+msgid "Загруженный файл пуст (0 байт)."
+msgstr "Uploaded file is empty (0 bytes)."
+
+#: apps/data_sources/services.py:92
+#, python-format
+msgid "Размер файла превышает допустимый предел %(max_mb)d МБ."
+msgstr "File size exceeds allowed limit of %(max_mb)d MB."
+
+#: apps/data_sources/services.py:99
+#, python-format
+msgid "Неподдерживаемый формат файла «%(ext)s». Разрешены только: .csv, .xlsx"
+msgstr "Unsupported file format '%(ext)s'. Allowed formats: .csv, .xlsx"
+
+#: apps/data_sources/services.py:122
+msgid "Файл не является корректным архивом Excel SpreadsheetML (.xlsx)."
+msgstr "File is not a valid Excel SpreadsheetML archive (.xlsx)."
+
+#: apps/data_sources/services.py:132
+msgid "Архив XLSX не содержит структуры рабочей книги Excel."
+msgstr "XLSX archive does not contain an Excel workbook structure."
+
+#: apps/data_sources/services.py:139
+#, python-format
+msgid "В архиве обнаружен недопустимый файл %(name)s."
+msgstr "Unsafe file '%(name)s' detected inside archive."
+
+#: apps/data_sources/services.py:150
+msgid "Размер распакованных данных превышает лимит безопасности (100 МБ)."
+msgstr "Uncompressed data size exceeds safety limit (100 MB)."
+
+#: apps/data_sources/services.py:157
+msgid "Подозрительно высокий коэффициент сжатия (возможная zip-бомба)."
+msgstr "Suspiciously high compression ratio (potential zip bomb)."
+
+#: apps/data_sources/services.py:161
+msgid "Файл повреждён или не является валидным ZIP-контейнером."
+msgstr "File is corrupted or not a valid ZIP container."
+
+#: apps/data_sources/services.py:169
+msgid "Файл CSV содержит бинарные нулевые байты."
+msgstr "CSV file contains binary null bytes."
+
+#: apps/data_sources/services.py:185
+msgid "Не удалось распознать кодировку CSV. Требуется UTF-8 или UTF-8 с BOM."
+msgstr "Could not detect CSV encoding. UTF-8 or UTF-8 with BOM is required."
+
+#: apps/data_sources/services.py:216
+msgid "Файл CSV пуст или не содержит данных."
+msgstr "CSV file is empty or contains no data."
+
+#: apps/data_sources/services.py:230
+msgid "Файл CSV не содержит строк с данными."
+msgstr "CSV file does not contain any data rows."
+
+#: apps/data_sources/services.py:238
+msgid "Файл CSV не содержит заголовков колонок."
+msgstr "CSV file does not contain column headers."
+
+#: apps/data_sources/services.py:242
+#, python-format
+msgid "Количество колонок (%(count)d) превышает допустимый лимит %(max)d."
+msgstr "Column count (%(count)d) exceeds allowed limit of %(max)d."
+
+#: apps/data_sources/services.py:250
+#, python-format
+msgid ""
+"Колонка №%(idx)d имеет пустой заголовок. Все колонки должны быть названы."
+msgstr "Column #%(idx)d has an empty header. All columns must be named."
+
+#: apps/data_sources/services.py:260
+#, python-format
+msgid "Обнаружены повторяющиеся названия колонок: %(cols)s."
+msgstr "Duplicate column names detected: %(cols)s."
+
+#: apps/data_sources/services.py:275
+#, python-format
+msgid "Файл превышает допустимый лимит строк (максимум %(max)d)."
+msgstr "File exceeds allowed row limit (maximum %(max)d)."
+
+#: apps/data_sources/services.py:284
+#, python-format
+msgid "Строка %(row)d содержит %(actual)d колонок при ожидаемых %(expected)d."
+msgstr "Row %(row)d contains %(actual)d columns, expected %(expected)d."
+
+#: apps/data_sources/services.py:298
+msgid "Файл CSV содержит заголовки, но не содержит строк данных."
+msgstr "CSV file contains headers, but no data rows."
+
+#: apps/data_sources/services.py:331
+msgid "Книга Excel не содержит ни одного листа."
+msgstr "Excel workbook does not contain any sheets."
+
+#: apps/data_sources/services.py:351
+#, python-format
+msgid "Лист «%(sheet)s» пуст или не содержит данных."
+msgstr "Sheet '%(sheet)s' is empty or contains no data."
+
+#: apps/data_sources/services.py:361
+#, python-format
+msgid "Лист «%(sheet)s» не содержит заголовков колонок."
+msgstr "Sheet '%(sheet)s' does not contain column headers."
+
+#: apps/data_sources/services.py:366
+#, python-format
+msgid "Количество колонок (%(count)d) превышает лимит %(max)d."
+msgstr "Column count (%(count)d) exceeds limit of %(max)d."
+
+#: apps/data_sources/services.py:376
+#, python-format
+msgid "Колонка №%(idx)d на листе «%(sheet)s» имеет пустой заголовок."
+msgstr "Column #%(idx)d on sheet '%(sheet)s' has an empty header."
+
+#: apps/data_sources/services.py:385
+#, python-format
+msgid "На листе «%(sheet)s» обнаружены повторяющиеся заголовки: %(cols)s."
+msgstr "Duplicate headers detected on sheet '%(sheet)s': %(cols)s."
+
+#: apps/data_sources/services.py:398
+#, python-format
+msgid "Превышен допустимый лимит строк на листе (максимум %(max)d)."
+msgstr "Row limit exceeded on sheet (maximum %(max)d)."
+
+#: apps/data_sources/services.py:410
+#, python-format
+msgid "Лист «%(sheet)s» содержит заголовки, но не содержит строк данных."
+msgstr "Sheet '%(sheet)s' contains headers, but no data rows."
+
+#: apps/data_sources/services.py:554
+#, python-format
+msgid "Сбой при обработке набора данных: %(msg)s"
+msgstr "Dataset processing failure: %(msg)s"
+
+#: apps/data_sources/views.py:48 apps/data_sources/views.py:61
+#: apps/data_sources/views.py:93 apps/data_sources/views.py:104
+#: templates/data_sources/upload.html:4
+msgid "Загрузка источника данных"
+msgstr "Upload Data Source"
+
+#: apps/data_sources/views.py:78
+#, python-format
+msgid ""
+"Источник данных «%(name)s» успешно импортирован. Загружено строк: %(rows)d, "
+"колонок: %(cols)d."
+msgstr "Data source '%(name)s' successfully imported. Rows loaded: %(rows)d, columns: %(cols)d."
+
+#: apps/data_sources/views.py:99
+#, python-format
+msgid "Ошибка обработки файла: %(err)s"
+msgstr "File processing error: %(err)s"
+
+#: apps/data_sources/views.py:146
+#, python-format
+msgid "Источник данных «%(name)s» и все связанные записи успешно удалены."
+msgstr "Data source '%(name)s' and all associated records successfully deleted."
+
+#: apps/data_sources/views.py:158
+msgid "Файл источника данных не найден на сервере."
+msgstr "Data source file was not found on the server."
+
 #: apps/documents/forms.py:19
 msgid "Например: Трудовой договор, Акт приёма-передачи"
-msgstr ""
+msgstr "e.g. Employment Contract, Acceptance Certificate"
 
 #: apps/documents/forms.py:27
 msgid "Краткое назначение и область применения документа..."
-msgstr ""
+msgstr "Brief purpose and scope of the document..."
 
 #: apps/documents/services.py:37
 msgid ""
 "У вашей роли недостаточно прав для создания или изменения шаблонов и типов "
 "документов."
-msgstr ""
+msgstr "Your role does not have permission to create or modify templates and document types."
 
 #: apps/documents/views.py:25 templates/core/dashboard.html:51
 #: templates/documents/create.html:9 templates/documents/detail.html:9
@@ -58,48 +399,352 @@ msgstr "Document Types"
 
 #: apps/documents/views.py:41 apps/documents/views.py:65
 #: templates/documents/create.html:10 templates/documents/create.html:18
-#, fuzzy
-#| msgid "Тип документа"
 msgid "Новый тип документа"
-msgstr "Document Type"
+msgstr "New Document Type"
 
 #: apps/documents/views.py:57
 #, python-format
 msgid "Тип документа «%(name)s» успешно создан."
-msgstr ""
+msgstr "Document type '%(name)s' successfully created."
 
-#: apps/generation/models.py:13
+#: apps/generation/forms.py:14
+msgid "Схема сопоставления (Mapping)"
+msgstr "Mapping Schema"
+
+#: apps/generation/forms.py:16
+msgid "Выберите конфигурацию сопоставления шаблона и источника данных."
+msgstr "Select a template and data source mapping configuration."
+
+#: apps/generation/models.py:34
 msgid "В очереди"
 msgstr "Pending"
 
-#: apps/generation/models.py:14
-msgid "Обработка"
-msgstr "Processing"
-
-#: apps/generation/models.py:15
+#: apps/generation/models.py:36 templates/generation/detail.html:22
+#: templates/generation/list.html:78
 msgid "Завершено"
 msgstr "Completed"
 
-#: apps/generation/models.py:16
-msgid "Ошибка"
-msgstr "Failed"
+#: apps/generation/models.py:41 templates/generation/detail.html:151
+#: templates/generation/list.html:64
+msgid "Успешно"
+msgstr "Success"
+
+#: apps/generation/models.py:52 apps/mapping/models.py:26
+#: apps/templates_manager/models.py:79
+msgid "Шаблон документа"
+msgstr "Document Template"
+
+#: apps/generation/models.py:68
+msgid "Схема маппинга"
+msgstr "Mapping Schema"
+
+#: apps/generation/models.py:76
+msgid "Инициатор"
+msgstr "Initiated By"
+
+#: apps/generation/models.py:82 apps/templates_manager/models.py:64
+#: templates/core/dashboard.html:71 templates/data_sources/list.html:37
+#: templates/documents/detail.html:121 templates/generation/detail.html:133
+#: templates/generation/list.html:39 templates/templates_manager/list.html:28
+msgid "Статус"
+msgstr "Status"
+
+#: apps/generation/models.py:86 templates/generation/detail.html:75
+msgid "Всего записей"
+msgstr "Total Records"
+
+#: apps/generation/models.py:90
+msgid "Обработано записей"
+msgstr "Processed Records"
+
+#: apps/generation/models.py:94
+msgid "Успешно сформировано"
+msgstr "Successfully Generated"
+
+#: apps/generation/models.py:98
+msgid "Ошибок при формировании"
+msgstr "Generation Errors"
+
+#: apps/generation/models.py:104
+msgid "Архив пакета (ZIP)"
+msgstr "Batch Archive (ZIP)"
+
+#: apps/generation/models.py:113 apps/generation/models.py:134
+msgid "Пакет генерации"
+msgstr "Generation Batch"
+
+#: apps/generation/models.py:114
+msgid "Пакеты генерации"
+msgstr "Generation Batches"
+
+#: apps/generation/models.py:148
+msgid "Файл документа (DOCX)"
+msgstr "Document File (DOCX)"
+
+#: apps/generation/models.py:154
+msgid "Статус генерации"
+msgstr "Generation Status"
+
+#: apps/generation/models.py:159
+msgid "Сообщение об ошибке"
+msgstr "Error Message"
+
+#: apps/generation/models.py:165
+msgid "Идентификатор записи"
+msgstr "Record Identifier"
+
+#: apps/generation/models.py:169
+msgid "Сформированный документ"
+msgstr "Generated Document"
+
+#: apps/generation/models.py:170
+msgid "Сформированные документы"
+msgstr "Generated Documents"
+
+#: apps/generation/services.py:66
+msgid "У вашей роли недостаточно прав для запуска генерации документов."
+msgstr "Your role does not have permission to run document generation."
+
+#: apps/generation/services.py:156
+msgid "Файл шаблона отсутствует на сервере."
+msgstr "Template file is missing on the server."
+
+#: apps/generation/services.py:203
+#, python-format
+msgid "Шаблон «%(name)s» v%(ver)d не активен. Генерация невозможна."
+msgstr "Template '%(name)s' v%(ver)d is not active. Generation is not possible."
+
+#: apps/generation/services.py:213
+msgid "Не выбрано ни одной записи для формирования документов."
+msgstr "No records selected for document generation."
+
+#: apps/generation/services.py:263
+msgid "Ни один документ не был сформирован из-за ошибок валидации."
+msgstr "No documents were generated due to validation errors."
+
+#: apps/generation/views.py:38 templates/components/sidebar.html:36
+#: templates/generation/detail.html:9 templates/generation/list.html:4
+#: templates/generation/list.html:9
+msgid "История генераций"
+msgstr "Generation History"
+
+#: apps/generation/views.py:77 templates/generation/wizard.html:4
+msgid "Мастер генерации документов"
+msgstr "Document Generation Wizard"
+
+#: apps/generation/views.py:90
+msgid "Необходимо выбрать схему маппинга."
+msgstr "A mapping schema must be selected."
+
+#: apps/generation/views.py:113
+msgid "Не выбрано ни одной строки данных для генерации."
+msgstr "No data rows selected for generation."
+
+#: apps/generation/views.py:125
+#, python-format
+msgid ""
+"Пакетная генерация #%(batch_id)d завершена. Сформировано: %(success)d из "
+"%(total)d документов."
+msgstr "Batch generation #%(batch_id)d completed. Generated: %(success)d of %(total)d documents."
+
+#: apps/generation/views.py:138
+#, python-format
+msgid "Сбой при запуске генерации: %(err)s"
+msgstr "Failed to start generation: %(err)s"
+
+#: apps/generation/views.py:158
+#, python-format
+msgid "Пакет генерации #%(id)d"
+msgstr "Generation Batch #%(id)d"
+
+#: apps/generation/views.py:172
+msgid "Архив документов не сформирован или отсутствует на сервере."
+msgstr "Document archive is not generated or missing from server."
+
+#: apps/generation/views.py:188
+msgid "Файл документа не найден на сервере."
+msgstr "Document file was not found on the server."
+
+#: apps/mapping/forms.py:18 templates/documents/list.html:27
+msgid "Активный шаблон"
+msgstr "Active Template"
+
+#: apps/mapping/forms.py:20
+msgid "Отображаются только активные версии шаблонов."
+msgstr "Only active template versions are displayed."
+
+#: apps/mapping/forms.py:26
+msgid "Отображаются только готовые наборы данных (CSV / XLSX)."
+msgstr "Only ready datasets (CSV / XLSX) are displayed."
+
+#: apps/mapping/forms.py:36
+msgid "Например: Маппинг договора подряда 2026"
+msgstr "e.g. Service Contract 2026 Mapping"
+
+#: apps/mapping/forms.py:43
+msgid "Необязательное описание схемы сопоставления..."
+msgstr "Optional mapping schema description..."
+
+#: apps/mapping/models.py:19
+msgid "Название схемы маппинга"
+msgstr "Mapping Schema Name"
+
+#: apps/mapping/models.py:20
+msgid "Понятное наименование конфигурации (например, Ведомость 2026)."
+msgstr "Descriptive configuration name (e.g. Payroll Roster 2026)."
+
+#: apps/mapping/models.py:45 templates/mapping/list.html:39
+msgid "Создал"
+msgstr "Created By"
+
+#: apps/mapping/models.py:49 apps/mapping/models.py:83
+msgid "Конфигурация маппинга"
+msgstr "Mapping Configuration"
+
+#: apps/mapping/models.py:50
+msgid "Конфигурации маппинга"
+msgstr "Mapping Configurations"
+
+#: apps/mapping/models.py:87 templates/mapping/create.html:99
+#: templates/mapping/detail.html:129
+msgid "Переменная шаблона"
+msgstr "Template Variable"
+
+#: apps/mapping/models.py:88
+msgid "Имя плейсхолдера в DOCX (например, full_name, specialty)."
+msgstr "Placeholder name in DOCX (e.g. full_name, specialty)."
+
+#: apps/mapping/models.py:94
+msgid "Колонка источника"
+msgstr "Source Column"
+
+#: apps/mapping/models.py:95
+msgid "Название колонки в таблице данных."
+msgstr "Column name in data table."
+
+#: apps/mapping/models.py:101 templates/mapping/create.html:101
+#: templates/mapping/detail.html:131
+msgid "Значение по умолчанию"
+msgstr "Default Value"
+
+#: apps/mapping/models.py:102
+msgid "Подставляется, если значение в таблице пустое."
+msgstr "Used if the table value is empty."
+
+#: apps/mapping/models.py:106
+msgid "Обязательное поле"
+msgstr "Required Field"
+
+#: apps/mapping/models.py:107
+msgid ""
+"Если True, значение переменной не должно оставаться пустым при генерации."
+msgstr "If True, variable value must not remain empty during generation."
+
+#: apps/mapping/models.py:111
+msgid "Правило сопоставления"
+msgstr "Mapping Rule"
+
+#: apps/mapping/models.py:112
+msgid "Правила сопоставления"
+msgstr "Mapping Rules"
+
+#: apps/mapping/services.py:47
+msgid ""
+"У вашей роли недостаточно прав для создания или изменения схем сопоставления."
+msgstr "Your role does not have permission to create or modify mapping schemas."
+
+#: apps/mapping/services.py:125
+msgid "В конфигурации маппинга отсутствует ссылка на шаблон."
+msgstr "Mapping configuration is missing a template reference."
+
+#: apps/mapping/services.py:130
+#, python-format
+msgid "Шаблон «%(name)s» v%(ver)d не активен (текущий статус: %(status)s)."
+msgstr "Template '%(name)s' v%(ver)d is not active (status: %(status)s)."
+
+#: apps/mapping/services.py:139
+msgid "Файл шаблона отсутствует."
+msgstr "Template file is missing."
+
+#: apps/mapping/services.py:143
+msgid "В конфигурации маппинга отсутствует источник данных."
+msgstr "Mapping configuration is missing a data source."
+
+#: apps/mapping/services.py:149
+#, python-format
+msgid ""
+"Источник данных «%(name)s» не готов к использованию (текущий статус: "
+"%(status)s)."
+msgstr "Data source '%(name)s' is not ready (status: %(status)s)."
+
+#: apps/mapping/services.py:166
+#, python-format
+msgid "Переменная шаблона «%(var)s» не имеет настроенного правила маппинга."
+msgstr "Template variable '%(var)s' does not have a configured mapping rule."
+
+#: apps/mapping/services.py:178
+#, python-format
+msgid ""
+"Переменная «%(var)s» сопоставлена с отсутствующей в источнике колонкой "
+"«%(col)s»."
+msgstr "Variable '%(var)s' is mapped to missing column '%(col)s'."
+
+#: apps/mapping/services.py:185
+#, python-format
+msgid ""
+"Обязательная переменная «%(var)s» не имеет привязки к колонке или значения "
+"по умолчанию."
+msgstr "Required variable '%(var)s' is not mapped to any column and has no default value."
+
+#: apps/mapping/services.py:215
+#, python-format
+msgid "Строка %(row)d: отсутствует правило для переменной «%(var)s»."
+msgstr "Row %(row)d: missing rule for variable '%(var)s'."
+
+#: apps/mapping/services.py:238
+#, python-format
+msgid ""
+"Строка %(row)d: обязательное поле «%(var)s» (колонка «%(col)s») не заполнено."
+msgstr "Row %(row)d: required field '%(var)s' (column '%(col)s') is empty."
+
+#: apps/mapping/services.py:240
+msgid "по умолчанию"
+msgstr "default"
+
+#: apps/mapping/views.py:38
+msgid "Схемы сопоставления полей"
+msgstr "Field Mapping Schemas"
+
+#: apps/mapping/views.py:80 apps/mapping/views.py:98
+msgid "Новая схема маппинга"
+msgstr "New Mapping Schema"
+
+#: apps/mapping/views.py:136
+#, python-format
+msgid "Конфигурация маппинга «%(name)s» успешно сохранена."
+msgstr "Mapping configuration '%(name)s' successfully saved."
+
+#: apps/mapping/views.py:180
+#, python-format
+msgid "Схема маппинга «%(name)s» успешно удалена."
+msgstr "Mapping schema '%(name)s' successfully deleted."
 
 #: apps/templates_manager/forms.py:20
 msgid "Необязательно (по умолчанию берется имя файла)"
-msgstr ""
+msgstr "Optional (defaults to file name)"
 
 #: apps/templates_manager/forms.py:38
 msgid "Что изменилось в этой версии шаблона..."
-msgstr ""
+msgstr "What changed in this template version..."
 
 #: apps/templates_manager/forms.py:51
 msgid "Пожалуйста, выберите DOCX-файл для загрузки."
-msgstr ""
+msgstr "Please select a DOCX file to upload."
 
 #: apps/templates_manager/models.py:31 templates/documents/detail.html:148
 #: templates/templates_manager/list.html:64
 msgid "Черновик"
-msgstr ""
+msgstr "Draft"
 
 #: apps/templates_manager/models.py:32 templates/documents/detail.html:144
 #: templates/templates_manager/list.html:60
@@ -109,67 +754,45 @@ msgstr "Active"
 #: apps/templates_manager/models.py:33 templates/documents/detail.html:152
 #: templates/templates_manager/list.html:68
 msgid "В архиве"
-msgstr ""
+msgstr "Archived"
 
 #: apps/templates_manager/models.py:43 templates/templates_manager/list.html:26
 msgid "Тип документа"
 msgstr "Document Type"
 
 #: apps/templates_manager/models.py:47 templates/documents/detail.html:120
-#, fuzzy
-#| msgid "Название воркспейса"
 msgid "Название шаблона"
-msgstr "Workspace Name"
+msgstr "Template Name"
 
 #: apps/templates_manager/models.py:48
 msgid "Понятное наименование шаблона (например, Стандартный договор 2026)."
-msgstr ""
+msgstr "Descriptive template name (e.g. Standard Contract 2026)."
 
 #: apps/templates_manager/models.py:52
-#, fuzzy
-#| msgid "DOCX Шаблоны"
 msgid "DOCX файл"
-msgstr "DOCX Templates"
+msgstr "DOCX File"
 
 #: apps/templates_manager/models.py:53
 msgid "Файл шаблона в формате DOCX с Jinja2-переменными."
-msgstr ""
+msgstr "DOCX template file with Jinja2 placeholders."
 
 #: apps/templates_manager/models.py:57 templates/documents/detail.html:119
 #: templates/templates_manager/list.html:27
 msgid "Версия"
-msgstr ""
+msgstr "Version"
 
 #: apps/templates_manager/models.py:58
 msgid "Порядковый номер версии шаблона."
-msgstr ""
-
-#: apps/templates_manager/models.py:64 templates/core/dashboard.html:71
-#: templates/documents/detail.html:121 templates/generation/list.html:27
-#: templates/templates_manager/list.html:28
-msgid "Статус"
-msgstr "Status"
-
-#: apps/templates_manager/models.py:69 templates/documents/list.html:26
-msgid "Описание"
-msgstr "Description"
+msgstr "Template sequential version number."
 
 #: apps/templates_manager/models.py:74 templates/documents/detail.html:122
 #: templates/templates_manager/list.html:29
-#, fuzzy
-#| msgid "Загруженные DOCX шаблоны"
 msgid "Обнаруженные переменные"
-msgstr "Uploaded DOCX Templates"
+msgstr "Detected Variables"
 
 #: apps/templates_manager/models.py:75
 msgid "Список плейсхолдеров, извлечённых из шаблона."
-msgstr ""
-
-#: apps/templates_manager/models.py:79
-#, fuzzy
-#| msgid "Шаблоны документов"
-msgid "Шаблон документа"
-msgstr "Document Templates"
+msgstr "List of placeholders extracted from the template."
 
 #: apps/templates_manager/models.py:80 apps/templates_manager/views.py:31
 #: templates/documents/detail.html:4 templates/templates_manager/list.html:4
@@ -179,93 +802,91 @@ msgstr "Document Templates"
 #: apps/templates_manager/services.py:75
 #, python-format
 msgid "Размер файла превышает максимально допустимый лимит (%(max_mb)d МБ)."
-msgstr ""
+msgstr "File size exceeds maximum allowed limit (%(max_mb)d MB)."
 
 #: apps/templates_manager/services.py:80
-#, fuzzy
-#| msgid "Загруженные DOCX шаблоны"
 msgid "Загруженный файл пуст."
-msgstr "Uploaded DOCX Templates"
+msgstr "Uploaded file is empty."
 
 #: apps/templates_manager/services.py:89
 #, python-format
 msgid "Недопустимое расширение файла '%(ext)s'. Разрешены только файлы .docx."
-msgstr ""
+msgstr "Invalid file extension '%(ext)s'. Only .docx files are allowed."
 
 #: apps/templates_manager/services.py:102
 msgid "Файл не является корректным DOCX-документом (неверная сигнатура ZIP)."
-msgstr ""
+msgstr "File is not a valid DOCX document (invalid ZIP signature)."
 
 #: apps/templates_manager/services.py:113
 msgid "Файл повреждён или не является валидным ZIP-архивом."
-msgstr ""
+msgstr "File is corrupted or not a valid ZIP archive."
 
 #: apps/templates_manager/services.py:121
 #, python-format
 msgid "Архив шаблона повреждён (ошибка в элементе '%(name)s')."
-msgstr ""
+msgstr "Template archive is corrupted (error in element '%(name)s')."
 
 #: apps/templates_manager/services.py:131
 msgid ""
 "Файл не является документом Word DOCX: отсутствует компонент word/"
 "document.xml."
-msgstr ""
+msgstr "File is not a Word DOCX document: missing word/document.xml component."
 
 #: apps/templates_manager/services.py:143
 #, python-format
 msgid "В архиве обнаружен недопустимый файл '%(name)s'."
-msgstr ""
+msgstr "Unsafe file '%(name)s' detected in archive."
 
 #: apps/templates_manager/services.py:150
 msgid "Общий распакованный объём документа превышает лимит безопасности."
-msgstr ""
+msgstr "Total uncompressed document volume exceeds safety limit."
 
 #: apps/templates_manager/services.py:156
 msgid "Обнаружен аномальный коэффициент сжатия (возможная zip-бомба)."
-msgstr ""
+msgstr "Abnormal compression ratio detected (potential zip bomb)."
 
 #: apps/templates_manager/services.py:161
 #, python-format
 msgid "Не удалось прочитать DOCX архив: %(err)s"
-msgstr ""
+msgstr "Failed to read DOCX archive: %(err)s"
 
 #: apps/templates_manager/services.py:197
 #, python-format
 msgid "Синтаксическая ошибка в Jinja2-разметке шаблона DOCX: %(err)s"
-msgstr ""
+msgstr "Syntax error in DOCX Jinja2 template markup: %(err)s"
 
 #: apps/templates_manager/views.py:86
 #, python-format
 msgid ""
 "Шаблон «%(name)s» v%(ver)d успешно загружен. Обнаружено переменных: "
 "%(count)d (%(sample)s)."
-msgstr ""
+msgstr "Template '%(name)s' v%(ver)d successfully uploaded. Detected %(count)d variables (%(sample)s)."
 
 #: apps/templates_manager/views.py:99
 #, python-format
 msgid ""
 "Шаблон «%(name)s» v%(ver)d успешно загружен. В документе не обнаружено "
 "переменных."
-msgstr ""
+msgstr "Template '%(name)s' v%(ver)d successfully uploaded. No variables detected."
 
 #: apps/templates_manager/views.py:109
 #, python-format
 msgid "Произошла непредвиденная ошибка при обработке файла: %(err)s"
-msgstr ""
+msgstr "Unexpected error occurred while processing file: %(err)s"
 
 #: apps/templates_manager/views.py:124
 #, python-format
 msgid "Шаблон «%(name)s» v%(ver)d активирован."
-msgstr ""
+msgstr "Template '%(name)s' v%(ver)d activated."
 
 #: apps/templates_manager/views.py:139
 #, python-format
 msgid "Шаблон «%(name)s» v%(ver)d перемещён в архив."
-msgstr ""
+msgstr "Template '%(name)s' v%(ver)d moved to archive."
 
 #: apps/templates_manager/views.py:152
 msgid "Файл шаблона не найден на диске."
-msgstr ""
+msgstr "Template file not found on disk."
 
 #: templates/accounts/login.html:4
 msgid "Вход в систему"
@@ -375,18 +996,9 @@ msgstr "Documents"
 msgid "Шаблоны"
 msgstr "Templates"
 
-#: templates/components/sidebar.html:28 templates/core/dashboard.html:27
-#: templates/data_sources/list.html:4
-msgid "Источники данных"
-msgstr "Data Sources"
-
 #: templates/components/sidebar.html:32 templates/mapping/list.html:4
 msgid "Сопоставление полей"
 msgstr "Field Mapping"
-
-#: templates/components/sidebar.html:36 templates/generation/list.html:4
-msgid "История генераций"
-msgstr "Generation History"
 
 #: templates/components/sidebar.html:40
 msgid "Конфигурация"
@@ -412,7 +1024,8 @@ msgstr "Recent Generations"
 msgid "Смотреть все"
 msgstr "View All"
 
-#: templates/core/dashboard.html:70 templates/generation/list.html:23
+#: templates/core/dashboard.html:70 templates/generation/list.html:36
+#: templates/mapping/list.html:36
 msgid "Шаблон"
 msgstr "Template"
 
@@ -420,11 +1033,11 @@ msgstr "Template"
 msgid "Записи"
 msgstr "Records"
 
-#: templates/core/dashboard.html:73
+#: templates/core/dashboard.html:73 templates/generation/list.html:40
 msgid "Дата запуска"
 msgstr "Started At"
 
-#: templates/core/dashboard.html:93 templates/generation/list.html:57
+#: templates/core/dashboard.html:93 templates/generation/list.html:117
 msgid "Генерации документов пока не производились."
 msgstr "No document generations recorded yet."
 
@@ -432,7 +1045,7 @@ msgstr "No document generations recorded yet."
 msgid "Журнал аудита"
 msgstr "Audit Trail"
 
-#: templates/core/dashboard.html:117 templates/generation/list.html:37
+#: templates/core/dashboard.html:117 templates/generation/detail.html:37
 msgid "Система"
 msgstr "System"
 
@@ -444,293 +1057,808 @@ msgstr "ago"
 msgid "Журнал аудита пуст."
 msgstr "No audit logs recorded yet."
 
-#: templates/data_sources/list.html:11
-msgid "Табличные наборы данных (CSV и XLSX)"
-msgstr "Tabular Datasets (CSV & XLSX)"
+#: templates/data_sources/detail.html:21
+msgid "Лист:"
+msgstr "Sheet:"
 
-#: templates/data_sources/list.html:14
-msgid "источников"
-msgstr "sources"
+#: templates/data_sources/detail.html:32
+msgid "Скачать файл"
+msgstr "Download File"
 
-#: templates/data_sources/list.html:22 templates/documents/list.html:25
-msgid "Наименование"
-msgstr "Name"
+#: templates/data_sources/detail.html:38 templates/data_sources/detail.html:244
+#: templates/data_sources/list.html:102 templates/data_sources/list.html:128
+#: templates/mapping/detail.html:33 templates/mapping/detail.html:206
+#: templates/mapping/list.html:81 templates/mapping/list.html:106
+msgid "Удалить"
+msgstr "Delete"
 
-#: templates/data_sources/list.html:23
-msgid "Формат"
-msgstr "Format"
+#: templates/data_sources/detail.html:49
+msgid "Ошибка импорта данных"
+msgstr "Data Import Error"
 
-#: templates/data_sources/list.html:24
-msgid "Количество строк"
-msgstr "Row Count"
+#: templates/data_sources/detail.html:50
+msgid "Произошла неизвестная ошибка при чтении файла."
+msgstr "An unknown error occurred while reading the file."
 
-#: templates/data_sources/list.html:25
-msgid "Распознанные колонки"
-msgstr "Detected Columns"
+#: templates/data_sources/detail.html:64
+msgid "Формат данных"
+msgstr "Data Format"
 
-#: templates/data_sources/list.html:26 templates/documents/detail.html:123
-#: templates/templates_manager/list.html:30
-msgid "Дата загрузки"
-msgstr "Uploaded At"
+#: templates/data_sources/detail.html:81
+msgid "Сбой"
+msgstr "Failed"
 
-#: templates/data_sources/list.html:36
-msgid "строк"
-msgstr "rows"
+#: templates/data_sources/detail.html:84
+msgid "Статус источника"
+msgstr "Source Status"
 
-#: templates/data_sources/list.html:38
+#: templates/data_sources/detail.html:96
+msgid "Строк данных"
+msgstr "Data Rows"
+
+#: templates/data_sources/detail.html:108 templates/data_sources/list.html:39
+msgid "Колонок"
+msgstr "Columns"
+
+#: templates/data_sources/detail.html:119
+msgid "Распознанные колонки таблицы"
+msgstr "Detected Table Columns"
+
+#: templates/data_sources/detail.html:121
 msgid "колонок"
 msgstr "columns"
 
-#: templates/data_sources/list.html:46
+#: templates/data_sources/detail.html:133
+msgid "Колонки не обнаружены."
+msgstr "No columns detected."
+
+#: templates/data_sources/detail.html:143
+msgid "Записи источника данных"
+msgstr "Data Source Records"
+
+#: templates/data_sources/detail.html:147
+msgid "Показано:"
+msgstr "Showing:"
+
+#: templates/data_sources/detail.html:147
+#: templates/data_sources/detail.html:186
+msgid "из"
+msgstr "of"
+
+#: templates/data_sources/detail.html:174
+msgid "В данном источнике отсутствуют записи данных."
+msgstr "No data records found in this data source."
+
+#: templates/data_sources/detail.html:186
+msgid "Страница"
+msgstr "Page"
+
+#: templates/data_sources/detail.html:191
+msgid "Первая"
+msgstr "First"
+
+#: templates/data_sources/detail.html:194
+#: templates/data_sources/detail.html:198
+msgid "Предыдущая"
+msgstr "Previous"
+
+#: templates/data_sources/detail.html:207
+#: templates/data_sources/detail.html:213
+msgid "Следующая"
+msgstr "Next"
+
+#: templates/data_sources/detail.html:210
+msgid "Последняя"
+msgstr "Last"
+
+#: templates/data_sources/detail.html:228 templates/data_sources/list.html:115
+msgid "Удаление источника данных"
+msgstr "Delete Data Source"
+
+#: templates/data_sources/detail.html:233
+msgid "Вы уверены, что хотите безвозвратно удалить источник данных"
+msgstr "Are you sure you want to permanently delete data source"
+
+#: templates/data_sources/detail.html:236
+msgid "Будут удалены все"
+msgstr "All"
+
+#: templates/data_sources/detail.html:236
+msgid "записей и физический файл таблицы."
+msgstr "records and the spreadsheet file will be deleted."
+
+#: templates/data_sources/detail.html:240 templates/data_sources/list.html:124
+#: templates/data_sources/upload.html:90 templates/documents/create.html:48
+#: templates/documents/detail.html:274 templates/generation/wizard.html:144
+#: templates/mapping/create.html:154 templates/mapping/detail.html:202
+#: templates/mapping/list.html:102
+msgid "Отмена"
+msgstr "Cancel"
+
+#: templates/data_sources/list.html:10
+msgid ""
+"Импортированные таблицы CSV и XLSX для автоматической подстановки в шаблоны "
+"документов."
+msgstr "Imported CSV and XLSX spreadsheets for automated document population."
+
+#: templates/data_sources/list.html:15
+msgid "Загрузить таблицу"
+msgstr "Upload Spreadsheet"
+
+#: templates/data_sources/list.html:24
+msgid "Табличные наборы данных"
+msgstr "Tabular Datasets"
+
+#: templates/data_sources/list.html:27
+msgid "источников"
+msgstr "sources"
+
+#: templates/data_sources/list.html:35 templates/documents/list.html:25
+msgid "Наименование"
+msgstr "Name"
+
+#: templates/data_sources/list.html:36
+msgid "Формат"
+msgstr "Format"
+
+#: templates/data_sources/list.html:38
+msgid "Строк"
+msgstr "Rows"
+
+#: templates/data_sources/list.html:40
+msgid "Загружено"
+msgstr "Uploaded"
+
+#: templates/data_sources/list.html:41 templates/documents/detail.html:124
+#: templates/documents/list.html:30 templates/generation/list.html:41
+#: templates/mapping/list.html:40 templates/templates_manager/list.html:31
+msgid "Действия"
+msgstr "Actions"
+
+#: templates/data_sources/list.html:59
+msgid "Лист Excel"
+msgstr "Excel Sheet"
+
+#: templates/data_sources/list.html:93
+msgid "Просмотр записей"
+msgstr "View Records"
+
+#: templates/data_sources/list.html:97
+msgid "Скачать исходный файл"
+msgstr "Download Original File"
+
+#: templates/data_sources/list.html:120
+msgid "Вы действительно хотите удалить источник данных"
+msgstr "Are you sure you want to delete data source"
+
+#: templates/data_sources/list.html:121
+msgid "Все связанные строки ("
+msgstr "All associated records ("
+
+#: templates/data_sources/list.html:121
+msgid " записей) и исходный файл на сервере будут безвозвратно удалены."
+msgstr " records) and the source file on the server will be permanently deleted."
+
+#: templates/data_sources/list.html:142
 msgid "Источники данных пока не загружены."
 msgstr "No data sources uploaded yet."
 
+#: templates/data_sources/list.html:145
+msgid "Загрузить первую таблицу"
+msgstr "Upload First Spreadsheet"
+
+#: templates/data_sources/upload.html:10
+msgid "Новый источник данных"
+msgstr "New Data Source"
+
+#: templates/data_sources/upload.html:20
+msgid "Импорт таблицы CSV или Excel"
+msgstr "Import CSV or Excel Spreadsheet"
+
+#: templates/data_sources/upload.html:87
+msgid "Импортировать таблицу"
+msgstr "Import Spreadsheet"
+
+#: templates/data_sources/upload.html:102
+msgid "Требования к таблицам"
+msgstr "Spreadsheet Requirements"
+
+#: templates/data_sources/upload.html:105
+msgid "Форматы файлов"
+msgstr "File Formats"
+
+#: templates/data_sources/upload.html:107
+msgid ""
+"UTF-8 или UTF-8 с BOM. Разделители определяются автоматически (запятая, "
+"точка с запятой, табуляция, пайп)."
+msgstr "UTF-8 or UTF-8 with BOM. Delimiters are auto-detected (comma, semicolon, tab, pipe)."
+
+#: templates/data_sources/upload.html:108
+msgid "Таблицы Excel (SpreadsheetML). Возможность указать конкретный лист."
+msgstr "Excel workbooks (SpreadsheetML). Ability to specify a specific worksheet."
+
+#: templates/data_sources/upload.html:111
+msgid "Структура заголовков"
+msgstr "Header Structure"
+
+#: templates/data_sources/upload.html:113
+msgid "Первая непустая строка файла считается строкой заголовков колонок."
+msgstr "The first non-empty row of the file is treated as the column headers."
+
+#: templates/data_sources/upload.html:114
+msgid "Все названия колонок должны быть непустыми и уникальными."
+msgstr "All column names must be non-empty and unique."
+
+#: templates/data_sources/upload.html:115
+msgid ""
+"Пустые строки в начале, середине и конце файла пропускаются автоматически."
+msgstr "Blank lines at the beginning, middle, and end of the file are skipped automatically."
+
+#: templates/data_sources/upload.html:118
+msgid "Системные лимиты"
+msgstr "System Limits"
+
+#: templates/data_sources/upload.html:120
+msgid "Максимальный размер файла: 20 МБ"
+msgstr "Maximum file size: 20 MB"
+
+#: templates/data_sources/upload.html:121
+msgid "Максимум колонок: 200"
+msgstr "Maximum columns: 200"
+
+#: templates/data_sources/upload.html:122
+msgid "Максимум строк: 50 000"
+msgstr "Maximum rows: 50,000"
+
 #: templates/documents/create.html:4
-#, fuzzy
-#| msgid "Настроенные типы документов"
 msgid "Создание типа документа"
-msgstr "Configured Document Types"
+msgstr "Create Document Type"
 
 #: templates/documents/create.html:25
-#, fuzzy
-#| msgid "Настроенные типы документов"
 msgid "Наименование типа документа"
-msgstr "Configured Document Types"
+msgstr "Document Type Name"
 
 #: templates/documents/create.html:32
 msgid ""
 "Например: Трудовой договор, Договор подряда, Акт выполненных работ, Справка "
 "с места работы."
-msgstr ""
+msgstr "e.g. Employment Contract, Service Agreement, Acceptance Act, Proof of Employment."
 
 #: templates/documents/create.html:38
 msgid "Описание и назначение"
-msgstr ""
-
-#: templates/documents/create.html:48 templates/documents/detail.html:274
-msgid "Отмена"
-msgstr ""
+msgstr "Description and Purpose"
 
 #: templates/documents/create.html:51
 msgid "Создать и перейти к шаблонам"
-msgstr ""
+msgstr "Create and Proceed to Templates"
 
 #: templates/documents/detail.html:28
-#, fuzzy
-#| msgid "Загруженные DOCX шаблоны"
 msgid "Загрузить новый шаблон"
-msgstr "Uploaded DOCX Templates"
+msgstr "Upload New Template"
 
 #: templates/documents/detail.html:48
-#, fuzzy
-#| msgid "Активен"
 msgid "Активная версия"
-msgstr "Active"
+msgstr "Active Version"
 
 #: templates/documents/detail.html:60 templates/documents/list.html:28
 msgid "Всего версий"
-msgstr ""
+msgstr "Total Versions"
 
 #: templates/documents/detail.html:78
 msgid "Переменных в активном шаблоне"
-msgstr ""
+msgstr "Variables in Active Template"
 
 #: templates/documents/detail.html:89
 msgid "Переменные текущей активной версии (v"
-msgstr ""
+msgstr "Variables in current active version (v"
 
-#: templates/documents/detail.html:91
+#: templates/documents/detail.html:91 templates/mapping/create.html:85
 msgid "переменных"
 msgstr "variables"
 
 #: templates/documents/detail.html:110
-#, fuzzy
-#| msgid "История генераций"
 msgid "История версий шаблона"
-msgstr "Generation History"
+msgstr "Template Version History"
 
 #: templates/documents/detail.html:112 templates/documents/list.html:58
 msgid "версий"
-msgstr ""
+msgstr "versions"
 
-#: templates/documents/detail.html:124 templates/documents/list.html:30
-#: templates/templates_manager/list.html:31
-msgid "Действия"
-msgstr ""
+#: templates/documents/detail.html:123 templates/templates_manager/list.html:30
+msgid "Дата загрузки"
+msgstr "Uploaded At"
 
 #: templates/documents/detail.html:171 templates/templates_manager/list.html:87
-#, fuzzy
-#| msgid "переменных"
 msgid "Нет переменных"
-msgstr "variables"
+msgstr "No variables"
 
 #: templates/documents/detail.html:177 templates/templates_manager/list.html:93
 msgid "Скачать DOCX"
-msgstr ""
+msgstr "Download DOCX"
 
 #: templates/documents/detail.html:184
-#, fuzzy
-#| msgid "Неактивен"
 msgid "Сделать активным"
-msgstr "Inactive"
+msgstr "Set as Active"
 
 #: templates/documents/detail.html:185
-#, fuzzy
-#| msgid "Активен"
 msgid "Активировать"
-msgstr "Active"
+msgstr "Activate"
 
 #: templates/documents/detail.html:192
 msgid "Переместить в архив"
-msgstr ""
+msgstr "Archive Template"
 
 #: templates/documents/detail.html:205
 msgid "Для этого типа документа ещё не загружено ни одного шаблона."
-msgstr ""
+msgstr "No templates have been uploaded for this document type yet."
 
 #: templates/documents/detail.html:208
-#, fuzzy
-#| msgid "Загруженные DOCX шаблоны"
 msgid "Загрузить первый DOCX шаблон"
-msgstr "Uploaded DOCX Templates"
+msgstr "Upload First DOCX Template"
 
 #: templates/documents/detail.html:226
-#, fuzzy
-#| msgid "Загруженные DOCX шаблоны"
 msgid "Загрузка нового DOCX-шаблона"
-msgstr "Uploaded DOCX Templates"
+msgstr "Upload New DOCX Template"
 
 #: templates/documents/detail.html:235
-#, fuzzy
-#| msgid "Настроенные типы документов"
 msgid "Шаблон будет привязан к типу документа:"
-msgstr "Configured Document Types"
+msgstr "Template will be bound to document type:"
 
 #: templates/documents/detail.html:236
 msgid "Система автоматически присвоит следующую версию (v"
-msgstr ""
+msgstr "The system will automatically assign the next version (v"
 
 #: templates/documents/detail.html:241
 msgid "Файл DOCX"
-msgstr ""
+msgstr "DOCX File"
 
 #: templates/documents/detail.html:245
 msgid ""
 "Поддерживаются переменные вида {{ full_name }}, {{ group }}, "
 "{{ specialty }}, {{ issue_date }}. Максимальный размер: 10 МБ."
-msgstr ""
+msgstr "Supported placeholders: {{ full_name }}, {{ group }}, {{ specialty }}, {{ issue_date }}. Maximum size: 10 MB."
 
 #: templates/documents/detail.html:251
 msgid "Название шаблона (необязательно)"
-msgstr ""
+msgstr "Template Name (optional)"
 
 #: templates/documents/detail.html:258
 msgid "Начальный статус"
-msgstr ""
+msgstr "Initial Status"
 
 #: templates/documents/detail.html:262
 msgid ""
 "При выборе «Активен» предыдущие активные шаблоны этого типа будут перемещены "
 "в архив."
-msgstr ""
+msgstr "When selecting 'Active', previous active templates of this type will be archived."
 
 #: templates/documents/detail.html:268
 msgid "Описание изменений в этой версии"
-msgstr ""
+msgstr "Description of changes in this version"
 
 #: templates/documents/detail.html:276
 msgid "Загрузить и проанализировать"
-msgstr ""
+msgstr "Upload and Inspect"
 
 #: templates/documents/list.html:10
 msgid "Классификация документов организации и привязанные DOCX-шаблоны"
-msgstr ""
+msgstr "Organization document classification and associated DOCX templates"
 
 #: templates/documents/list.html:15
-#, fuzzy
-#| msgid "Тип документа"
 msgid "Добавить тип документа"
-msgstr "Document Type"
-
-#: templates/documents/list.html:27
-#, fuzzy
-#| msgid "Целевой шаблон"
-msgid "Активный шаблон"
-msgstr "Target Template"
+msgstr "Add Document Type"
 
 #: templates/documents/list.html:29
-#, fuzzy
-#| msgid "Дата загрузки"
 msgid "Дата создания"
-msgstr "Uploaded At"
+msgstr "Created At"
 
 #: templates/documents/list.html:52
-#, fuzzy
-#| msgid "Целевой шаблон"
 msgid "Нет активного шаблона"
-msgstr "Target Template"
+msgstr "No active template"
 
 #: templates/documents/list.html:72
 msgid "Типы документов пока не зарегистрированы."
 msgstr "No document types registered yet."
 
 #: templates/documents/list.html:75
-#, fuzzy
-#| msgid "Настроенные типы документов"
 msgid "Создать первый тип документа"
-msgstr "Configured Document Types"
+msgstr "Create First Document Type"
 
-#: templates/generation/list.html:11
+#: templates/generation/detail.html:4 templates/generation/detail.html:18
+msgid "Пакет генерации #"
+msgstr "Generation Batch #"
+
+#: templates/generation/detail.html:10
+msgid "Пакет #"
+msgstr "Batch #"
+
+#: templates/generation/detail.html:35
+msgid "Источник данных:"
+msgstr "Data Source:"
+
+#: templates/generation/detail.html:36
+msgid "Запущено:"
+msgstr "Started:"
+
+#: templates/generation/detail.html:37
+msgid "Инициатор:"
+msgstr "Initiated By:"
+
+#: templates/generation/detail.html:45
+msgid "Скачать архив (ZIP)"
+msgstr "Download Archive (ZIP)"
+
+#: templates/generation/detail.html:50 templates/generation/list.html:15
+msgid "Новая генерация"
+msgstr "New Generation"
+
+#: templates/generation/detail.html:60
+msgid "Сообщение об ошибке пакета"
+msgstr "Batch Error Message"
+
+#: templates/generation/detail.html:87
+msgid "Сформировано успешно"
+msgstr "Generated Successfully"
+
+#: templates/generation/detail.html:99
+msgid "Ошибок формирования"
+msgstr "Generation Errors"
+
+#: templates/generation/detail.html:111
+msgid "Успешность пакета"
+msgstr "Batch Success Rate"
+
+#: templates/generation/detail.html:122
+msgid "Сформированные документы пакета"
+msgstr "Batch Generated Documents"
+
+#: templates/generation/detail.html:124
+msgid "документов"
+msgstr "documents"
+
+#: templates/generation/detail.html:132
+msgid "Строка / Идентификатор записи"
+msgstr "Row / Record Identifier"
+
+#: templates/generation/detail.html:135
+msgid "Действие"
+msgstr "Action"
+
+#: templates/generation/detail.html:180
+msgid "В данном пакете нет сформированных документов."
+msgstr "No generated documents in this batch."
+
+#: templates/generation/list.html:10
+msgid "Журнал сформированных пакетов документов и архивов."
+msgstr "Log of generated document packages and archives."
+
+#: templates/generation/list.html:24
 msgid "Пакеты сформированных документов"
 msgstr "Generated Document Batches"
 
-#: templates/generation/list.html:14
+#: templates/generation/list.html:27
 msgid "пакетов"
 msgstr "batches"
 
-#: templates/generation/list.html:24 templates/mapping/list.html:24
-msgid "Источник данных"
-msgstr "Data Source"
+#: templates/generation/list.html:38
+msgid "Результат"
+msgstr "Result"
 
-#: templates/generation/list.html:25
-msgid "Инициатор"
-msgstr "Initiated By"
+#: templates/generation/list.html:68
+msgid "Ошибок"
+msgstr "Errors"
 
-#: templates/generation/list.html:26
-msgid "Прогресс"
-msgstr "Progress"
+#: templates/generation/list.html:102
+msgid "Детали пакета"
+msgstr "Batch Details"
 
-#: templates/generation/list.html:28
+#: templates/generation/list.html:106
+msgid "Скачать ZIP архив"
+msgstr "Download ZIP Archive"
+
+#: templates/generation/list.html:120
+msgid "Запустить первую генерацию"
+msgstr "Run First Generation"
+
+#: templates/generation/wizard.html:9
+msgid "Генерация"
+msgstr "Generation"
+
+#: templates/generation/wizard.html:10
+msgid "Новый пакет документов"
+msgstr "New Document Batch"
+
+#: templates/generation/wizard.html:16
+msgid "Мастер пакетной генерации документов"
+msgstr "Batch Document Generation Wizard"
+
+#: templates/generation/wizard.html:17
+msgid ""
+"Выберите схему сопоставления, укажите строки таблицы и сформируйте пакет "
+"DOCX-файлов."
+msgstr "Select a mapping schema, specify table rows, and generate a batch of DOCX files."
+
+#: templates/generation/wizard.html:26
+msgid "Шаг 1: Выбор схемы сопоставления (Mapping)"
+msgstr "Step 1: Select Mapping Schema"
+
+#: templates/generation/wizard.html:33
+msgid "— Выберите схему маппинга для генерации —"
+msgstr "— Select a mapping schema to generate —"
+
+#: templates/generation/wizard.html:43
+msgid "Загрузить данные"
+msgstr "Load Records"
+
+#: templates/generation/wizard.html:56
+msgid "Генерация заблокирована: схема содержит ошибки"
+msgstr "Generation blocked: schema contains errors"
+
+#: templates/generation/wizard.html:68
+msgid "Конфигурация проверена и готова к генерации."
+msgstr "Configuration verified and ready for generation."
+
+#: templates/generation/wizard.html:69
+msgid "Шаблон «"
+msgstr "Template '"
+
+#: templates/generation/wizard.html:69
+msgid "» активен, источник данных доступен."
+msgstr "' is active, data source is available."
+
+#: templates/generation/wizard.html:83
+msgid "Шаг 2: Выбор записей для формирования"
+msgstr "Step 2: Select Records to Generate"
+
+#: templates/generation/wizard.html:86
+msgid "всего записей"
+msgstr "total records"
+
+#: templates/generation/wizard.html:117
+msgid "В выбранном источнике данных отсутствуют строки."
+msgstr "The selected data source contains no records."
+
+#: templates/generation/wizard.html:127
+msgid "Показаны первые 100 строк. Для генерации всех"
+msgstr "Showing first 100 rows. To generate all"
+
+#: templates/generation/wizard.html:127
+msgid "строк набора отметьте флаг ниже:"
+msgstr "records in dataset, check the box below:"
+
+#: templates/generation/wizard.html:131
+msgid "Обработать весь набор данных целиком"
+msgstr "Process the entire dataset"
+
+#: templates/generation/wizard.html:141
+msgid "Запустить пакетную генерацию"
+msgstr "Start Batch Generation"
+
+#: templates/mapping/create.html:4
+msgid "Создание схемы маппинга"
+msgstr "Create Mapping Schema"
+
+#: templates/mapping/create.html:9 templates/mapping/detail.html:9
+msgid "Маппинг"
+msgstr "Mapping"
+
+#: templates/mapping/create.html:10
+msgid "Новая схема сопоставления"
+msgstr "New Mapping Schema"
+
+#: templates/mapping/create.html:24
+msgid "Основные параметры конфигурации"
+msgstr "Core Configuration Parameters"
+
+#: templates/mapping/create.html:82
+msgid "Правила сопоставления переменных"
+msgstr "Variable Mapping Rules"
+
+#: templates/mapping/create.html:92
+msgid ""
+"Для каждой переменной выберите колонку источника данных или задайте "
+"фиксированное значение по умолчанию."
+msgstr "For each variable, select a data source column or specify a fixed default value."
+
+#: templates/mapping/create.html:100
+msgid "Колонка источника данных"
+msgstr "Data Source Column"
+
+#: templates/mapping/create.html:102 templates/mapping/detail.html:166
+msgid "Обязательное"
+msgstr "Required"
+
+#: templates/mapping/create.html:115
+msgid "— Не привязано (по умолчанию / системное) —"
+msgstr "— Not mapped (default / system) —"
+
+#: templates/mapping/create.html:124
+msgid "По умолчанию..."
+msgstr "Default..."
+
+#: templates/mapping/create.html:139
+msgid ""
+"Выберите шаблон и источник данных выше, затем нажмите кнопку «Обновить "
+"переменные» для настройки полей."
+msgstr "Select a template and data source above, then click 'Reload Variables' to configure fields."
+
+#: templates/mapping/create.html:148
+msgid "Сохранить схему сопоставления"
+msgstr "Save Mapping Schema"
+
+#: templates/mapping/create.html:151
+msgid "Обновить переменные"
+msgstr "Reload Variables"
+
+#: templates/mapping/create.html:164
+msgid "Системные переменные"
+msgstr "System Variables"
+
+#: templates/mapping/create.html:167
+msgid ""
+"Если в шаблоне присутствуют эти переменные, система вычисляет их "
+"автоматически при генерации:"
+msgstr "If present in the template, these variables are computed automatically during generation:"
+
+#: templates/mapping/create.html:169
+msgid "Текущая дата (ДД.ММ.ГГГГ)"
+msgstr "Current date (DD.MM.YYYY)"
+
+#: templates/mapping/create.html:170
 msgid "Дата и время"
 msgstr "Timestamp"
 
-#: templates/generation/list.html:36
-msgid "Прямой ввод"
-msgstr "Direct Input"
+#: templates/mapping/create.html:171
+msgid "Текущий год"
+msgstr "Current year"
 
-#: templates/mapping/list.html:11
-msgid "Схемы маппинга полей"
-msgstr "Field Mapping Schemas"
+#: templates/mapping/create.html:180
+msgid "Правила валидации"
+msgstr "Validation Rules"
 
-#: templates/mapping/list.html:14
+#: templates/mapping/create.html:184
+msgid ""
+"Обязательные поля должны иметь либо привязанную колонку с непустыми "
+"значениями, либо значение по умолчанию."
+msgstr "Required fields must have either a mapped column with non-empty values or a default value."
+
+#: templates/mapping/create.html:185
+msgid ""
+"Если колонка пуста в строке данных, автоматически подставляется значение по "
+"умолчанию."
+msgstr "If a column is empty in a data row, the default value is automatically substituted."
+
+#: templates/mapping/create.html:186
+msgid "Не разрешается привязывать переменные к несуществующим колонкам."
+msgstr "Variables cannot be mapped to non-existent columns."
+
+#: templates/mapping/detail.html:4
+msgid "Схема сопоставления"
+msgstr "Mapping Schema"
+
+#: templates/mapping/detail.html:29 templates/mapping/list.html:78
+msgid "Перейти к генерации"
+msgstr "Proceed to Generation"
+
+#: templates/mapping/detail.html:44
+msgid "Схема готова к генерации."
+msgstr "Schema is ready for generation."
+
+#: templates/mapping/detail.html:45
+msgid ""
+"Все переменные шаблона корректно сопоставлены с колонками или обеспечены "
+"значениями по умолчанию."
+msgstr "All template variables are correctly mapped to columns or provided with default values."
+
+#: templates/mapping/detail.html:52
+msgid "Обнаружены замечания в конфигурации маппинга"
+msgstr "Issues found in mapping configuration"
+
+#: templates/mapping/detail.html:71
+msgid "Шаблон (v"
+msgstr "Template (v"
+
+#: templates/mapping/detail.html:83
+msgid "строк данных"
+msgstr "data rows"
+
+#: templates/mapping/detail.html:95
+msgid "Настроенных правил"
+msgstr "Configured Rules"
+
+#: templates/mapping/detail.html:107
+msgid "Валидна"
+msgstr "Valid"
+
+#: templates/mapping/detail.html:107
+msgid "Замечания"
+msgstr "Warnings"
+
+#: templates/mapping/detail.html:109
+msgid "Статус проверки"
+msgstr "Validation Status"
+
+#: templates/mapping/detail.html:120
+msgid "Таблица сопоставления переменных"
+msgstr "Variable Mapping Table"
+
+#: templates/mapping/detail.html:122 templates/mapping/list.html:64
+msgid "правил"
+msgstr "rules"
+
+#: templates/mapping/detail.html:130
+msgid "Целевая колонка таблицы"
+msgstr "Target Table Column"
+
+#: templates/mapping/detail.html:132
+msgid "Обязательность"
+msgstr "Mandatory"
+
+#: templates/mapping/detail.html:150
+msgid "Системное значение"
+msgstr "System Value"
+
+#: templates/mapping/detail.html:153
+msgid "Не привязано"
+msgstr "Not mapped"
+
+#: templates/mapping/detail.html:170
+msgid "Необязательное"
+msgstr "Optional"
+
+#: templates/mapping/detail.html:178
+msgid "Правила сопоставления не настроены."
+msgstr "Mapping rules have not been configured."
+
+#: templates/mapping/detail.html:194 templates/mapping/list.html:94
+msgid "Удаление схемы маппинга"
+msgstr "Delete Mapping Schema"
+
+#: templates/mapping/detail.html:199 templates/mapping/list.html:99
+msgid "Вы действительно хотите удалить схему сопоставления"
+msgstr "Are you sure you want to delete mapping schema"
+
+#: templates/mapping/list.html:9
+msgid "Схемы сопоставления (Mapping)"
+msgstr "Mapping Schemas"
+
+#: templates/mapping/list.html:10
+msgid ""
+"Связывание переменных DOCX-шаблонов с колонками импортированных таблиц "
+"данных."
+msgstr "Pairing DOCX template placeholders with imported spreadsheet columns."
+
+#: templates/mapping/list.html:15
+msgid "Создать маппинг"
+msgstr "Create Mapping"
+
+#: templates/mapping/list.html:24
+msgid "Схемы сопоставления"
+msgstr "Mapping Schemas"
+
+#: templates/mapping/list.html:27
 msgid "схем"
 msgstr "schemas"
 
-#: templates/mapping/list.html:22
+#: templates/mapping/list.html:35
 msgid "Название схемы"
 msgstr "Mapping Name"
 
-#: templates/mapping/list.html:23
-msgid "Целевой шаблон"
-msgstr "Target Template"
+#: templates/mapping/list.html:38
+msgid "Правил"
+msgstr "Rules"
 
-#: templates/mapping/list.html:25
-msgid "Создан"
-msgstr "Created"
+#: templates/mapping/list.html:74
+msgid "Просмотр схемы"
+msgstr "View Schema"
 
-#: templates/mapping/list.html:40
+#: templates/mapping/list.html:120
 msgid "Схемы сопоставления полей пока не созданы."
 msgstr "No field mapping schemas created yet."
+
+#: templates/mapping/list.html:123
+msgid "Создать первую схему"
+msgstr "Create First Schema"
 
 #: templates/organizations/settings.html:13
 msgid "Реквизиты организации"
@@ -786,36 +1914,29 @@ msgstr "Single-Tenant Mode"
 
 #: templates/organizations/settings.html:85
 msgid "Данная установка Flowdow работает в режиме изолированной организации."
-msgstr ""
-"This Flowdow deployment operates in dedicated single-organization mode."
+msgstr "This Flowdow deployment operates in dedicated single-organization mode."
 
 #: templates/organizations/settings.html:86
 msgid ""
 "Все шаблоны документов, наборы данных и сгенерированные файлы принадлежат "
 "исключительно вашей компании."
-msgstr ""
-"All templates, datasets, and generated documents belong exclusively to your "
-"company."
+msgstr "All templates, datasets, and generated documents belong exclusively to your company."
 
 #: templates/templates_manager/list.html:10
 msgid "Все загруженные версии шаблонов по типам документов"
-msgstr ""
+msgstr "All uploaded template versions organized by document type"
 
 #: templates/templates_manager/list.html:15
-#, fuzzy
-#| msgid "Форматирование документов"
 msgid "Перейти к типам документов"
-msgstr "Document Defaults"
+msgstr "Go to Document Types"
 
 #: templates/templates_manager/list.html:25
 msgid "Название"
 msgstr "Title"
 
 #: templates/templates_manager/list.html:96
-#, fuzzy
-#| msgid "Тип документа"
 msgid "Открыть тип документа"
-msgstr "Document Type"
+msgstr "Open Document Type"
 
 #: templates/templates_manager/list.html:106
 msgid "Шаблоны DOCX пока не загружены."
@@ -823,16 +1944,20 @@ msgstr "No DOCX templates uploaded yet."
 
 #: templates/templates_manager/list.html:108
 msgid "Выбрать тип документа для загрузки шаблона"
-msgstr ""
+msgstr "Select Document Type to Upload Template"
+
+#~ msgid "Прогресс"
+#~ msgstr "Progress"
+
+#~ msgid "Прямой ввод"
+#~ msgstr "Direct Input"
 
 #~ msgid "типов"
 #~ msgstr "types"
-
-#~ msgid "Идентификатор (Slug)"
-#~ msgstr "Identifier (Slug)"
 
 #~ msgid "шаблонов"
 #~ msgstr "templates"
 
 #~ msgid "Переменные"
 #~ msgstr "Variables"
+

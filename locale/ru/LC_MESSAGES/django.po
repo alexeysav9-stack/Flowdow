@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 20:35+0300\n"
+"POT-Creation-Date: 2026-11-22 22:23+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -96,8 +96,9 @@ msgstr ""
 msgid "В ожидании"
 msgstr ""
 
-#: apps/data_sources/models.py:35 apps/generation/models.py:14
+#: apps/data_sources/models.py:35 apps/generation/models.py:35
 #: templates/data_sources/detail.html:79 templates/data_sources/list.html:69
+#: templates/generation/list.html:86
 msgid "Обработка"
 msgstr ""
 
@@ -106,8 +107,10 @@ msgstr ""
 msgid "Готов"
 msgstr ""
 
-#: apps/data_sources/models.py:37 apps/generation/models.py:16
-#: templates/data_sources/list.html:73
+#: apps/data_sources/models.py:37 apps/generation/models.py:37
+#: apps/generation/models.py:42 templates/data_sources/list.html:73
+#: templates/generation/detail.html:26 templates/generation/detail.html:155
+#: templates/generation/list.html:82
 msgid "Ошибка"
 msgstr ""
 
@@ -155,12 +158,13 @@ msgstr ""
 msgid "Количество валидных распознанных колонок."
 msgstr ""
 
-#: apps/data_sources/models.py:89 apps/templates_manager/models.py:69
-#: templates/documents/list.html:26
+#: apps/data_sources/models.py:89 apps/mapping/models.py:37
+#: apps/templates_manager/models.py:69 templates/documents/list.html:26
 msgid "Описание"
 msgstr ""
 
-#: apps/data_sources/models.py:94
+#: apps/data_sources/models.py:94 apps/generation/models.py:109
+#: templates/generation/detail.html:134
 msgid "Диагностика ошибок"
 msgstr ""
 
@@ -173,7 +177,9 @@ msgid "Кем загружен"
 msgstr ""
 
 #: apps/data_sources/models.py:107 apps/data_sources/models.py:139
-#: templates/generation/list.html:24 templates/mapping/list.html:24
+#: apps/generation/models.py:60 apps/mapping/forms.py:24
+#: apps/mapping/models.py:32 templates/generation/list.html:37
+#: templates/mapping/list.html:37
 msgid "Источник данных"
 msgstr ""
 
@@ -201,7 +207,8 @@ msgstr ""
 msgid "Динамический словарь {имя_колонки: значение}."
 msgstr ""
 
-#: apps/data_sources/models.py:152
+#: apps/data_sources/models.py:152 apps/generation/models.py:142
+#: templates/generation/detail.html:143
 msgid "Запись данных"
 msgstr ""
 
@@ -289,60 +296,60 @@ msgstr ""
 msgid "Обнаружены повторяющиеся названия колонок: %(cols)s."
 msgstr ""
 
-#: apps/data_sources/services.py:276
+#: apps/data_sources/services.py:275
 #, python-format
 msgid "Файл превышает допустимый лимит строк (максимум %(max)d)."
 msgstr ""
 
-#: apps/data_sources/services.py:286
+#: apps/data_sources/services.py:284
 #, python-format
 msgid "Строка %(row)d содержит %(actual)d колонок при ожидаемых %(expected)d."
 msgstr ""
 
-#: apps/data_sources/services.py:301
+#: apps/data_sources/services.py:298
 msgid "Файл CSV содержит заголовки, но не содержит строк данных."
 msgstr ""
 
-#: apps/data_sources/services.py:334
+#: apps/data_sources/services.py:331
 msgid "Книга Excel не содержит ни одного листа."
 msgstr ""
 
-#: apps/data_sources/services.py:354
+#: apps/data_sources/services.py:351
 #, python-format
 msgid "Лист «%(sheet)s» пуст или не содержит данных."
 msgstr ""
 
-#: apps/data_sources/services.py:364
+#: apps/data_sources/services.py:361
 #, python-format
 msgid "Лист «%(sheet)s» не содержит заголовков колонок."
 msgstr ""
 
-#: apps/data_sources/services.py:369
+#: apps/data_sources/services.py:366
 #, python-format
 msgid "Количество колонок (%(count)d) превышает лимит %(max)d."
 msgstr ""
 
-#: apps/data_sources/services.py:379
+#: apps/data_sources/services.py:376
 #, python-format
 msgid "Колонка №%(idx)d на листе «%(sheet)s» имеет пустой заголовок."
 msgstr ""
 
-#: apps/data_sources/services.py:388
+#: apps/data_sources/services.py:385
 #, python-format
 msgid "На листе «%(sheet)s» обнаружены повторяющиеся заголовки: %(cols)s."
 msgstr ""
 
-#: apps/data_sources/services.py:402
+#: apps/data_sources/services.py:398
 #, python-format
 msgid "Превышен допустимый лимит строк на листе (максимум %(max)d)."
 msgstr ""
 
-#: apps/data_sources/services.py:414
+#: apps/data_sources/services.py:410
 #, python-format
 msgid "Лист «%(sheet)s» содержит заголовки, но не содержит строк данных."
 msgstr ""
 
-#: apps/data_sources/services.py:558
+#: apps/data_sources/services.py:554
 #, python-format
 msgid "Сбой при обработке набора данных: %(msg)s"
 msgstr ""
@@ -404,12 +411,326 @@ msgstr ""
 msgid "Тип документа «%(name)s» успешно создан."
 msgstr ""
 
-#: apps/generation/models.py:13
+#: apps/generation/forms.py:14
+msgid "Схема сопоставления (Mapping)"
+msgstr ""
+
+#: apps/generation/forms.py:16
+msgid "Выберите конфигурацию сопоставления шаблона и источника данных."
+msgstr ""
+
+#: apps/generation/models.py:34
 msgid "В очереди"
 msgstr ""
 
-#: apps/generation/models.py:15
+#: apps/generation/models.py:36 templates/generation/detail.html:22
+#: templates/generation/list.html:78
 msgid "Завершено"
+msgstr ""
+
+#: apps/generation/models.py:41 templates/generation/detail.html:151
+#: templates/generation/list.html:64
+msgid "Успешно"
+msgstr ""
+
+#: apps/generation/models.py:52 apps/mapping/models.py:26
+#: apps/templates_manager/models.py:79
+msgid "Шаблон документа"
+msgstr ""
+
+#: apps/generation/models.py:68
+msgid "Схема маппинга"
+msgstr ""
+
+#: apps/generation/models.py:76
+msgid "Инициатор"
+msgstr ""
+
+#: apps/generation/models.py:82 apps/templates_manager/models.py:64
+#: templates/core/dashboard.html:71 templates/data_sources/list.html:37
+#: templates/documents/detail.html:121 templates/generation/detail.html:133
+#: templates/generation/list.html:39 templates/templates_manager/list.html:28
+msgid "Статус"
+msgstr ""
+
+#: apps/generation/models.py:86 templates/generation/detail.html:75
+msgid "Всего записей"
+msgstr ""
+
+#: apps/generation/models.py:90
+msgid "Обработано записей"
+msgstr ""
+
+#: apps/generation/models.py:94
+msgid "Успешно сформировано"
+msgstr ""
+
+#: apps/generation/models.py:98
+msgid "Ошибок при формировании"
+msgstr ""
+
+#: apps/generation/models.py:104
+msgid "Архив пакета (ZIP)"
+msgstr ""
+
+#: apps/generation/models.py:113 apps/generation/models.py:134
+msgid "Пакет генерации"
+msgstr ""
+
+#: apps/generation/models.py:114
+msgid "Пакеты генерации"
+msgstr ""
+
+#: apps/generation/models.py:148
+msgid "Файл документа (DOCX)"
+msgstr ""
+
+#: apps/generation/models.py:154
+msgid "Статус генерации"
+msgstr ""
+
+#: apps/generation/models.py:159
+msgid "Сообщение об ошибке"
+msgstr ""
+
+#: apps/generation/models.py:165
+msgid "Идентификатор записи"
+msgstr ""
+
+#: apps/generation/models.py:169
+msgid "Сформированный документ"
+msgstr ""
+
+#: apps/generation/models.py:170
+msgid "Сформированные документы"
+msgstr ""
+
+#: apps/generation/services.py:66
+msgid "У вашей роли недостаточно прав для запуска генерации документов."
+msgstr ""
+
+#: apps/generation/services.py:156
+msgid "Файл шаблона отсутствует на сервере."
+msgstr ""
+
+#: apps/generation/services.py:203
+#, python-format
+msgid "Шаблон «%(name)s» v%(ver)d не активен. Генерация невозможна."
+msgstr ""
+
+#: apps/generation/services.py:213
+msgid "Не выбрано ни одной записи для формирования документов."
+msgstr ""
+
+#: apps/generation/services.py:263
+msgid "Ни один документ не был сформирован из-за ошибок валидации."
+msgstr ""
+
+#: apps/generation/views.py:38 templates/components/sidebar.html:36
+#: templates/generation/detail.html:9 templates/generation/list.html:4
+#: templates/generation/list.html:9
+msgid "История генераций"
+msgstr ""
+
+#: apps/generation/views.py:77 templates/generation/wizard.html:4
+msgid "Мастер генерации документов"
+msgstr ""
+
+#: apps/generation/views.py:90
+msgid "Необходимо выбрать схему маппинга."
+msgstr ""
+
+#: apps/generation/views.py:113
+msgid "Не выбрано ни одной строки данных для генерации."
+msgstr ""
+
+#: apps/generation/views.py:125
+#, python-format
+msgid ""
+"Пакетная генерация #%(batch_id)d завершена. Сформировано: %(success)d из "
+"%(total)d документов."
+msgstr ""
+
+#: apps/generation/views.py:138
+#, python-format
+msgid "Сбой при запуске генерации: %(err)s"
+msgstr ""
+
+#: apps/generation/views.py:158
+#, python-format
+msgid "Пакет генерации #%(id)d"
+msgstr ""
+
+#: apps/generation/views.py:172
+msgid "Архив документов не сформирован или отсутствует на сервере."
+msgstr ""
+
+#: apps/generation/views.py:188
+msgid "Файл документа не найден на сервере."
+msgstr ""
+
+#: apps/mapping/forms.py:18 templates/documents/list.html:27
+msgid "Активный шаблон"
+msgstr ""
+
+#: apps/mapping/forms.py:20
+msgid "Отображаются только активные версии шаблонов."
+msgstr ""
+
+#: apps/mapping/forms.py:26
+msgid "Отображаются только готовые наборы данных (CSV / XLSX)."
+msgstr ""
+
+#: apps/mapping/forms.py:36
+msgid "Например: Маппинг договора подряда 2026"
+msgstr ""
+
+#: apps/mapping/forms.py:43
+msgid "Необязательное описание схемы сопоставления..."
+msgstr ""
+
+#: apps/mapping/models.py:19
+msgid "Название схемы маппинга"
+msgstr ""
+
+#: apps/mapping/models.py:20
+msgid "Понятное наименование конфигурации (например, Ведомость 2026)."
+msgstr ""
+
+#: apps/mapping/models.py:45 templates/mapping/list.html:39
+msgid "Создал"
+msgstr ""
+
+#: apps/mapping/models.py:49 apps/mapping/models.py:83
+msgid "Конфигурация маппинга"
+msgstr ""
+
+#: apps/mapping/models.py:50
+msgid "Конфигурации маппинга"
+msgstr ""
+
+#: apps/mapping/models.py:87 templates/mapping/create.html:99
+#: templates/mapping/detail.html:129
+msgid "Переменная шаблона"
+msgstr ""
+
+#: apps/mapping/models.py:88
+msgid "Имя плейсхолдера в DOCX (например, full_name, specialty)."
+msgstr ""
+
+#: apps/mapping/models.py:94
+msgid "Колонка источника"
+msgstr ""
+
+#: apps/mapping/models.py:95
+msgid "Название колонки в таблице данных."
+msgstr ""
+
+#: apps/mapping/models.py:101 templates/mapping/create.html:101
+#: templates/mapping/detail.html:131
+msgid "Значение по умолчанию"
+msgstr ""
+
+#: apps/mapping/models.py:102
+msgid "Подставляется, если значение в таблице пустое."
+msgstr ""
+
+#: apps/mapping/models.py:106
+msgid "Обязательное поле"
+msgstr ""
+
+#: apps/mapping/models.py:107
+msgid ""
+"Если True, значение переменной не должно оставаться пустым при генерации."
+msgstr ""
+
+#: apps/mapping/models.py:111
+msgid "Правило сопоставления"
+msgstr ""
+
+#: apps/mapping/models.py:112
+msgid "Правила сопоставления"
+msgstr ""
+
+#: apps/mapping/services.py:47
+msgid ""
+"У вашей роли недостаточно прав для создания или изменения схем сопоставления."
+msgstr ""
+
+#: apps/mapping/services.py:125
+msgid "В конфигурации маппинга отсутствует ссылка на шаблон."
+msgstr ""
+
+#: apps/mapping/services.py:130
+#, python-format
+msgid "Шаблон «%(name)s» v%(ver)d не активен (текущий статус: %(status)s)."
+msgstr ""
+
+#: apps/mapping/services.py:139
+msgid "Файл шаблона отсутствует."
+msgstr ""
+
+#: apps/mapping/services.py:143
+msgid "В конфигурации маппинга отсутствует источник данных."
+msgstr ""
+
+#: apps/mapping/services.py:149
+#, python-format
+msgid ""
+"Источник данных «%(name)s» не готов к использованию (текущий статус: "
+"%(status)s)."
+msgstr ""
+
+#: apps/mapping/services.py:166
+#, python-format
+msgid "Переменная шаблона «%(var)s» не имеет настроенного правила маппинга."
+msgstr ""
+
+#: apps/mapping/services.py:178
+#, python-format
+msgid ""
+"Переменная «%(var)s» сопоставлена с отсутствующей в источнике колонкой "
+"«%(col)s»."
+msgstr ""
+
+#: apps/mapping/services.py:185
+#, python-format
+msgid ""
+"Обязательная переменная «%(var)s» не имеет привязки к колонке или значения "
+"по умолчанию."
+msgstr ""
+
+#: apps/mapping/services.py:215
+#, python-format
+msgid "Строка %(row)d: отсутствует правило для переменной «%(var)s»."
+msgstr ""
+
+#: apps/mapping/services.py:238
+#, python-format
+msgid ""
+"Строка %(row)d: обязательное поле «%(var)s» (колонка «%(col)s») не заполнено."
+msgstr ""
+
+#: apps/mapping/services.py:240
+msgid "по умолчанию"
+msgstr ""
+
+#: apps/mapping/views.py:38
+msgid "Схемы сопоставления полей"
+msgstr ""
+
+#: apps/mapping/views.py:80 apps/mapping/views.py:98
+msgid "Новая схема маппинга"
+msgstr ""
+
+#: apps/mapping/views.py:136
+#, python-format
+msgid "Конфигурация маппинга «%(name)s» успешно сохранена."
+msgstr ""
+
+#: apps/mapping/views.py:180
+#, python-format
+msgid "Схема маппинга «%(name)s» успешно удалена."
 msgstr ""
 
 #: apps/templates_manager/forms.py:20
@@ -468,12 +789,6 @@ msgstr ""
 msgid "Порядковый номер версии шаблона."
 msgstr ""
 
-#: apps/templates_manager/models.py:64 templates/core/dashboard.html:71
-#: templates/data_sources/list.html:37 templates/documents/detail.html:121
-#: templates/generation/list.html:27 templates/templates_manager/list.html:28
-msgid "Статус"
-msgstr ""
-
 #: apps/templates_manager/models.py:74 templates/documents/detail.html:122
 #: templates/templates_manager/list.html:29
 msgid "Обнаруженные переменные"
@@ -481,10 +796,6 @@ msgstr ""
 
 #: apps/templates_manager/models.py:75
 msgid "Список плейсхолдеров, извлечённых из шаблона."
-msgstr ""
-
-#: apps/templates_manager/models.py:79
-msgid "Шаблон документа"
 msgstr ""
 
 #: apps/templates_manager/models.py:80 apps/templates_manager/views.py:31
@@ -693,10 +1004,6 @@ msgstr ""
 msgid "Сопоставление полей"
 msgstr ""
 
-#: templates/components/sidebar.html:36 templates/generation/list.html:4
-msgid "История генераций"
-msgstr ""
-
 #: templates/components/sidebar.html:40
 msgid "Конфигурация"
 msgstr ""
@@ -721,7 +1028,8 @@ msgstr ""
 msgid "Смотреть все"
 msgstr ""
 
-#: templates/core/dashboard.html:70 templates/generation/list.html:23
+#: templates/core/dashboard.html:70 templates/generation/list.html:36
+#: templates/mapping/list.html:36
 msgid "Шаблон"
 msgstr ""
 
@@ -729,11 +1037,11 @@ msgstr ""
 msgid "Записи"
 msgstr ""
 
-#: templates/core/dashboard.html:73
+#: templates/core/dashboard.html:73 templates/generation/list.html:40
 msgid "Дата запуска"
 msgstr ""
 
-#: templates/core/dashboard.html:93 templates/generation/list.html:57
+#: templates/core/dashboard.html:93 templates/generation/list.html:117
 msgid "Генерации документов пока не производились."
 msgstr ""
 
@@ -741,7 +1049,7 @@ msgstr ""
 msgid "Журнал аудита"
 msgstr ""
 
-#: templates/core/dashboard.html:117 templates/generation/list.html:37
+#: templates/core/dashboard.html:117 templates/generation/detail.html:37
 msgid "Система"
 msgstr ""
 
@@ -763,6 +1071,8 @@ msgstr ""
 
 #: templates/data_sources/detail.html:38 templates/data_sources/detail.html:244
 #: templates/data_sources/list.html:102 templates/data_sources/list.html:128
+#: templates/mapping/detail.html:33 templates/mapping/detail.html:206
+#: templates/mapping/list.html:81 templates/mapping/list.html:106
 msgid "Удалить"
 msgstr ""
 
@@ -863,7 +1173,9 @@ msgstr ""
 
 #: templates/data_sources/detail.html:240 templates/data_sources/list.html:124
 #: templates/data_sources/upload.html:90 templates/documents/create.html:48
-#: templates/documents/detail.html:274
+#: templates/documents/detail.html:274 templates/generation/wizard.html:144
+#: templates/mapping/create.html:154 templates/mapping/detail.html:202
+#: templates/mapping/list.html:102
 msgid "Отмена"
 msgstr ""
 
@@ -902,7 +1214,8 @@ msgid "Загружено"
 msgstr ""
 
 #: templates/data_sources/list.html:41 templates/documents/detail.html:124
-#: templates/documents/list.html:30 templates/templates_manager/list.html:31
+#: templates/documents/list.html:30 templates/generation/list.html:41
+#: templates/mapping/list.html:40 templates/templates_manager/list.html:31
 msgid "Действия"
 msgstr ""
 
@@ -1043,7 +1356,7 @@ msgstr ""
 msgid "Переменные текущей активной версии (v"
 msgstr ""
 
-#: templates/documents/detail.html:91
+#: templates/documents/detail.html:91 templates/mapping/create.html:85
 msgid "переменных"
 msgstr ""
 
@@ -1139,10 +1452,6 @@ msgstr ""
 msgid "Добавить тип документа"
 msgstr ""
 
-#: templates/documents/list.html:27
-msgid "Активный шаблон"
-msgstr ""
-
 #: templates/documents/list.html:29
 msgid "Дата создания"
 msgstr ""
@@ -1159,52 +1468,404 @@ msgstr ""
 msgid "Создать первый тип документа"
 msgstr ""
 
-#: templates/generation/list.html:11
+#: templates/generation/detail.html:4 templates/generation/detail.html:18
+msgid "Пакет генерации #"
+msgstr ""
+
+#: templates/generation/detail.html:10
+msgid "Пакет #"
+msgstr ""
+
+#: templates/generation/detail.html:35
+msgid "Источник данных:"
+msgstr ""
+
+#: templates/generation/detail.html:36
+msgid "Запущено:"
+msgstr ""
+
+#: templates/generation/detail.html:37
+msgid "Инициатор:"
+msgstr ""
+
+#: templates/generation/detail.html:45
+msgid "Скачать архив (ZIP)"
+msgstr ""
+
+#: templates/generation/detail.html:50 templates/generation/list.html:15
+msgid "Новая генерация"
+msgstr ""
+
+#: templates/generation/detail.html:60
+msgid "Сообщение об ошибке пакета"
+msgstr ""
+
+#: templates/generation/detail.html:87
+msgid "Сформировано успешно"
+msgstr ""
+
+#: templates/generation/detail.html:99
+msgid "Ошибок формирования"
+msgstr ""
+
+#: templates/generation/detail.html:111
+msgid "Успешность пакета"
+msgstr ""
+
+#: templates/generation/detail.html:122
+msgid "Сформированные документы пакета"
+msgstr ""
+
+#: templates/generation/detail.html:124
+msgid "документов"
+msgstr ""
+
+#: templates/generation/detail.html:132
+msgid "Строка / Идентификатор записи"
+msgstr ""
+
+#: templates/generation/detail.html:135
+msgid "Действие"
+msgstr ""
+
+#: templates/generation/detail.html:180
+msgid "В данном пакете нет сформированных документов."
+msgstr ""
+
+#: templates/generation/list.html:10
+msgid "Журнал сформированных пакетов документов и архивов."
+msgstr ""
+
+#: templates/generation/list.html:24
 msgid "Пакеты сформированных документов"
 msgstr ""
 
-#: templates/generation/list.html:14
+#: templates/generation/list.html:27
 msgid "пакетов"
 msgstr ""
 
-#: templates/generation/list.html:25
-msgid "Инициатор"
+#: templates/generation/list.html:38
+msgid "Результат"
 msgstr ""
 
-#: templates/generation/list.html:26
-msgid "Прогресс"
+#: templates/generation/list.html:68
+msgid "Ошибок"
 msgstr ""
 
-#: templates/generation/list.html:28
+#: templates/generation/list.html:102
+msgid "Детали пакета"
+msgstr ""
+
+#: templates/generation/list.html:106
+msgid "Скачать ZIP архив"
+msgstr ""
+
+#: templates/generation/list.html:120
+msgid "Запустить первую генерацию"
+msgstr ""
+
+#: templates/generation/wizard.html:9
+msgid "Генерация"
+msgstr ""
+
+#: templates/generation/wizard.html:10
+msgid "Новый пакет документов"
+msgstr ""
+
+#: templates/generation/wizard.html:16
+msgid "Мастер пакетной генерации документов"
+msgstr ""
+
+#: templates/generation/wizard.html:17
+msgid ""
+"Выберите схему сопоставления, укажите строки таблицы и сформируйте пакет "
+"DOCX-файлов."
+msgstr ""
+
+#: templates/generation/wizard.html:26
+msgid "Шаг 1: Выбор схемы сопоставления (Mapping)"
+msgstr ""
+
+#: templates/generation/wizard.html:33
+msgid "— Выберите схему маппинга для генерации —"
+msgstr ""
+
+#: templates/generation/wizard.html:43
+msgid "Загрузить данные"
+msgstr ""
+
+#: templates/generation/wizard.html:56
+msgid "Генерация заблокирована: схема содержит ошибки"
+msgstr ""
+
+#: templates/generation/wizard.html:68
+msgid "Конфигурация проверена и готова к генерации."
+msgstr ""
+
+#: templates/generation/wizard.html:69
+msgid "Шаблон «"
+msgstr ""
+
+#: templates/generation/wizard.html:69
+msgid "» активен, источник данных доступен."
+msgstr ""
+
+#: templates/generation/wizard.html:83
+msgid "Шаг 2: Выбор записей для формирования"
+msgstr ""
+
+#: templates/generation/wizard.html:86
+msgid "всего записей"
+msgstr ""
+
+#: templates/generation/wizard.html:117
+msgid "В выбранном источнике данных отсутствуют строки."
+msgstr ""
+
+#: templates/generation/wizard.html:127
+msgid "Показаны первые 100 строк. Для генерации всех"
+msgstr ""
+
+#: templates/generation/wizard.html:127
+msgid "строк набора отметьте флаг ниже:"
+msgstr ""
+
+#: templates/generation/wizard.html:131
+msgid "Обработать весь набор данных целиком"
+msgstr ""
+
+#: templates/generation/wizard.html:131
+msgid "строк"
+msgstr ""
+
+#: templates/generation/wizard.html:141
+msgid "Запустить пакетную генерацию"
+msgstr ""
+
+#: templates/mapping/create.html:4
+msgid "Создание схемы маппинга"
+msgstr ""
+
+#: templates/mapping/create.html:9 templates/mapping/detail.html:9
+msgid "Маппинг"
+msgstr ""
+
+#: templates/mapping/create.html:10
+msgid "Новая схема сопоставления"
+msgstr ""
+
+#: templates/mapping/create.html:24
+msgid "Основные параметры конфигурации"
+msgstr ""
+
+#: templates/mapping/create.html:82
+msgid "Правила сопоставления переменных"
+msgstr ""
+
+#: templates/mapping/create.html:92
+msgid ""
+"Для каждой переменной выберите колонку источника данных или задайте "
+"фиксированное значение по умолчанию."
+msgstr ""
+
+#: templates/mapping/create.html:100
+msgid "Колонка источника данных"
+msgstr ""
+
+#: templates/mapping/create.html:102 templates/mapping/detail.html:166
+msgid "Обязательное"
+msgstr ""
+
+#: templates/mapping/create.html:115
+msgid "— Не привязано (по умолчанию / системное) —"
+msgstr ""
+
+#: templates/mapping/create.html:124
+msgid "По умолчанию..."
+msgstr ""
+
+#: templates/mapping/create.html:139
+msgid ""
+"Выберите шаблон и источник данных выше, затем нажмите кнопку «Обновить "
+"переменные» для настройки полей."
+msgstr ""
+
+#: templates/mapping/create.html:148
+msgid "Сохранить схему сопоставления"
+msgstr ""
+
+#: templates/mapping/create.html:151
+msgid "Обновить переменные"
+msgstr ""
+
+#: templates/mapping/create.html:164
+msgid "Системные переменные"
+msgstr ""
+
+#: templates/mapping/create.html:167
+msgid ""
+"Если в шаблоне присутствуют эти переменные, система вычисляет их "
+"автоматически при генерации:"
+msgstr ""
+
+#: templates/mapping/create.html:169
+msgid "Текущая дата (ДД.ММ.ГГГГ)"
+msgstr ""
+
+#: templates/mapping/create.html:170
 msgid "Дата и время"
 msgstr ""
 
-#: templates/generation/list.html:36
-msgid "Прямой ввод"
+#: templates/mapping/create.html:171
+msgid "Текущий год"
 msgstr ""
 
-#: templates/mapping/list.html:11
-msgid "Схемы маппинга полей"
+#: templates/mapping/create.html:180
+msgid "Правила валидации"
 msgstr ""
 
-#: templates/mapping/list.html:14
+#: templates/mapping/create.html:184
+msgid ""
+"Обязательные поля должны иметь либо привязанную колонку с непустыми "
+"значениями, либо значение по умолчанию."
+msgstr ""
+
+#: templates/mapping/create.html:185
+msgid ""
+"Если колонка пуста в строке данных, автоматически подставляется значение по "
+"умолчанию."
+msgstr ""
+
+#: templates/mapping/create.html:186
+msgid "Не разрешается привязывать переменные к несуществующим колонкам."
+msgstr ""
+
+#: templates/mapping/detail.html:4
+msgid "Схема сопоставления"
+msgstr ""
+
+#: templates/mapping/detail.html:29 templates/mapping/list.html:78
+msgid "Перейти к генерации"
+msgstr ""
+
+#: templates/mapping/detail.html:44
+msgid "Схема готова к генерации."
+msgstr ""
+
+#: templates/mapping/detail.html:45
+msgid ""
+"Все переменные шаблона корректно сопоставлены с колонками или обеспечены "
+"значениями по умолчанию."
+msgstr ""
+
+#: templates/mapping/detail.html:52
+msgid "Обнаружены замечания в конфигурации маппинга"
+msgstr ""
+
+#: templates/mapping/detail.html:71
+msgid "Шаблон (v"
+msgstr ""
+
+#: templates/mapping/detail.html:83
+msgid "строк данных"
+msgstr ""
+
+#: templates/mapping/detail.html:95
+msgid "Настроенных правил"
+msgstr ""
+
+#: templates/mapping/detail.html:107
+msgid "Валидна"
+msgstr ""
+
+#: templates/mapping/detail.html:107
+msgid "Замечания"
+msgstr ""
+
+#: templates/mapping/detail.html:109
+msgid "Статус проверки"
+msgstr ""
+
+#: templates/mapping/detail.html:120
+msgid "Таблица сопоставления переменных"
+msgstr ""
+
+#: templates/mapping/detail.html:122 templates/mapping/list.html:64
+msgid "правил"
+msgstr ""
+
+#: templates/mapping/detail.html:130
+msgid "Целевая колонка таблицы"
+msgstr ""
+
+#: templates/mapping/detail.html:132
+msgid "Обязательность"
+msgstr ""
+
+#: templates/mapping/detail.html:150
+msgid "Системное значение"
+msgstr ""
+
+#: templates/mapping/detail.html:153
+msgid "Не привязано"
+msgstr ""
+
+#: templates/mapping/detail.html:170
+msgid "Необязательное"
+msgstr ""
+
+#: templates/mapping/detail.html:178
+msgid "Правила сопоставления не настроены."
+msgstr ""
+
+#: templates/mapping/detail.html:194 templates/mapping/list.html:94
+msgid "Удаление схемы маппинга"
+msgstr ""
+
+#: templates/mapping/detail.html:199 templates/mapping/list.html:99
+msgid "Вы действительно хотите удалить схему сопоставления"
+msgstr ""
+
+#: templates/mapping/list.html:9
+msgid "Схемы сопоставления (Mapping)"
+msgstr ""
+
+#: templates/mapping/list.html:10
+msgid ""
+"Связывание переменных DOCX-шаблонов с колонками импортированных таблиц "
+"данных."
+msgstr ""
+
+#: templates/mapping/list.html:15
+msgid "Создать маппинг"
+msgstr ""
+
+#: templates/mapping/list.html:24
+msgid "Схемы сопоставления"
+msgstr ""
+
+#: templates/mapping/list.html:27
 msgid "схем"
 msgstr ""
 
-#: templates/mapping/list.html:22
+#: templates/mapping/list.html:35
 msgid "Название схемы"
 msgstr ""
 
-#: templates/mapping/list.html:23
-msgid "Целевой шаблон"
+#: templates/mapping/list.html:38
+msgid "Правил"
 msgstr ""
 
-#: templates/mapping/list.html:25
-msgid "Создан"
+#: templates/mapping/list.html:74
+msgid "Просмотр схемы"
 msgstr ""
 
-#: templates/mapping/list.html:40
+#: templates/mapping/list.html:120
 msgid "Схемы сопоставления полей пока не созданы."
+msgstr ""
+
+#: templates/mapping/list.html:123
+msgid "Создать первую схему"
 msgstr ""
 
 #: templates/organizations/settings.html:13
