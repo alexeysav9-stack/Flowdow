@@ -44,4 +44,3 @@ class MappingConfigForm(forms.ModelForm):
                 }
             ),
         }
-

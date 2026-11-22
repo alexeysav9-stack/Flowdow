@@ -1,47 +1,80 @@
 # Flowdow — Open-Source Document Automation Platform
 
-Flowdow is a modern, self-hosted web application that automates repetitive document preparation from custom DOCX templates and tabular data sources (CSV, XLSX).
+[![CI](https://github.com/flowdow/flowdow/actions/workflows/ci.yml/badge.svg)](https://github.com/flowdow/flowdow/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-5.1-green.svg)](https://www.djangoproject.com/)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
-Designed for HR, legal, sales, finance, and operational teams, Flowdow empowers business users to visually map variables, validate datasets, and generate individual or bulk document packages without writing code.
+**Flowdow** is a self-hosted, open-source web platform that automates repetitive document preparation from custom Word (`.docx`) templates and tabular datasets (`.csv`, `.xlsx`).
+
+Designed for HR, legal, sales, finance, and operations teams, Flowdow empowers non-technical users to visually map variables, validate datasets, and generate individual or bulk document packages without writing code.
+
+---
+
+## ⚡ Try Flowdow in 60 Seconds (Ready-to-Use Demo)
+
+Pre-built sample files are provided in [`examples/`](examples/):
+
+1. **Start the application** with Docker Compose:
+   ```bash
+   cp .env.example .env
+   docker compose up -d --build
+   docker compose exec web python manage.py createsuperuser
+   ```
+2. Open **http://localhost:8000** and log in.
+3. **Upload Template:** Create document type `Employment Certificate` and upload [`examples/sample_certificate.docx`](examples/sample_certificate.docx). Flowdow automatically detects `full_name`, `position`, `department`, `salary`, and `current_date`.
+4. **Import Data:** Upload [`examples/sample_employees.csv`](examples/sample_employees.csv) or [`examples/sample_employees.xlsx`](examples/sample_employees.xlsx).
+5. **Create Mapping:** Map variables to table columns (`full_name` ➔ `ФИО`, etc.).
+6. **Generate:** Generate certificates for all rows and download a single ZIP package containing personalized `.docx` files!
+
+See [`examples/README.md`](examples/README.md) for detailed step-by-step screenshots and guidelines.
 
 ---
 
 ## Key Features
 
-- **Document & Template Management:** Create document types, upload DOCX templates with version control (`v1`, `v2`), and automatically extract variables.
-- **Automatic Variable Detection:** Deep AST inspection of DOCX templates resolving Word's internal split XML runs.
-- **Multi-Version Lifecycle:** Versioning (`draft`, `active`, `archived`) with collision-proof storage paths preventing file overwriting.
-- **Enterprise Security:** Strict file validation (magic bytes `PK\x03\x04`, zip bomb protection, 10MB limit), path traversal defense, and role-based access control.
-- **Multilingual UI (RU / EN):** Instant language switching for all management screens.
-- **Tabular Data Ingestion (Upcoming):** Import spreadsheet data from CSV and XLSX files with automatic column detection.
-- **Variable Mapping & Validation (Upcoming):** Map template variables to data columns with default fallback values and pre-flight validation.
-- **Single & Batch Generation (Upcoming):** Generate single documents on demand or package thousands of personalized documents into a single ZIP archive.
-- **Modular Monolith Architecture:** Clean layered design (Presentation, Service Layer, Business Modules, Infrastructure).
-- **Audit & History:** Full visibility into who generated which documents, with which template, and when.
-- **Self-Hosted & Private:** Keep corporate data, contracts, and personal records safely within your own infrastructure.
+- **Document & Template Management:** Create document types, upload `.docx` templates with auto-incrementing version control (`v1`, `v2`, ...), and manage lifecycles (`draft`, `active`, `archived`).
+- **Deep Variable Discovery:** Jinja2 AST inspection of DOCX templates resolving Microsoft Word's internal split XML runs without executing untrusted code.
+- **Tabular Data Ingestion (CSV & XLSX):**
+  - **CSV:** Auto-detects delimiters (`,`, `;`, `\t`, `|`), handles standard UTF-8 and UTF-8 with BOM, and gracefully falls back to Windows-1251.
+  - **XLSX:** Memory-efficient streaming parser (`openpyxl` with `read_only=True`) supporting multi-sheet selection and typed formatting.
+- **Dynamic Schema Storage:** Uses PostgreSQL `jsonb` (`DataRecord.data`) allowing arbitrary column layouts without running database migrations.
+- **Visual Mapping & Pre-Flight Validation:**
+  - Pair template variables to dataset columns.
+  - Set fallback default values and enforce mandatory required fields.
+  - Built-in safe system variables (`current_date`, `current_datetime`, `current_year`, `system_platform`).
+- **Resilient Batch Generation:**
+  - Single document rendering or batch generation across thousands of rows.
+  - **Error isolation:** a failure in row 5 will not interrupt row 6.
+  - **Automated ZIP packaging:** all successfully rendered `.docx` files are compiled into a downloadable archive.
+- **Audit & History:** Complete visibility into every batch, generation duration, success rate, and detailed error diagnostics.
+- **Multilingual UI (RU / EN):** Seamless language switching for all interfaces.
+- **Self-Hosted & Private:** Keep confidential customer data, contracts, and HR records strictly on your own servers.
 
 ---
 
 ### Supported DOCX Template Syntax
 
-Flowdow processes Word `.docx` documents using `docxtpl`. At this stage, simple placeholder variables are supported:
+Flowdow processes Word `.docx` documents using `docxtpl`. Simple Jinja2 placeholder variables are supported:
 
 ```jinja2
 {{ full_name }}
-{{ group }}
-{{ specialty }}
-{{ issue_date }}
+{{ position }}
+{{ department }}
+{{ salary }}
+{{ current_date }}
 ```
 
-- **Split Run Resolution:** Word often divides text into multiple `<w:r><w:t>` elements during editing. Flowdow cleans and unifies these runs, accurately discovering variables.
-- **Security Invariant:** Template discovery uses non-evaluating Jinja2 AST analysis (`find_undeclared_variables`). Execution of arbitrary Python code or dangerous dunder attributes is completely blocked.
+- **Split Run Resolution:** Word frequently breaks placeholders across multiple XML runs (`<w:r><w:t>{{</w:t></w:r><w:r><w:t>var}}</w:t></w:r>`). Flowdow normalizes runs before extraction and rendering.
+- **Security Invariant:** Template discovery utilizes non-evaluating Jinja2 AST analysis (`find_undeclared_variables`). Arbitrary Python evaluation and dunder attributes (`__class__`, `__subclasses__`) are strictly rejected.
 
 ---
 
 ## Tech Stack
 
 - **Backend:** Python 3.12+, Django 5.1
-- **Database:** PostgreSQL 16+ (via `psycopg` 3)
+- **Database:** PostgreSQL 16+ (via `psycopg` 3) / SQLite (for fast headless CI/testing)
 - **Document Engine:** `docxtpl`, `python-docx`, `openpyxl`
 - **Frontend:** Django Templates, Bootstrap 5.3, Bootstrap Icons, Vanilla JS
 - **Containerization:** Docker, Docker Compose
@@ -51,11 +84,11 @@ Flowdow processes Word `.docx` documents using `docxtpl`. At this stage, simple 
 
 ## Quickstart with Docker Compose
 
-The fastest way to launch Flowdow with PostgreSQL is using Docker Compose:
+The recommended way to deploy Flowdow in production or local evaluation:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-org/flowdow.git
+git clone https://github.com/flowdow/flowdow.git
 cd flowdow
 
 # 2. Copy the environment configuration
@@ -82,11 +115,11 @@ Once running, access the web interface at **http://localhost:8000**.
 ### 2. Virtual Environment & Dependencies
 ```bash
 # Create and activate virtual environment
-uv venv --python 3.12 .venv
+python -m venv .venv
 source .venv/bin/activate
 
 # Install dependencies including development tools
-uv pip install -e ".[dev]"
+pip install -e ".[dev]"
 ```
 
 ### 3. Environment Variables
@@ -95,13 +128,9 @@ cp .env.example .env
 # Adjust DB_NAME, DB_USER, DB_PASSWORD, DB_HOST in .env if needed
 ```
 
-### 4. Database Migrations
+### 4. Database Migrations & Initial Setup
 ```bash
 python manage.py migrate
-```
-
-### 5. Create Superuser & Run Development Server
-```bash
 python manage.py createsuperuser
 python manage.py runserver
 ```
@@ -110,50 +139,9 @@ Open **http://127.0.0.1:8000** in your browser.
 
 ---
 
-## Data Sources & Tabular Ingestion (CSV / XLSX)
-
-Flowdow includes a tabular data ingestion engine designed to import structured spreadsheets without schema migrations:
-
-- **Supported Formats:**
-  - **CSV:** Decoded with `utf-8-sig` (transparently supporting standard UTF-8 and UTF-8 with BOM, with fallback to Windows-1251). Delimiters (`,`, `;`, `\t`, `|`) are auto-detected via `csv.Sniffer` and frequency analysis.
-  - **XLSX:** Parsed via `openpyxl` in memory-efficient streaming mode (`read_only=True, data_only=True`), supporting multi-sheet selection and date/number formatting.
-- **Header & Structure Validation:**
-  - First non-empty row serves as column headers.
-  - Headers must be unique and non-empty.
-  - Leading, intermediate, and trailing empty lines are automatically skipped.
-  - Rows with excess undeclared values raise descriptive record-level errors, preventing silent data loss.
-- **Dynamic Storage via `JSONField`:**
-  - Ingested rows are stored in `DataRecord.data` as a dynamic JSON object (`{"ФИО": "Иванов И.И.", "Оклад": "120000"}`).
-  - Backed by PostgreSQL `jsonb` for high performance, indexing, and direct 1:1 mapping into template contexts without dynamic database tables.
-- **Security & Limits:**
-  - Max upload size: 20 MB.
-  - Max rows: 50,000 rows per dataset (DoS protection).
-  - Max columns: 200 columns.
-  - XLSX archive inspection: magic bytes `PK\x03\x04`, OpenXML structure verification, executable payload rejection, and zip-bomb decompression ratio checks.
-
----
-
-## Mapping, Validation & Document Generation
-
-Flowdow delivers an end-to-end pipeline: **DOCX Template + Data Source → Mapping → Validation → DOCX Generation**:
-
-1. **Mapping Engine (`apps/mapping`):**
-   - Bind template placeholders (`{{ var }}`) to table columns via `MappingConfig` and `MappingRule`.
-   - Set fallback `default_value` for empty cells.
-   - Configure `required` flags to protect against missing mandatory data.
-   - Built-in **System Variables** (`{{ current_date }}`, `{{ current_datetime }}`, `{{ current_year }}`, `{{ system_platform }}`) are securely resolved automatically without executing Python code.
-2. **Two-Tier Validation:**
-   - *Configuration validation:* verifies that the template is active, the dataset is ready, and all variables are covered.
-   - *Record validation:* validates each individual row, applying defaults and flagging missing required fields before rendering.
-3. **Resilient Batch Generation (`apps/generation`):**
-   - Synchronous rendering using `docxtpl` with sanitized output filenames.
-   - **Error isolation:** a failed row (e.g. missing required field) generates an error record without interrupting the remaining rows in the batch.
-   - **Automated ZIP packaging:** all successfully rendered DOCX files in a batch are compiled into a downloadable ZIP archive.
-   - Individual DOCX files can also be downloaded directly from the batch detail view.
-
----
-
 ## Running Tests & Code Quality
+
+Flowdow requires 100% test pass and zero linting violations:
 
 ```bash
 # Run test suite with pytest
@@ -172,10 +160,10 @@ ruff format --check .
 
 ```
 Flowdow/
-├── config/             # Core project configuration (settings, routing, wsgi)
+├── config/             # Core project configuration (settings, routing, wsgi, asgi)
 ├── apps/
-│   ├── core/           # Base models, dashboard metrics, shared services
-│   ├── accounts/       # Custom User model, authentication, profiles
+│   ├── core/           # Base models, health check, dashboard metrics
+│   ├── accounts/       # Custom User model, authentication, RBAC
 │   ├── organizations/  # Single-tenant organization profile & settings
 │   ├── documents/      # Document types catalog
 │   ├── templates_manager/ # DOCX template storage & variable inspection
@@ -183,9 +171,11 @@ Flowdow/
 │   ├── mapping/        # Variable-to-column mapping & validation
 │   ├── generation/     # Single & batch document generation
 │   └── audit/          # System audit trails
+├── examples/           # Ready-to-use sample templates & datasets
 ├── static/             # Static CSS and JavaScript assets
 ├── templates/          # Bootstrap 5 server-rendered HTML templates
-├── tests/              # Pytest test suite
+├── tests/              # Pytest test suite (100+ tests)
+├── .github/workflows/  # GitHub Actions CI pipeline
 ├── Dockerfile          # Container specification
 ├── docker-compose.yml  # Docker Compose orchestration
 └── pyproject.toml      # Build metadata, dependencies & tool configs
@@ -195,15 +185,16 @@ Flowdow/
 
 ## Documentation
 
+- [ARCHITECTURE.md](ARCHITECTURE.md) — System Architecture, Boundaries & Layering
 - [PRD.md](PRD.md) — Product Requirements Document
-- [ARCHITECTURE.md](ARCHITECTURE.md) — System Architecture & Layering
 - [ROADMAP.md](ROADMAP.md) — Development Roadmap & Horizons
-- [AGENTS.md](AGENTS.md) — Rules & Invariants for Developers & AI Agents
+- [CONTRIBUTING.md](CONTRIBUTING.md) — Contribution Guidelines
+- [CHANGELOG.md](CHANGELOG.md) — Release Notes & Version History
 - [DECISIONS.md](DECISIONS.md) — Architecture Decision Records (ADRs)
+- [AGENTS.md](AGENTS.md) — Architectural Rules for Developers & AI Agents
 
 ---
 
 ## License
 
-This project is licensed under the Apache 2.0 License.
-
+This project is licensed under the Apache 2.0 License. See [LICENSE](LICENSE) for details.

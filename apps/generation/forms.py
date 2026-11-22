@@ -15,4 +15,3 @@ class BatchLaunchForm(forms.Form):
         widget=forms.Select(attrs={"class": "form-select"}),
         help_text=_("Выберите конфигурацию сопоставления шаблона и источника данных."),
     )
-
