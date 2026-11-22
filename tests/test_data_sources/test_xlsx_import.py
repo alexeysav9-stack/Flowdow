@@ -164,4 +164,3 @@ def test_xlsx_reject_header_only_sheet():
     with pytest.raises(DataSourceValidationError) as exc:
         XlsxImportService.parse_file(file_obj)
     assert "не содержит строк данных" in str(exc.value)
-

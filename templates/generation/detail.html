@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Пакет генерации #" %}{{ batch.id }} — Flowdow{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{% url 'generation:list' %}" class="text-decoration-none">{% trans "История генераций" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Пакет #" %}{{ batch.id }}</li>
+  </ol>
+</nav>
+
+<!-- Header & Actions -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <div class="d-flex align-items-center gap-2">
+      <h4 class="fw-bold mb-0 text-dark">{% trans "Пакет генерации #" %}{{ batch.id }}</h4>
+      <span class="badge bg-light text-dark border">{{ batch.template.name }} (v{{ batch.template.version }})</span>
+      {% if batch.status == "COMPLETED" %}
+        <span class="badge bg-success-subtle text-success border border-success-subtle">
+          <i class="bi bi-check-circle-fill me-1"></i>{% trans "Завершено" %}
+        </span>
+      {% elif batch.status == "FAILED" %}
+        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+          <i class="bi bi-x-circle-fill me-1"></i>{% trans "Ошибка" %}
+        </span>
+      {% else %}
+        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+          <i class="bi bi-hourglass-split me-1"></i>{{ batch.get_status_display }}
+        </span>
+      {% endif %}
+    </div>
+    <p class="text-muted small mt-1 mb-0">
+      {% trans "Источник данных:" %} <strong>{{ batch.data_source.name|default:"—" }}</strong> &bull;
+      {% trans "Запущено:" %} {{ batch.created_at|date:"d.m.Y H:i" }} &bull;
+      {% trans "Инициатор:" %} {{ batch.initiated_by.get_full_name|default:batch.initiated_by.username|default:_("Система") }}
+    </p>
+  </div>
+
+  <div class="d-flex align-items-center gap-2">
+    {% if batch.output_file %}
+      <a href="{% url 'generation:download_zip' batch.pk %}" class="btn btn-success d-inline-flex align-items-center gap-2">
+        <i class="bi bi-file-earmark-zip-fill fs-5"></i>
+        <span>{% trans "Скачать архив (ZIP)" %}</span>
+      </a>
+    {% endif %}
+    <a href="{% url 'generation:wizard' %}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
+      <i class="bi bi-plus-circle"></i>
+      <span>{% trans "Новая генерация" %}</span>
+    </a>
+  </div>
+</div>
+
+<!-- Diagnostics if Batch Error -->
+{% if batch.error_message %}
+  <div class="alert alert-danger d-flex align-items-start gap-2 mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5 mt-1 flex-shrink-0"></i>
+    <div>
+      <h6 class="alert-heading fw-bold mb-1">{% trans "Сообщение об ошибке пакета" %}</h6>
+      <p class="mb-0">{{ batch.error_message }}</p>
+    </div>
+  </div>
+{% endif %}
+
+<!-- Metric KPI Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-md-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-primary-subtle text-primary">
+        <i class="bi bi-layers"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">{{ batch.total_records }}</div>
+        <div class="fd-stat-label">{% trans "Всего записей" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-success-subtle text-success">
+        <i class="bi bi-check2-circle"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number text-success">{{ batch.successful_records }}</div>
+        <div class="fd-stat-label">{% trans "Сформировано успешно" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon {% if batch.failed_records > 0 %}bg-danger-subtle text-danger{% else %}bg-secondary-subtle text-secondary{% endif %}">
+        <i class="bi bi-exclamation-circle"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number {% if batch.failed_records > 0 %}text-danger{% endif %}">{{ batch.failed_records }}</div>
+        <div class="fd-stat-label">{% trans "Ошибок формирования" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-info-subtle text-info">
+        <i class="bi bi-percent"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">{{ batch.progress_percent }}%</div>
+        <div class="fd-stat-label">{% trans "Успешность пакета" %}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Generated Documents Table -->
+<div class="fd-card">
+  <div class="fd-card-header d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-files text-primary"></i>
+      <span class="fw-semibold">{% trans "Сформированные документы пакета" %}</span>
+    </div>
+    <span class="badge bg-light text-dark border">{{ documents|length }} {% trans "документов" %}</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0 font-monospace small">
+      <thead class="table-light">
+        <tr>
+          <th style="width: 70px;">ID</th>
+          <th>{% trans "Строка / Идентификатор записи" %}</th>
+          <th>{% trans "Статус" %}</th>
+          <th>{% trans "Диагностика ошибок" %}</th>
+          <th class="text-end">{% trans "Действие" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for doc in documents %}
+          <tr>
+            <td class="text-muted fw-semibold">#{{ doc.id }}</td>
+            <td>
+              <span class="fw-semibold text-dark">{{ doc.record_identifier|default:_("Запись данных") }}</span>
+              {% if doc.data_record %}
+                <span class="badge bg-light text-dark border small ms-1">Row {{ doc.data_record.row_number }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if doc.status == "SUCCESS" %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                  <i class="bi bi-check-circle-fill me-1"></i>{% trans "Успешно" %}
+                </span>
+              {% else %}
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                  <i class="bi bi-x-circle-fill me-1"></i>{% trans "Ошибка" %}
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              {% if doc.error_message %}
+                <div class="text-danger small font-monospace">{{ doc.error_message }}</div>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              {% if doc.status == "SUCCESS" and doc.file %}
+                <a href="{% url 'generation:download_doc' doc.pk %}" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1">
+                  <i class="bi bi-download"></i>
+                  <span>DOCX</span>
+                </a>
+              {% else %}
+                <span class="text-muted small">—</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="text-center py-4 text-muted">
+              {% trans "В данном пакете нет сформированных документов." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

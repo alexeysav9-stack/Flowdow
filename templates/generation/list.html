@@ -4,6 +4,19 @@
 {% block title %}{% trans "История генераций" %} — Flowdow{% endblock %}
 
 {% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <h4 class="fw-bold mb-1 text-dark">{% trans "История генераций" %}</h4>
+    <p class="text-muted small mb-0">{% trans "Журнал сформированных пакетов документов и архивов." %}</p>
+  </div>
+  {% if user.role != "VIEWER" %}
+    <a href="{% url 'generation:wizard' %}" class="btn btn-primary d-inline-flex align-items-center gap-2">
+      <i class="bi bi-play-circle"></i>
+      <span>{% trans "Новая генерация" %}</span>
+    </a>
+  {% endif %}
+</div>
+
 <div class="fd-card">
   <div class="fd-card-header">
     <div class="d-flex align-items-center gap-2">
@@ -16,45 +29,97 @@
   </div>
 
   <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
-      <thead>
+    <table class="table table-hover align-middle mb-0 font-monospace small">
+      <thead class="table-light">
         <tr>
-          <th>ID</th>
+          <th style="width: 80px;">ID</th>
           <th>{% trans "Шаблон" %}</th>
           <th>{% trans "Источник данных" %}</th>
-          <th>{% trans "Инициатор" %}</th>
-          <th>{% trans "Прогресс" %}</th>
+          <th>{% trans "Результат" %}</th>
           <th>{% trans "Статус" %}</th>
-          <th>{% trans "Дата и время" %}</th>
+          <th>{% trans "Дата запуска" %}</th>
+          <th class="text-end">{% trans "Действия" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for batch in batches %}
           <tr>
-            <td class="fw-semibold">#{{ batch.id }}</td>
-            <td>{{ batch.template.title }}</td>
-            <td>{{ batch.data_source.name|default:_("Прямой ввод") }}</td>
-            <td>{{ batch.initiated_by.username|default:_("Система") }}</td>
-            <td style="min-width: 140px;">
-              <div class="progress" style="height: 6px;">
-                <div class="progress-bar {% if batch.status == 'COMPLETED' %}bg-success{% elif batch.status == 'FAILED' %}bg-danger{% else %}bg-primary{% endif %}" role="progressbar" style="width: {{ batch.progress_percent }}%;" aria-valuenow="{{ batch.progress_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-              <div class="small text-muted mt-1" style="font-size: 0.725rem;">
-                {{ batch.processed_records }} / {{ batch.total_records }} ({{ batch.progress_percent }}%)
+            <td>
+              <a href="{% url 'generation:detail' batch.pk %}" class="fw-bold text-decoration-none">
+                #{{ batch.id }}
+              </a>
+            </td>
+            <td>
+              <div class="fw-semibold text-dark">{{ batch.template.name }}</div>
+              <span class="badge bg-light text-dark border small">v{{ batch.template.version }}</span>
+            </td>
+            <td>
+              <div>{{ batch.data_source.name|default:"—" }}</div>
+              {% if batch.mapping_config %}
+                <span class="text-muted small font-sans-serif">{{ batch.mapping_config.name }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success-subtle text-success border border-success-subtle" title="{% trans 'Успешно' %}">
+                  <i class="bi bi-check2 me-1"></i>{{ batch.successful_records }}
+                </span>
+                {% if batch.failed_records > 0 %}
+                  <span class="badge bg-danger-subtle text-danger border border-danger-subtle" title="{% trans 'Ошибок' %}">
+                    <i class="bi bi-x me-1"></i>{{ batch.failed_records }}
+                  </span>
+                {% endif %}
+                <span class="text-muted small">/ {{ batch.total_records }}</span>
               </div>
             </td>
             <td>
-              <span class="badge badge-status-{{ batch.status|lower }} px-2 py-1">
-                {{ batch.get_status_display }}
-              </span>
+              {% if batch.status == "COMPLETED" %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                  {% trans "Завершено" %}
+                </span>
+              {% elif batch.status == "FAILED" %}
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                  {% trans "Ошибка" %}
+                </span>
+              {% elif batch.status == "PROCESSING" %}
+                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                  {% trans "Обработка" %}
+                </span>
+              {% else %}
+                <span class="badge bg-secondary-subtle text-secondary border">
+                  {{ batch.get_status_display }}
+                </span>
+              {% endif %}
             </td>
-            <td class="text-muted small">{{ batch.created_at|date:"d.m.Y H:i" }}</td>
+            <td class="text-muted small">
+              <div>{{ batch.created_at|date:"d.m.Y H:i" }}</div>
+              {% if batch.initiated_by %}
+                <div class="text-secondary small">{{ batch.initiated_by.get_full_name|default:batch.initiated_by.username }}</div>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <a href="{% url 'generation:detail' batch.pk %}" class="btn btn-outline-secondary" title="{% trans 'Детали пакета' %}">
+                  <i class="bi bi-eye"></i>
+                </a>
+                {% if batch.output_file %}
+                  <a href="{% url 'generation:download_zip' batch.pk %}" class="btn btn-outline-success" title="{% trans 'Скачать ZIP архив' %}">
+                    <i class="bi bi-file-earmark-zip"></i>
+                  </a>
+                {% endif %}
+              </div>
+            </td>
           </tr>
         {% empty %}
           <tr>
-            <td colspan="7" class="text-center py-5 text-muted">
-              <i class="bi bi-inbox d-block fs-2 mb-2 text-secondary"></i>
-              {% trans "Генерации документов пока не производились." %}
+            <td colspan="7" class="text-center py-5 text-muted font-sans-serif">
+              <i class="bi bi-clock-history d-block fs-1 mb-2 text-secondary"></i>
+              <p class="mb-2">{% trans "Генерации документов пока не производились." %}</p>
+              {% if user.role != "VIEWER" %}
+                <a href="{% url 'generation:wizard' %}" class="btn btn-primary btn-sm">
+                  <i class="bi bi-play-circle me-1"></i>{% trans "Запустить первую генерацию" %}
+                </a>
+              {% endif %}
             </td>
           </tr>
         {% endfor %}

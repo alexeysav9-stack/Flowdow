@@ -161,3 +161,34 @@ This document tracks all significant architectural decisions, their context, rat
   3. **Strict Validation:** Files must contain valid, non-empty, and non-duplicate headers. Rows with extra unexpected columns trigger explicit errors rather than silently losing data.
 - **Consequences:**
   - *Positive:* Robust handling of legacy Russian business exports; protection against memory bloat and zip-bombs; zero silent row loss.
+
+---
+
+## ADR 0012: Relational Mapping Architecture and Pre-Generation Validation Pipeline
+
+- **Status:** Accepted
+- **Date:** 2026-11-22
+- **Context:**
+  Binding DOCX template variables to data source columns requires persistence, user edits, and validation. Storing rules as a plain unconstrained JSON blob makes database-level referential integrity and uniqueness checks difficult, while allowing silent misconfigurations.
+- **Decision:**
+  We adopt a relational model: `MappingConfig` (parent linking `Template` and `DataSource`) and `MappingRule` (child rows specifying `template_variable`, `source_column`, `default_value`, and `required` flag) with a unique constraint on `(mapping_config, template_variable)`. Before generation, `MappingValidationService` executes two-tier validation:
+  1. *Configuration tier:* ensures the template is active, dataset is ready, and all template placeholders are mapped or have defaults.
+  2. *Record tier:* checks individual row values against required constraints and injects secure system variables (`current_date`, `current_datetime`).
+- **Consequences:**
+  - *Positive:* Strict relational constraints, granular rule editing, pre-generation failure prevention, and separation between configuration flaws and row-level data flaws.
+
+---
+
+## ADR 0013: Synchronous Document Generation with Granular Error Isolation and Automated ZIP Archival
+
+- **Status:** Accepted
+- **Date:** 2026-11-22
+- **Context:**
+  When generating dozens or hundreds of documents from a spreadsheet, a single corrupted row or missing required field should not crash the entire batch. Users need both individual DOCX documents and a bundled download.
+- **Decision:**
+  We implement synchronous batch execution in `DocumentGenerationService` with per-record error isolation:
+  1. Each selected `DataRecord` is processed independently. A failure in one record records a `GeneratedDocument` with status `FAILED` and detailed diagnostics, allowing the remaining records to proceed.
+  2. Successfully generated DOCX files are named using sanitized, predictable schemes (`<slug>_rec<row>_<identifier>.docx`) and saved to storage.
+  3. When at least one document succeeds, the batch automatically compiles an in-memory ZIP archive of all successful DOCX files and attaches it to `GenerationBatch.output_file`.
+- **Consequences:**
+  - *Positive:* High resilience against dirty data; immediate ZIP download; full auditability of failed rows; avoids heavy asynchronous infrastructure (Celery/Redis) during the current phase.

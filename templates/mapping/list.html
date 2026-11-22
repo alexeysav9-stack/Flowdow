@@ -4,11 +4,24 @@
 {% block title %}{% trans "Сопоставление полей" %} — Flowdow{% endblock %}
 
 {% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <h4 class="fw-bold mb-1 text-dark">{% trans "Схемы сопоставления (Mapping)" %}</h4>
+    <p class="text-muted small mb-0">{% trans "Связывание переменных DOCX-шаблонов с колонками импортированных таблиц данных." %}</p>
+  </div>
+  {% if user.role != "VIEWER" %}
+    <a href="{% url 'mapping:create' %}" class="btn btn-primary d-inline-flex align-items-center gap-2">
+      <i class="bi bi-link-45deg"></i>
+      <span>{% trans "Создать маппинг" %}</span>
+    </a>
+  {% endif %}
+</div>
+
 <div class="fd-card">
   <div class="fd-card-header">
     <div class="d-flex align-items-center gap-2">
       <i class="bi bi-diagram-3 text-primary"></i>
-      <span>{% trans "Схемы маппинга полей" %}</span>
+      <span>{% trans "Схемы сопоставления" %}</span>
     </div>
     <div>
       <span class="badge bg-light text-dark border">{{ mappings|length }} {% trans "схем" %}</span>
@@ -20,24 +33,96 @@
       <thead>
         <tr>
           <th>{% trans "Название схемы" %}</th>
-          <th>{% trans "Целевой шаблон" %}</th>
+          <th>{% trans "Шаблон" %}</th>
           <th>{% trans "Источник данных" %}</th>
-          <th>{% trans "Создан" %}</th>
+          <th>{% trans "Правил" %}</th>
+          <th>{% trans "Создал" %}</th>
+          <th class="text-end">{% trans "Действия" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for mapping in mappings %}
           <tr>
-            <td class="fw-semibold text-dark">{{ mapping.name }}</td>
-            <td>{{ mapping.template.title }}</td>
-            <td>{{ mapping.data_source.name|default:"—" }}</td>
-            <td class="text-muted small">{{ mapping.created_at|date:"d.m.Y" }}</td>
+            <td>
+              <a href="{% url 'mapping:detail' mapping.pk %}" class="fw-semibold text-decoration-none text-dark d-flex align-items-center gap-2">
+                <i class="bi bi-diagram-3-fill text-primary"></i>
+                <span>{{ mapping.name }}</span>
+              </a>
+              {% if mapping.description %}
+                <div class="text-muted small text-truncate" style="max-width: 280px;">{{ mapping.description }}</div>
+              {% endif %}
+            </td>
+            <td>
+              <div class="fw-medium text-dark">{{ mapping.template.name }}</div>
+              <span class="badge bg-light text-dark border small">v{{ mapping.template.version }}</span>
+            </td>
+            <td>
+              <div class="fw-medium text-dark">{{ mapping.data_source.name }}</div>
+              <span class="badge bg-light text-dark border small">{{ mapping.data_source.format|upper }}</span>
+            </td>
+            <td>
+              <span class="badge bg-secondary-subtle text-secondary">{{ mapping.rules.count }} {% trans "правил" %}</span>
+            </td>
+            <td class="text-muted small">
+              <div>{{ mapping.created_at|date:"d.m.Y" }}</div>
+              {% if mapping.created_by %}
+                <div class="text-secondary">{{ mapping.created_by.get_full_name|default:mapping.created_by.username }}</div>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <a href="{% url 'mapping:detail' mapping.pk %}" class="btn btn-outline-secondary" title="{% trans 'Просмотр схемы' %}">
+                  <i class="bi bi-eye"></i>
+                </a>
+                {% if user.role != "VIEWER" %}
+                  <a href="{% url 'generation:wizard' %}?mapping_id={{ mapping.pk }}" class="btn btn-outline-primary" title="{% trans 'Перейти к генерации' %}">
+                    <i class="bi bi-play-circle"></i>
+                  </a>
+                  <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteMappingModal{{ mapping.pk }}" title="{% trans 'Удалить' %}">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                {% endif %}
+              </div>
+
+              <!-- Delete Confirmation Modal -->
+              {% if user.role != "VIEWER" %}
+                <div class="modal fade text-start" id="deleteMappingModal{{ mapping.pk }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title text-danger">
+                          <i class="bi bi-exclamation-triangle-fill me-2"></i>{% trans "Удаление схемы маппинга" %}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <p>{% trans "Вы действительно хотите удалить схему сопоставления" %} <strong>«{{ mapping.name }}»</strong>?</p>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{% trans "Отмена" %}</button>
+                        <form method="post" action="{% url 'mapping:delete' mapping.pk %}" class="d-inline">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash me-1"></i>{% trans "Удалить" %}
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            </td>
           </tr>
         {% empty %}
           <tr>
-            <td colspan="4" class="text-center py-5 text-muted">
-              <i class="bi bi-link-45deg d-block fs-2 mb-2 text-secondary"></i>
-              {% trans "Схемы сопоставления полей пока не созданы." %}
+            <td colspan="6" class="text-center py-5 text-muted">
+              <i class="bi bi-link-45deg d-block fs-1 mb-2 text-secondary"></i>
+              <p class="mb-2">{% trans "Схемы сопоставления полей пока не созданы." %}</p>
+              {% if user.role != "VIEWER" %}
+                <a href="{% url 'mapping:create' %}" class="btn btn-primary btn-sm">
+                  <i class="bi bi-link-45deg me-1"></i>{% trans "Создать первую схему" %}
+                </a>
+              {% endif %}
             </td>
           </tr>
         {% endfor %}

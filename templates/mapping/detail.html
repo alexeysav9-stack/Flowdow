@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ mapping_config.name }} — {% trans "Схема сопоставления" %}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{% url 'mapping:list' %}" class="text-decoration-none">{% trans "Маппинг" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ mapping_config.name }}</li>
+  </ol>
+</nav>
+
+<!-- Header & Actions -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <div class="d-flex align-items-center gap-2">
+      <h4 class="fw-bold mb-0 text-dark">{{ mapping_config.name }}</h4>
+      <span class="badge bg-light text-dark border">{{ mapping_config.template.name }} v{{ mapping_config.template.version }}</span>
+    </div>
+    {% if mapping_config.description %}
+      <p class="text-muted small mt-1 mb-0">{{ mapping_config.description }}</p>
+    {% endif %}
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    {% if user.role != "VIEWER" %}
+      <a href="{% url 'generation:wizard' %}?mapping_id={{ mapping_config.pk }}" class="btn btn-primary d-inline-flex align-items-center gap-2 btn-sm">
+        <i class="bi bi-play-circle"></i>
+        <span>{% trans "Перейти к генерации" %}</span>
+      </a>
+      <button type="button" class="btn btn-outline-danger d-inline-flex align-items-center gap-2 btn-sm" data-bs-toggle="modal" data-bs-target="#deleteMappingModal">
+        <i class="bi bi-trash"></i>
+        <span>{% trans "Удалить" %}</span>
+      </button>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Validation Status Banner -->
+{% if is_valid %}
+  <div class="alert alert-success d-flex align-items-center gap-2 mb-4" role="alert">
+    <i class="bi bi-check-circle-fill fs-5 flex-shrink-0"></i>
+    <div>
+      <strong>{% trans "Схема готова к генерации." %}</strong>
+      <span>{% trans "Все переменные шаблона корректно сопоставлены с колонками или обеспечены значениями по умолчанию." %}</span>
+    </div>
+  </div>
+{% else %}
+  <div class="alert alert-warning mb-4" role="alert">
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0 text-warning-emphasis"></i>
+      <h6 class="alert-heading fw-bold mb-0 text-warning-emphasis">{% trans "Обнаружены замечания в конфигурации маппинга" %}</h6>
+    </div>
+    <ul class="mb-0 small ps-3">
+      {% for err in validation_errors %}
+        <li>{{ err }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-md-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-primary-subtle text-primary">
+        <i class="bi bi-file-earmark-word"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number text-truncate" style="max-width: 140px;">{{ mapping_config.template.name }}</div>
+        <div class="fd-stat-label">{% trans "Шаблон (v" %}{{ mapping_config.template.version }})</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-success-subtle text-success">
+        <i class="bi bi-table"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number text-truncate" style="max-width: 140px;">{{ mapping_config.data_source.name }}</div>
+        <div class="fd-stat-label">{{ mapping_config.data_source.row_count }} {% trans "строк данных" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-info-subtle text-info">
+        <i class="bi bi-diagram-3"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">{{ mapping_config.rules.count }}</div>
+        <div class="fd-stat-label">{% trans "Настроенных правил" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon {% if is_valid %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning-emphasis{% endif %}">
+        <i class="bi {% if is_valid %}bi-shield-check{% else %}bi-shield-exclamation{% endif %}"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">
+          {% if is_valid %}{% trans "Валидна" %}{% else %}{% trans "Замечания" %}{% endif %}
+        </div>
+        <div class="fd-stat-label">{% trans "Статус проверки" %}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rules Table -->
+<div class="fd-card">
+  <div class="fd-card-header d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-list-check text-primary"></i>
+      <span class="fw-semibold">{% trans "Таблица сопоставления переменных" %}</span>
+    </div>
+    <span class="badge bg-light text-dark border">{{ mapping_config.rules.count }} {% trans "правил" %}</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0 font-monospace small">
+      <thead class="table-light">
+        <tr>
+          <th>{% trans "Переменная шаблона" %}</th>
+          <th>{% trans "Целевая колонка таблицы" %}</th>
+          <th>{% trans "Значение по умолчанию" %}</th>
+          <th>{% trans "Обязательность" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rule in mapping_config.rules.all %}
+          <tr>
+            <td>
+              <span class="badge bg-light text-dark border py-2 px-3">
+                <code>&#123;&#123; {{ rule.template_variable }} &#125;&#125;</code>
+              </span>
+            </td>
+            <td>
+              {% if rule.source_column %}
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-2 px-3">
+                  <i class="bi bi-arrow-right me-1"></i>{{ rule.source_column }}
+                </span>
+              {% elif rule.template_variable in system_vars %}
+                <span class="badge bg-info-subtle text-info border border-info-subtle py-2 px-3">
+                  <i class="bi bi-cpu me-1"></i>{% trans "Системное значение" %}
+                </span>
+              {% else %}
+                <span class="text-muted fst-italic">{% trans "Не привязано" %}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if rule.default_value %}
+                <code class="text-dark bg-light px-2 py-1 rounded border">{{ rule.default_value }}</code>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if rule.required %}
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                  <i class="bi bi-asterisk me-1 small"></i>{% trans "Обязательное" %}
+                </span>
+              {% else %}
+                <span class="badge bg-secondary-subtle text-secondary border">
+                  {% trans "Необязательное" %}
+                </span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="text-center py-4 text-muted">
+              {% trans "Правила сопоставления не настроены." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+{% if user.role != "VIEWER" %}
+  <div class="modal fade" id="deleteMappingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{% trans "Удаление схемы маппинга" %}
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>{% trans "Вы действительно хотите удалить схему сопоставления" %} <strong>«{{ mapping_config.name }}»</strong>?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{% trans "Отмена" %}</button>
+          <form method="post" action="{% url 'mapping:delete' mapping_config.pk %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">
+              <i class="bi bi-trash me-1"></i>{% trans "Удалить" %}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}
+

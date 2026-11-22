@@ -13,4 +13,3 @@ def get_item(dictionary: Any, key: Any) -> Any:
     if isinstance(dictionary, dict):
         return dictionary.get(key, "")
     return ""
-

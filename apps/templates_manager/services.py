@@ -227,16 +227,19 @@ class TemplateService:
     def create_template_version(
         cls,
         document_type: DocumentType,
-        file_obj: Any,
+        file_obj: Any = None,
         name: str = "",
         description: str = "",
         status: str = TemplateStatus.ACTIVE,
         user: User | None = None,
+        **kwargs: Any,
     ) -> Template:
         """Validates, inspects, and creates a new versioned template.
 
         Guarantees that old template files are never overwritten.
         """
+        if file_obj is None and "uploaded_file" in kwargs:
+            file_obj = kwargs["uploaded_file"]
         original_name = getattr(file_obj, "name", "template.docx")
         if not name:
             clean_name = os.path.basename(original_name)

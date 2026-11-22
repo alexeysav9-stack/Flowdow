@@ -133,6 +133,26 @@ Flowdow includes a tabular data ingestion engine designed to import structured s
 
 ---
 
+## Mapping, Validation & Document Generation
+
+Flowdow delivers an end-to-end pipeline: **DOCX Template + Data Source → Mapping → Validation → DOCX Generation**:
+
+1. **Mapping Engine (`apps/mapping`):**
+   - Bind template placeholders (`{{ var }}`) to table columns via `MappingConfig` and `MappingRule`.
+   - Set fallback `default_value` for empty cells.
+   - Configure `required` flags to protect against missing mandatory data.
+   - Built-in **System Variables** (`{{ current_date }}`, `{{ current_datetime }}`, `{{ current_year }}`, `{{ system_platform }}`) are securely resolved automatically without executing Python code.
+2. **Two-Tier Validation:**
+   - *Configuration validation:* verifies that the template is active, the dataset is ready, and all variables are covered.
+   - *Record validation:* validates each individual row, applying defaults and flagging missing required fields before rendering.
+3. **Resilient Batch Generation (`apps/generation`):**
+   - Synchronous rendering using `docxtpl` with sanitized output filenames.
+   - **Error isolation:** a failed row (e.g. missing required field) generates an error record without interrupting the remaining rows in the batch.
+   - **Automated ZIP packaging:** all successfully rendered DOCX files in a batch are compiled into a downloadable ZIP archive.
+   - Individual DOCX files can also be downloaded directly from the batch detail view.
+
+---
+
 ## Running Tests & Code Quality
 
 ```bash

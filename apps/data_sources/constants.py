@@ -20,4 +20,3 @@ ALLOWED_DATA_EXTENSIONS = {".csv", ".xlsx"}
 
 # Allowed delimiters for CSV auto-detection
 CSV_CANDIDATE_DELIMITERS = [",", ";", "\t", "|"]
-

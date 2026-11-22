@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load i18n data_sources_tags %}
+
+{% block title %}{% trans "Мастер генерации документов" %} — Flowdow{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{% url 'generation:list' %}" class="text-decoration-none">{% trans "Генерация" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Новый пакет документов" %}</li>
+  </ol>
+</nav>
+
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <h4 class="fw-bold mb-1 text-dark">{% trans "Мастер пакетной генерации документов" %}</h4>
+    <p class="text-muted small mb-0">{% trans "Выберите схему сопоставления, укажите строки таблицы и сформируйте пакет DOCX-файлов." %}</p>
+  </div>
+</div>
+
+<!-- Step 1: Mapping Configuration Selection -->
+<div class="fd-card mb-4">
+  <div class="fd-card-header">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-diagram-3-fill text-primary"></i>
+      <span class="fw-semibold">{% trans "Шаг 1: Выбор схемы сопоставления (Mapping)" %}</span>
+    </div>
+  </div>
+  <div class="p-3">
+    <form method="get" class="row g-2 align-items-center">
+      <div class="col-md-9">
+        <select name="mapping_id" class="form-select" onchange="this.form.submit()">
+          <option value="">{% trans "— Выберите схему маппинга для генерации —" %}</option>
+          {% for m in mappings %}
+            <option value="{{ m.id }}" {% if selected_mapping and selected_mapping.id == m.id %}selected{% endif %}>
+              {{ m.name }} — {{ m.template.name }} (v{{ m.template.version }}) &rarr; {{ m.data_source.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-outline-primary w-100">
+          <i class="bi bi-arrow-clockwise me-1"></i>{% trans "Загрузить данные" %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if selected_mapping %}
+  <!-- Pre-generation Validation Status -->
+  {% if not is_valid %}
+    <div class="alert alert-danger mb-4" role="alert">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bi bi-x-circle-fill fs-5 flex-shrink-0"></i>
+        <h6 class="alert-heading fw-bold mb-0">{% trans "Генерация заблокирована: схема содержит ошибки" %}</h6>
+      </div>
+      <ul class="mb-0 small ps-3">
+        {% for err in validation_errors %}
+          <li>{{ err }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% else %}
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-4" role="alert">
+      <i class="bi bi-check-circle-fill fs-5 flex-shrink-0"></i>
+      <div>
+        <strong>{% trans "Конфигурация проверена и готова к генерации." %}</strong>
+        <span>{% trans "Шаблон «" %}{{ selected_mapping.template.name }}{% trans "» активен, источник данных доступен." %}</span>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Step 2: Record Selection & Launch -->
+  <form method="post" action="{% url 'generation:wizard' %}">
+    {% csrf_token %}
+    <input type="hidden" name="mapping_id" value="{{ selected_mapping.id }}">
+
+    <div class="fd-card mb-4">
+      <div class="fd-card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-check2-square text-success"></i>
+          <span class="fw-semibold">{% trans "Шаг 2: Выбор записей для формирования" %}</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-light text-dark border">{{ selected_mapping.data_source.row_count }} {% trans "всего записей" %}</span>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 font-monospace small">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 40px;" class="text-center">
+                <input class="form-check-input" type="checkbox" id="masterCheckbox" checked onclick="toggleAllRecords(this)">
+              </th>
+              <th style="width: 70px;" class="text-center">#</th>
+              {% for h in selected_mapping.data_source.headers|slice:":5" %}
+                <th class="text-nowrap">{{ h }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for rec in records %}
+              <tr>
+                <td class="text-center">
+                  <input class="form-check-input record-checkbox" type="checkbox" name="record_ids" value="{{ rec.id }}" checked>
+                </td>
+                <td class="text-center text-muted">{{ rec.row_number }}</td>
+                {% for h in selected_mapping.data_source.headers|slice:":5" %}
+                  <td class="text-nowrap">{{ rec.data|get_item:h|default:"" }}</td>
+                {% endfor %}
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7" class="text-center py-4 text-muted">
+                  {% trans "В выбранном источнике данных отсутствуют строки." %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if selected_mapping.data_source.row_count > 100 %}
+        <div class="p-3 bg-light border-top small text-muted d-flex align-items-center justify-content-between">
+          <span>{% trans "Показаны первые 100 строк. Для генерации всех" %} {{ selected_mapping.data_source.row_count }} {% trans "строк набора отметьте флаг ниже:" %}</span>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="select_all" value="1" id="selectAllEntireDs">
+            <label class="form-check-label fw-semibold" for="selectAllEntireDs">
+              {% trans "Обработать весь набор данных целиком" %} ({{ selected_mapping.data_source.row_count }} {% trans "строк" %})
+            </label>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <button type="submit" class="btn btn-primary btn-lg d-inline-flex align-items-center gap-2" {% if not is_valid %}disabled{% endif %}>
+        <i class="bi bi-play-fill fs-5"></i>
+        <span>{% trans "Запустить пакетную генерацию" %}</span>
+      </button>
+      <a href="{% url 'generation:list' %}" class="btn btn-outline-secondary btn-lg">
+        {% trans "Отмена" %}
+      </a>
+    </div>
+  </form>
+
+  <script>
+  function toggleAllRecords(master) {
+    const checkboxes = document.querySelectorAll(".record-checkbox");
+    checkboxes.forEach(cb => cb.checked = master.checked);
+  }
+  </script>
+{% endif %}
+{% endblock %}
+

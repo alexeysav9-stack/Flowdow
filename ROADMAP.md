@@ -41,24 +41,22 @@ This document outlines the evolutionary milestones for Flowdow from its architec
 
 ---
 
-## Phase 4: Visual Mapping Engine & Validation (v0.4.0)
-- [ ] Interactive mapping UI: connect template placeholders on the left with dataset columns on the right.
-- [ ] Rule configuration:
-  - Required vs. optional fields.
-  - Fallback default values when cells are empty.
-  - Value transformations (uppercase, lowercase, title case, date formatting `YYYY-MM-DD` -> `DD.MM.YYYY`, currency formatting).
-- [ ] Pre-generation dry-run validation:
-  - Detect missing required values across rows.
-  - Flag type mismatch errors before starting batch generation.
+## Phase 4: Visual Mapping Engine & Validation (Current Milestone - v0.4.0)
+- [x] Relational mapping models (`MappingConfig` and `MappingRule` with unique constraints).
+- [x] Interactive mapping UI: bind template placeholders with dataset columns, default values, and required flags.
+- [x] System variables support (`current_date`, `current_datetime`, `current_year`, `system_platform`) without code execution.
+- [x] Two-tier validation engine: configuration-level validation and record-level context checking.
+- [ ] Value transformations (uppercase, lowercase, title case, currency formatting).
 
 ---
 
-## Phase 5: Batch Generation Engine & Package Export (v0.5.0)
-- [ ] Single document rendering engine with immediate download.
-- [ ] Batch document generator processing all rows in the dataset.
-- [ ] Document naming pattern configuration (e.g. `Contract_{{ employee_id }}_{{ last_name }}.docx`).
-- [ ] Automatic ZIP packaging for batch results with downloadable progress.
-- [ ] Generation batch dashboard with error logs for failed rows.
+## Phase 5: Batch Generation Engine & Package Export (Current Milestone - v0.5.0)
+- [x] Single document rendering engine using `docxtpl` with immediate download.
+- [x] Batch document generator processing selected or all records in the dataset.
+- [x] Error isolation: single row failures do not halt batch execution, with per-record error diagnostics.
+- [x] Automatic ZIP packaging for batch results with download endpoint.
+- [x] Generation batch detail view with KPI metrics (total, success, failed, progress).
+- [x] Safe filesystem sanitization for generated document filenames.
 
 ---
 

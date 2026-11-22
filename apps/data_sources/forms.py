@@ -74,4 +74,3 @@ class DataSourceUploadForm(forms.Form):
             base_name = os.path.splitext(file.name)[0].replace("_", " ").strip()
             cleaned_data["name"] = base_name or _("Набор данных")
         return cleaned_data
-

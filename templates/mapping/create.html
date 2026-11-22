@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Создание схемы маппинга" %} — Flowdow{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{% url 'mapping:list' %}" class="text-decoration-none">{% trans "Маппинг" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Новая схема сопоставления" %}</li>
+  </ol>
+</nav>
+
+<form method="post" novalidate id="mappingForm">
+  {% csrf_token %}
+
+  <div class="row g-4">
+    <!-- Main Configuration Column -->
+    <div class="col-lg-8">
+      <div class="fd-card mb-4">
+        <div class="fd-card-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-gear-fill text-primary"></i>
+            <span class="fw-semibold">{% trans "Основные параметры конфигурации" %}</span>
+          </div>
+        </div>
+        <div class="p-4">
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger mb-3" role="alert">
+              {% for error in form.non_field_errors %}
+                <div><i class="bi bi-exclamation-triangle-fill me-1"></i>{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">
+              {{ form.name.label }} <span class="text-danger">*</span>
+            </label>
+            {{ form.name }}
+            {% if form.name.errors %}
+              <div class="text-danger small mt-1">{{ form.name.errors|first }}</div>
+            {% endif %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="{{ form.template.id_for_label }}" class="form-label fw-semibold">
+                {{ form.template.label }} <span class="text-danger">*</span>
+              </label>
+              {{ form.template }}
+              {% if form.template.errors %}
+                <div class="text-danger small mt-1">{{ form.template.errors|first }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label for="{{ form.data_source.id_for_label }}" class="form-label fw-semibold">
+                {{ form.data_source.label }} <span class="text-danger">*</span>
+              </label>
+              {{ form.data_source }}
+              {% if form.data_source.errors %}
+                <div class="text-danger small mt-1">{{ form.data_source.errors|first }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mb-0">
+            <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
+              {{ form.description.label }}
+            </label>
+            {{ form.description }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Variable Mapping Rules Matrix -->
+      <div class="fd-card mb-4">
+        <div class="fd-card-header d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-table text-success"></i>
+            <span class="fw-semibold">{% trans "Правила сопоставления переменных" %}</span>
+          </div>
+          {% if template_variables %}
+            <span class="badge bg-light text-dark border">{{ template_variables|length }} {% trans "переменных" %}</span>
+          {% endif %}
+        </div>
+
+        <div class="p-3">
+          {% if template_variables %}
+            <p class="text-muted small mb-3">
+              {% trans "Для каждой переменной выберите колонку источника данных или задайте фиксированное значение по умолчанию." %}
+            </p>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover align-middle mb-0 font-monospace small">
+                <thead class="table-light">
+                  <tr>
+                    <th style="min-width: 180px;">{% trans "Переменная шаблона" %}</th>
+                    <th style="min-width: 220px;">{% trans "Колонка источника данных" %}</th>
+                    <th style="min-width: 180px;">{% trans "Значение по умолчанию" %}</th>
+                    <th class="text-center" style="width: 110px;">{% trans "Обязательное" %}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for var in template_variables %}
+                    <tr>
+                      <td>
+                        <span class="badge bg-light text-dark border p-2">
+                          <code>&#123;&#123; {{ var }} &#125;&#125;</code>
+                        </span>
+                      </td>
+                      <td>
+                        <select name="col_{{ var }}" class="form-select form-select-sm">
+                          <option value="">{% trans "— Не привязано (по умолчанию / системное) —" %}</option>
+                          {% for col in data_columns %}
+                            <option value="{{ col }}" {% if col == var %}selected{% endif %}>
+                              {{ col }}
+                            </option>
+                          {% endfor %}
+                        </select>
+                      </td>
+                      <td>
+                        <input type="text" name="def_{{ var }}" class="form-control form-control-sm" placeholder="{% trans 'По умолчанию...' %}">
+                      </td>
+                      <td class="text-center">
+                        <div class="form-check form-switch d-inline-block">
+                          <input class="form-check-input" type="checkbox" name="req_{{ var }}" id="req_{{ var }}" checked>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-arrow-up-circle d-block fs-3 mb-2 text-secondary"></i>
+              <p class="mb-0">{% trans "Выберите шаблон и источник данных выше, затем нажмите кнопку «Обновить переменные» для настройки полей." %}</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+          <i class="bi bi-check2-circle"></i>
+          <span>{% trans "Сохранить схему сопоставления" %}</span>
+        </button>
+        <button type="button" class="btn btn-outline-secondary" onclick="reloadWithSelection()">
+          <i class="bi bi-arrow-repeat me-1"></i>{% trans "Обновить переменные" %}
+        </button>
+        <a href="{% url 'mapping:list' %}" class="btn btn-outline-secondary">
+          {% trans "Отмена" %}
+        </a>
+      </div>
+    </div>
+
+    <!-- Help & System Variables Column -->
+    <div class="col-lg-4">
+      <div class="fd-card mb-3">
+        <div class="fd-card-header">
+          <i class="bi bi-cpu text-primary me-2"></i>
+          <span>{% trans "Системные переменные" %}</span>
+        </div>
+        <div class="p-3 small text-muted">
+          <p class="mb-2">{% trans "Если в шаблоне присутствуют эти переменные, система вычисляет их автоматически при генерации:" %}</p>
+          <ul class="list-unstyled mb-0 font-monospace">
+            <li class="mb-1"><code class="text-primary">&#123;&#123; current_date &#125;&#125;</code> — {% trans "Текущая дата (ДД.ММ.ГГГГ)" %}</li>
+            <li class="mb-1"><code class="text-primary">&#123;&#123; current_datetime &#125;&#125;</code> — {% trans "Дата и время" %}</li>
+            <li class="mb-1"><code class="text-primary">&#123;&#123; current_year &#125;&#125;</code> — {% trans "Текущий год" %}</li>
+            <li class="mb-0"><code class="text-primary">&#123;&#123; system_platform &#125;&#125;</code> — Flowdow</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="fd-card">
+        <div class="fd-card-header">
+          <i class="bi bi-info-circle text-primary me-2"></i>
+          <span>{% trans "Правила валидации" %}</span>
+        </div>
+        <div class="p-3 small text-muted">
+          <ul class="ps-3 mb-0">
+            <li class="mb-2">{% trans "Обязательные поля должны иметь либо привязанную колонку с непустыми значениями, либо значение по умолчанию." %}</li>
+            <li class="mb-2">{% trans "Если колонка пуста в строке данных, автоматически подставляется значение по умолчанию." %}</li>
+            <li class="mb-0">{% trans "Не разрешается привязывать переменные к несуществующим колонкам." %}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<script>
+function reloadWithSelection() {
+  const tmpl = document.getElementById("id_template").value;
+  const ds = document.getElementById("id_data_source").value;
+  const name = document.getElementById("id_name").value;
+  let url = "{% url 'mapping:create' %}?";
+  if (tmpl) url += "template_id=" + encodeURIComponent(tmpl) + "&";
+  if (ds) url += "data_source_id=" + encodeURIComponent(ds);
+  window.location.href = url;
+}
+</script>
+{% endblock %}
+

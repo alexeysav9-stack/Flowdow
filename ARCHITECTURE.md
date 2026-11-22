@@ -168,14 +168,22 @@ Flowdow/
 - **Views:** `DataSourceListView`, `DataSourceUploadView`, `DataSourceDetailView`, `DataSourceDeleteView`, `DataSourceDownloadView`.
 
 ### 4.7 `apps.mapping`
-- **Models:** `FieldMappingSchema` (links `DocumentTemplate` to `DataSource`), `FieldMappingItem` (variable name, column header, default value, required flag).
-- **Services:** `MappingValidationService` (verifies all template variables have matched columns or defaults).
-- **Views:** `MappingListView`, `MappingConfigView`.
+- **Models:**
+  - `MappingConfig`: binds a `Template` to a `DataSource` with metadata and ownership tracking.
+  - `MappingRule`: individual variable binding (`template_variable`, `source_column`, `default_value`, `required` flag). Unique constraint on `(mapping_config, template_variable)`.
+- **Services:**
+  - `MappingValidationService`: validates mapping configuration readiness (active template, dataset availability, unmapped required variables) and builds validated record contexts.
+  - `get_system_variables`: securely evaluates predefined system variables (`current_date`, `current_datetime`, `current_year`, `system_platform`) without arbitrary code execution.
+  - `MappingService`: manages atomic persistence of mapping schemes and rules with `AuditLog` tracking.
+- **Views:** `MappingListView`, `MappingCreateView`, `MappingDetailView`, `MappingDeleteView`.
 
 ### 4.8 `apps.generation`
-- **Models:** `GenerationBatch` (template, data source, user, status, total records, successful records, output archive path).
-- **Services:** `DocumentGenerationService` (processes rows, renders docxtpl context, writes output DOCX / ZIP).
-- **Views:** `GenerationHistoryView`, `GenerationDetailView`.
+- **Models:**
+  - `GenerationBatch`: tracks batch execution progress (`template`, `data_source`, `mapping_config`, `initiated_by`, `status`, `total_records`, `processed_records`, `successful_records`, `failed_records`, `output_file` [ZIP], `error_message`).
+  - `GeneratedDocument`: tracks each individual output DOCX (`batch`, `data_record`, `file`, `status` [SUCCESS/FAILED], `error_message`, `record_identifier`).
+- **Services:**
+  - `DocumentGenerationService`: handles single-document rendering via `docxtpl`, synchronous batch orchestration with record error isolation, safe filename sanitization, and automated packaging of successful documents into a ZIP archive.
+- **Views:** `GenerationHistoryView`, `GenerationWizardView`, `GenerationDetailView`, `GenerationBatchDownloadView`, `GeneratedDocumentDownloadView`.
 
 ### 4.9 `apps.audit`
 - **Models:** `AuditLog` (user, action, target model, object id, ip address, extra JSON payload).

@@ -1,24 +1,182 @@
 """Views for Field Mapping module."""
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext_lazy as _
 from django.views import View
 
-from apps.mapping.models import FieldMappingSchema
+from apps.data_sources.models import DataSource, DataSourceStatus
+from apps.mapping.forms import MappingConfigForm
+from apps.mapping.models import MappingConfig
+from apps.mapping.services import (
+    MappingPermissionMixin,
+    MappingService,
+    MappingValidationService,
+    get_system_variables,
+)
+from apps.templates_manager.models import Template, TemplateStatus
 
 
 class MappingListView(LoginRequiredMixin, View):
     """Lists existing field mapping configurations."""
 
     def get(self, request: HttpRequest) -> HttpResponse:
-        mappings = FieldMappingSchema.objects.select_related("template", "data_source").all()
+        mappings = (
+            MappingConfig.objects.select_related(
+                "template", "data_source", "template__document_type", "created_by"
+            )
+            .prefetch_related("rules")
+            .all()
+            .order_by("-created_at")
+        )
         return render(
             request,
             "mapping/list.html",
             {
-                "title": "Field Mappings",
+                "title": _("Схемы сопоставления полей"),
                 "active_nav": "mapping",
                 "mappings": mappings,
             },
         )
+
+
+class MappingCreateView(LoginRequiredMixin, MappingPermissionMixin, View):
+    """Wizard for configuring template variable to data source column rules."""
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        template_id = request.GET.get("template_id")
+        data_source_id = request.GET.get("data_source_id")
+
+        selected_template = None
+        selected_data_source = None
+
+        if template_id and str(template_id).isdigit():
+            selected_template = Template.objects.filter(
+                pk=int(template_id), status=TemplateStatus.ACTIVE
+            ).first()
+
+        if data_source_id and str(data_source_id).isdigit():
+            selected_data_source = DataSource.objects.filter(
+                pk=int(data_source_id), status=DataSourceStatus.READY
+            ).first()
+
+        form = MappingConfigForm(
+            initial={
+                "template": selected_template,
+                "data_source": selected_data_source,
+            }
+        )
+
+        template_variables = selected_template.detected_variables if selected_template else []
+        data_columns = selected_data_source.headers if selected_data_source else []
+        system_vars = get_system_variables()
+
+        return render(
+            request,
+            "mapping/create.html",
+            {
+                "title": _("Новая схема маппинга"),
+                "active_nav": "mapping",
+                "form": form,
+                "selected_template": selected_template,
+                "selected_data_source": selected_data_source,
+                "template_variables": template_variables,
+                "data_columns": data_columns,
+                "system_vars": system_vars,
+            },
+        )
+
+    def post(self, request: HttpRequest) -> HttpResponse:
+        form = MappingConfigForm(request.POST)
+        if not form.is_valid():
+            return render(
+                request,
+                "mapping/create.html",
+                {
+                    "title": _("Новая схема маппинга"),
+                    "active_nav": "mapping",
+                    "form": form,
+                },
+            )
+
+        template = form.cleaned_data["template"]
+        data_source = form.cleaned_data["data_source"]
+        name = form.cleaned_data["name"]
+        description = form.cleaned_data.get("description", "")
+
+        # Extract rules for each template variable
+        rules_data: list[dict] = []
+        for var in template.detected_variables:
+            col = request.POST.get(f"col_{var}", "").strip()
+            def_val = request.POST.get(f"def_{var}", "").strip()
+            is_req = request.POST.get(f"req_{var}") == "on"
+
+            rules_data.append(
+                {
+                    "template_variable": var,
+                    "source_column": col,
+                    "default_value": def_val,
+                    "required": is_req,
+                }
+            )
+
+        config = MappingService.create_or_update_mapping_config(
+            name=name,
+            template=template,
+            data_source=data_source,
+            rules_data=rules_data,
+            user=request.user,
+            description=description,
+        )
+
+        messages.success(
+            request,
+            _("Конфигурация маппинга «%(name)s» успешно сохранена.") % {"name": config.name},
+        )
+        return redirect("mapping:detail", pk=config.pk)
+
+
+class MappingDetailView(LoginRequiredMixin, View):
+    """Displays detailed rule bindings and validation status for a MappingConfig."""
+
+    def get(self, request: HttpRequest, pk: int) -> HttpResponse:
+        mapping_config = get_object_or_404(
+            MappingConfig.objects.select_related(
+                "template", "data_source", "template__document_type", "created_by"
+            ).prefetch_related("rules"),
+            pk=pk,
+        )
+
+        is_valid, validation_errors = MappingValidationService.validate_mapping_config(
+            mapping_config
+        )
+        system_vars = get_system_variables()
+
+        return render(
+            request,
+            "mapping/detail.html",
+            {
+                "title": mapping_config.name,
+                "active_nav": "mapping",
+                "mapping_config": mapping_config,
+                "is_valid": is_valid,
+                "validation_errors": validation_errors,
+                "system_vars": system_vars,
+            },
+        )
+
+
+class MappingDeleteView(LoginRequiredMixin, MappingPermissionMixin, View):
+    """Deletes a MappingConfig."""
+
+    def post(self, request: HttpRequest, pk: int) -> HttpResponse:
+        config = get_object_or_404(MappingConfig, pk=pk)
+        name = config.name
+        MappingService.delete_mapping_config(pk, user=request.user)
+        messages.info(
+            request,
+            _("Схема маппинга «%(name)s» успешно удалена.") % {"name": name},
+        )
+        return redirect("mapping:list")
