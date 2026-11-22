@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Панель управления" %} — Flowdow{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-primary-subtle text-primary">
+        <i class="bi bi-file-earmark-word"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">{{ total_templates }}</div>
+        <div class="fd-stat-label">{% trans "DOCX Шаблоны" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-success-subtle text-success">
+        <i class="bi bi-table"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">{{ total_data_sources }}</div>
+        <div class="fd-stat-label">{% trans "Источники данных" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-info-subtle text-info">
+        <i class="bi bi-layers"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">{{ total_batches }}</div>
+        <div class="fd-stat-label">{% trans "Запуски генераций" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-warning-subtle text-warning">
+        <i class="bi bi-file-earmark-text"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">{{ total_document_types }}</div>
+        <div class="fd-stat-label">{% trans "Типы документов" %}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Recent Document Generations -->
+  <div class="col-lg-8">
+    <div class="fd-card">
+      <div class="fd-card-header">
+        <span><i class="bi bi-clock-history me-2 text-primary"></i>{% trans "Последние генерации" %}</span>
+        <a href="{% url 'generation:history' %}" class="btn btn-sm btn-outline-primary">{% trans "Смотреть все" %}</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>{% trans "Шаблон" %}</th>
+              <th>{% trans "Статус" %}</th>
+              <th>{% trans "Записи" %}</th>
+              <th>{% trans "Дата запуска" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for batch in recent_batches %}
+              <tr>
+                <td class="fw-semibold">#{{ batch.id }}</td>
+                <td>{{ batch.template.title }}</td>
+                <td>
+                  <span class="badge badge-status-{{ batch.status|lower }} px-2 py-1">
+                    {{ batch.get_status_display }}
+                  </span>
+                </td>
+                <td>{{ batch.processed_records }} / {{ batch.total_records }}</td>
+                <td class="text-muted small">{{ batch.created_at|date:"d.m.Y H:i" }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="text-center py-4 text-muted">
+                  <i class="bi bi-inbox d-block fs-3 mb-2"></i>
+                  {% trans "Генерации документов пока не производились." %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent System Audit / Activity -->
+  <div class="col-lg-4">
+    <div class="fd-card">
+      <div class="fd-card-header">
+        <span><i class="bi bi-shield-check me-2 text-success"></i>{% trans "Журнал аудита" %}</span>
+      </div>
+      <div class="p-3">
+        <ul class="list-unstyled mb-0">
+          {% for log in recent_activities %}
+            <li class="d-flex align-items-start gap-2 mb-3 pb-2 border-bottom">
+              <i class="bi bi-dot fs-4 text-primary"></i>
+              <div>
+                <div class="small fw-semibold text-dark">{{ log.action }}</div>
+                <div class="text-muted small" style="font-size: 0.78rem;">
+                  {{ log.user.username|default:_("Система") }} &bull; {{ log.created_at|timesince }} {% trans "назад" %}
+                </div>
+              </div>
+            </li>
+          {% empty %}
+            <li class="text-center py-4 text-muted small">
+              {% trans "Журнал аудита пуст." %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

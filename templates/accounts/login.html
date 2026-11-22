@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Вход в систему" %} — {{ APP_NAME }}{% endblock %}
+
+{% block auth_content %}
+<div class="fd-auth-card">
+  <!-- Language Toggle on Login Page -->
+  {% get_current_language as CURRENT_LANGUAGE %}
+  <div class="d-flex justify-content-end mb-2">
+    <div class="dropdown">
+      <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown">
+        <i class="bi bi-translate"></i>
+        <span class="small fw-semibold">{% if CURRENT_LANGUAGE == 'ru' %}RU{% else %}EN{% endif %}</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+        <li>
+          <form action="{% url 'set_language' %}" method="post">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.get_full_path }}">
+            <input name="language" type="hidden" value="ru">
+            <button type="submit" class="dropdown-item d-flex align-items-center justify-content-between {% if CURRENT_LANGUAGE == 'ru' %}active{% endif %}">
+              <span>🇷🇺 Русский</span>
+              {% if CURRENT_LANGUAGE == 'ru' %}<i class="bi bi-check ms-2"></i>{% endif %}
+            </button>
+          </form>
+        </li>
+        <li>
+          <form action="{% url 'set_language' %}" method="post">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.get_full_path }}">
+            <input name="language" type="hidden" value="en">
+            <button type="submit" class="dropdown-item d-flex align-items-center justify-content-between {% if CURRENT_LANGUAGE == 'en' %}active{% endif %}">
+              <span>🇬🇧 English</span>
+              {% if CURRENT_LANGUAGE == 'en' %}<i class="bi bi-check ms-2"></i>{% endif %}
+            </button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="text-center mb-4">
+    <div class="fd-brand-badge mx-auto mb-3" style="width: 48px; height: 48px; font-size: 1.5rem;">
+      <i class="bi bi-file-earmark-diff"></i>
+    </div>
+    <h4 class="fw-bold mb-1">{% trans "Вход в Flowdow" %}</h4>
+    <p class="text-muted small">{% trans "Автоматизация подготовки документов" %}</p>
+  </div>
+
+  {% if form.errors %}
+    <div class="alert alert-danger py-2 small" role="alert">
+      {% trans "Неверное имя пользователя или пароль. Попробуйте еще раз." %}
+    </div>
+  {% endif %}
+
+  <form method="post" action="{% url 'accounts:login' %}">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="{{ form.username.id_for_label }}" class="form-label small fw-semibold text-muted">{% trans "Имя пользователя" %}</label>
+      {{ form.username }}
+    </div>
+
+    <div class="mb-4">
+      <label for="{{ form.password.id_for_label }}" class="form-label small fw-semibold text-muted">{% trans "Пароль" %}</label>
+      {{ form.password }}
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+      {% trans "Войти" %}
+    </button>
+  </form>
+
+  <div class="text-center text-muted mt-4 small">
+    {% trans "Self-hosted платформа" %} &bull; v{{ APP_VERSION }}
+  </div>
+</div>
+{% endblock %}

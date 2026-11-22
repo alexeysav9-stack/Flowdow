@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Источники данных" %} — Flowdow{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <h4 class="fw-bold mb-1 text-dark">{% trans "Источники данных" %}</h4>
+    <p class="text-muted small mb-0">{% trans "Импортированные таблицы CSV и XLSX для автоматической подстановки в шаблоны документов." %}</p>
+  </div>
+  {% if user.role != "VIEWER" %}
+    <a href="{% url 'data_sources:upload' %}" class="btn btn-primary d-inline-flex align-items-center gap-2">
+      <i class="bi bi-cloud-arrow-up"></i>
+      <span>{% trans "Загрузить таблицу" %}</span>
+    </a>
+  {% endif %}
+</div>
+
+<div class="fd-card">
+  <div class="fd-card-header">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-table text-success"></i>
+      <span>{% trans "Табличные наборы данных" %}</span>
+    </div>
+    <div>
+      <span class="badge bg-light text-dark border">{{ data_sources|length }} {% trans "источников" %}</span>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>{% trans "Наименование" %}</th>
+          <th>{% trans "Формат" %}</th>
+          <th>{% trans "Статус" %}</th>
+          <th>{% trans "Строк" %}</th>
+          <th>{% trans "Колонок" %}</th>
+          <th>{% trans "Загружено" %}</th>
+          <th class="text-end">{% trans "Действия" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ds in data_sources %}
+          <tr>
+            <td>
+              <a href="{% url 'data_sources:detail' ds.pk %}" class="fw-semibold text-decoration-none text-dark d-flex align-items-center gap-2">
+                <i class="bi {% if ds.format == 'xlsx' %}bi-file-earmark-excel text-success{% else %}bi-filetype-csv text-primary{% endif %} fs-5"></i>
+                <span>{{ ds.name }}</span>
+              </a>
+              {% if ds.description %}
+                <div class="text-muted small text-truncate" style="max-width: 300px;">{{ ds.description }}</div>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border fw-medium">{{ ds.format|upper }}</span>
+              {% if ds.sheet_name %}
+                <span class="badge bg-secondary-subtle text-secondary small" title="{% trans 'Лист Excel' %}">{{ ds.sheet_name }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if ds.status == "ready" %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                  <i class="bi bi-check-circle-fill me-1"></i>{% trans "Готов" %}
+                </span>
+              {% elif ds.status == "processing" %}
+                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                  <i class="bi bi-hourglass-split me-1"></i>{% trans "Обработка" %}
+                </span>
+              {% elif ds.status == "error" %}
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle" title="{{ ds.error_message }}">
+                  <i class="bi bi-exclamation-triangle-fill me-1"></i>{% trans "Ошибка" %}
+                </span>
+              {% else %}
+                <span class="badge bg-secondary-subtle text-secondary border">
+                  {{ ds.status }}
+                </span>
+              {% endif %}
+            </td>
+            <td class="fw-medium">{{ ds.row_count }}</td>
+            <td>
+              <span class="badge bg-light text-dark border">{{ ds.column_count }}</span>
+            </td>
+            <td class="text-muted small">
+              <div>{{ ds.created_at|date:"d.m.Y H:i" }}</div>
+              {% if ds.uploaded_by %}
+                <div class="text-secondary">{{ ds.uploaded_by.get_full_name|default:ds.uploaded_by.username }}</div>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <a href="{% url 'data_sources:detail' ds.pk %}" class="btn btn-outline-secondary" title="{% trans 'Просмотр записей' %}">
+                  <i class="bi bi-eye"></i>
+                </a>
+                {% if ds.file %}
+                  <a href="{% url 'data_sources:download' ds.pk %}" class="btn btn-outline-secondary" title="{% trans 'Скачать исходный файл' %}">
+                    <i class="bi bi-download"></i>
+                  </a>
+                {% endif %}
+                {% if user.role != "VIEWER" %}
+                  <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteDsModal{{ ds.pk }}" title="{% trans 'Удалить' %}">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                {% endif %}
+              </div>
+
+              <!-- Delete Confirmation Modal -->
+              {% if user.role != "VIEWER" %}
+                <div class="modal fade text-start" id="deleteDsModal{{ ds.pk }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title text-danger">
+                          <i class="bi bi-exclamation-triangle-fill me-2"></i>{% trans "Удаление источника данных" %}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-toggle="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <p>{% trans "Вы действительно хотите удалить источник данных" %} <strong>«{{ ds.name }}»</strong>?</p>
+                        <p class="text-muted small mb-0">{% trans "Все связанные строки (" %}{{ ds.row_count }}{% trans " записей) и исходный файл на сервере будут безвозвратно удалены." %}</p>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{% trans "Отмена" %}</button>
+                        <form method="post" action="{% url 'data_sources:delete' ds.pk %}" class="d-inline">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash me-1"></i>{% trans "Удалить" %}
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="bi bi-file-earmark-spreadsheet d-block fs-1 mb-2 text-secondary"></i>
+              <p class="mb-2">{% trans "Источники данных пока не загружены." %}</p>
+              {% if user.role != "VIEWER" %}
+                <a href="{% url 'data_sources:upload' %}" class="btn btn-primary btn-sm">
+                  <i class="bi bi-cloud-arrow-up me-1"></i>{% trans "Загрузить первую таблицу" %}
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

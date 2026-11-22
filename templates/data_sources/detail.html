@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% load i18n data_sources_tags %}
+
+{% block title %}{{ data_source.name }} — {% trans "Источники данных" %}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{% url 'data_sources:list' %}" class="text-decoration-none">{% trans "Источники данных" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ data_source.name }}</li>
+  </ol>
+</nav>
+
+<!-- Header & Actions -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <div class="d-flex align-items-center gap-2">
+      <h4 class="fw-bold mb-0 text-dark">{{ data_source.name }}</h4>
+      <span class="badge bg-light text-dark border">{{ data_source.format|upper }}</span>
+      {% if data_source.sheet_name %}
+        <span class="badge bg-secondary-subtle text-secondary border">{% trans "Лист:" %} {{ data_source.sheet_name }}</span>
+      {% endif %}
+    </div>
+    {% if data_source.description %}
+      <p class="text-muted small mt-1 mb-0">{{ data_source.description }}</p>
+    {% endif %}
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    {% if data_source.file %}
+      <a href="{% url 'data_sources:download' data_source.pk %}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 btn-sm">
+        <i class="bi bi-download"></i>
+        <span>{% trans "Скачать файл" %}</span>
+      </a>
+    {% endif %}
+    {% if user.role != "VIEWER" %}
+      <button type="button" class="btn btn-outline-danger d-inline-flex align-items-center gap-2 btn-sm" data-bs-toggle="modal" data-bs-target="#deleteDsModal">
+        <i class="bi bi-trash"></i>
+        <span>{% trans "Удалить" %}</span>
+      </button>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Diagnostics if Error -->
+{% if data_source.status == "error" %}
+  <div class="alert alert-danger d-flex align-items-start gap-2 mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5 mt-1 flex-shrink-0"></i>
+    <div>
+      <h6 class="alert-heading fw-bold mb-1">{% trans "Ошибка импорта данных" %}</h6>
+      <p class="mb-0">{{ data_source.error_message|default:_("Произошла неизвестная ошибка при чтении файла.") }}</p>
+    </div>
+  </div>
+{% endif %}
+
+<!-- Summary Metric Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-md-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-primary-subtle text-primary">
+        <i class="bi {% if data_source.format == 'xlsx' %}bi-file-earmark-excel{% else %}bi-filetype-csv{% endif %}"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">{{ data_source.format|upper }}</div>
+        <div class="fd-stat-label">{% trans "Формат данных" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon {% if data_source.status == 'ready' %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %}">
+        <i class="bi {% if data_source.status == 'ready' %}bi-check-circle{% else %}bi-x-circle{% endif %}"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">
+          {% if data_source.status == "ready" %}
+            {% trans "Готов" %}
+          {% elif data_source.status == "processing" %}
+            {% trans "Обработка" %}
+          {% else %}
+            {% trans "Сбой" %}
+          {% endif %}
+        </div>
+        <div class="fd-stat-label">{% trans "Статус источника" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-info-subtle text-info">
+        <i class="bi bi-list-ol"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">{{ data_source.row_count }}</div>
+        <div class="fd-stat-label">{% trans "Строк данных" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-3">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-secondary-subtle text-secondary">
+        <i class="bi bi-layout-three-columns"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">{{ data_source.column_count }}</div>
+        <div class="fd-stat-label">{% trans "Колонок" %}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detected Columns Structure -->
+<div class="fd-card mb-4">
+  <div class="fd-card-header">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-layout-three-columns text-primary"></i>
+      <span class="fw-semibold">{% trans "Распознанные колонки таблицы" %}</span>
+    </div>
+    <span class="badge bg-light text-dark border">{{ headers|length }} {% trans "колонок" %}</span>
+  </div>
+  <div class="p-3">
+    {% if headers %}
+      <div class="d-flex flex-wrap gap-2">
+        {% for col in headers %}
+          <span class="badge bg-light text-dark border py-2 px-3 fw-medium">
+            <i class="bi bi-tag-fill text-muted me-1 small"></i>{{ col }}
+          </span>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-muted small">{% trans "Колонки не обнаружены." %}</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Tabular Records Preview -->
+<div class="fd-card">
+  <div class="fd-card-header">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-table text-success"></i>
+      <span class="fw-semibold">{% trans "Записи источника данных" %}</span>
+    </div>
+    <span class="text-muted small">
+      {% if records_page.paginator.count %}
+        {% trans "Показано:" %} {{ records_page.start_index }}–{{ records_page.end_index }} {% trans "из" %} {{ records_page.paginator.count }}
+      {% endif %}
+    </span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle mb-0 font-monospace small">
+      <thead class="table-light">
+        <tr>
+          <th style="width: 60px;" class="text-center text-secondary">#</th>
+          {% for col in headers %}
+            <th class="fw-semibold text-dark text-nowrap">{{ col }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in records_page %}
+          <tr>
+            <td class="text-center text-muted">{{ record.row_number }}</td>
+            {% for col in headers %}
+              <td class="text-nowrap">{{ record.data|get_item:col|default:"" }}</td>
+            {% endfor %}
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="{{ headers|length|add:1 }}" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox d-block fs-2 mb-2 text-secondary"></i>
+              {% trans "В данном источнике отсутствуют записи данных." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination Controls -->
+  {% if records_page.paginator.num_pages > 1 %}
+    <div class="p-3 border-top d-flex align-items-center justify-content-between">
+      <div class="small text-muted">
+        {% trans "Страница" %} {{ records_page.number }} {% trans "из" %} {{ records_page.paginator.num_pages }}
+      </div>
+      <ul class="pagination pagination-sm mb-0">
+        {% if records_page.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1" title="{% trans 'Первая' %}">&laquo;</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ records_page.previous_page_number }}">{% trans "Предыдущая" %}</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+          <li class="page-item disabled"><span class="page-link">{% trans "Предыдущая" %}</span></li>
+        {% endif %}
+
+        <li class="page-item active">
+          <span class="page-link">{{ records_page.number }}</span>
+        </li>
+
+        {% if records_page.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ records_page.next_page_number }}">{% trans "Следующая" %}</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ records_page.paginator.num_pages }}" title="{% trans 'Последняя' %}">&raquo;</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">{% trans "Следующая" %}</span></li>
+          <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+        {% endif %}
+      </ul>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+{% if user.role != "VIEWER" %}
+  <div class="modal fade" id="deleteDsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{% trans "Удаление источника данных" %}
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>{% trans "Вы уверены, что хотите безвозвратно удалить источник данных" %} <strong>«{{ data_source.name }}»</strong>?</p>
+          <div class="alert alert-warning small mb-0">
+            <i class="bi bi-info-circle me-1"></i>
+            {% trans "Будут удалены все" %} <strong>{{ data_source.row_count }}</strong> {% trans "записей и физический файл таблицы." %}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{% trans "Отмена" %}</button>
+          <form method="post" action="{% url 'data_sources:delete' data_source.pk %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">
+              <i class="bi bi-trash me-1"></i>{% trans "Удалить" %}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}
+

@@ -1,0 +1,60 @@
+[project]
+name = "flowdow"
+version = "0.1.0"
+description = "Self-hosted open-source platform for automating document preparation"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.1,<5.2",
+    "psycopg[binary]>=3.2.0",
+    "python-dotenv>=1.0.0",
+    "docxtpl>=0.16.0",
+    "openpyxl>=3.1.0",
+    "djangorestframework>=3.15.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-django>=4.9.0",
+    "ruff>=0.8.0",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "*/migrations/*",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "C4",  # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line length handled by formatter
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py", "*_test.py"]
+testpaths = ["tests"]
+addopts = "--strict-markers -v"
+

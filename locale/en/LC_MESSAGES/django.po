@@ -1,0 +1,838 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Flowdow 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-22 19:40+0300\n"
+"PO-Revision-Date: 2026-11-22 19:24+0300\n"
+"Last-Translator: Flowdow Team\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: apps/accounts/models.py:9
+msgid "Администратор"
+msgstr "Administrator"
+
+#: apps/accounts/models.py:10
+msgid "Менеджер"
+msgstr "Manager"
+
+#: apps/accounts/models.py:11
+msgid "Оператор"
+msgstr "Operator"
+
+#: apps/accounts/models.py:12
+msgid "Наблюдатель"
+msgstr "Viewer"
+
+#: apps/data_sources/models.py:10
+msgid "Значения через запятую (CSV)"
+msgstr "Comma-Separated Values (CSV)"
+
+#: apps/data_sources/models.py:11
+msgid "Электронная таблица Excel (XLSX)"
+msgstr "Microsoft Excel Spreadsheet (XLSX)"
+
+#: apps/documents/forms.py:19
+msgid "Например: Трудовой договор, Акт приёма-передачи"
+msgstr ""
+
+#: apps/documents/forms.py:27
+msgid "Краткое назначение и область применения документа..."
+msgstr ""
+
+#: apps/documents/services.py:37
+msgid ""
+"У вашей роли недостаточно прав для создания или изменения шаблонов и типов "
+"документов."
+msgstr ""
+
+#: apps/documents/views.py:25 templates/core/dashboard.html:51
+#: templates/documents/create.html:9 templates/documents/detail.html:9
+#: templates/documents/list.html:4 templates/documents/list.html:9
+msgid "Типы документов"
+msgstr "Document Types"
+
+#: apps/documents/views.py:41 apps/documents/views.py:65
+#: templates/documents/create.html:10 templates/documents/create.html:18
+#, fuzzy
+#| msgid "Тип документа"
+msgid "Новый тип документа"
+msgstr "Document Type"
+
+#: apps/documents/views.py:57
+#, python-format
+msgid "Тип документа «%(name)s» успешно создан."
+msgstr ""
+
+#: apps/generation/models.py:13
+msgid "В очереди"
+msgstr "Pending"
+
+#: apps/generation/models.py:14
+msgid "Обработка"
+msgstr "Processing"
+
+#: apps/generation/models.py:15
+msgid "Завершено"
+msgstr "Completed"
+
+#: apps/generation/models.py:16
+msgid "Ошибка"
+msgstr "Failed"
+
+#: apps/templates_manager/forms.py:20
+msgid "Необязательно (по умолчанию берется имя файла)"
+msgstr ""
+
+#: apps/templates_manager/forms.py:38
+msgid "Что изменилось в этой версии шаблона..."
+msgstr ""
+
+#: apps/templates_manager/forms.py:51
+msgid "Пожалуйста, выберите DOCX-файл для загрузки."
+msgstr ""
+
+#: apps/templates_manager/models.py:31 templates/documents/detail.html:148
+#: templates/templates_manager/list.html:64
+msgid "Черновик"
+msgstr ""
+
+#: apps/templates_manager/models.py:32 templates/documents/detail.html:144
+#: templates/templates_manager/list.html:60
+msgid "Активен"
+msgstr "Active"
+
+#: apps/templates_manager/models.py:33 templates/documents/detail.html:152
+#: templates/templates_manager/list.html:68
+msgid "В архиве"
+msgstr ""
+
+#: apps/templates_manager/models.py:43 templates/templates_manager/list.html:26
+msgid "Тип документа"
+msgstr "Document Type"
+
+#: apps/templates_manager/models.py:47 templates/documents/detail.html:120
+#, fuzzy
+#| msgid "Название воркспейса"
+msgid "Название шаблона"
+msgstr "Workspace Name"
+
+#: apps/templates_manager/models.py:48
+msgid "Понятное наименование шаблона (например, Стандартный договор 2026)."
+msgstr ""
+
+#: apps/templates_manager/models.py:52
+#, fuzzy
+#| msgid "DOCX Шаблоны"
+msgid "DOCX файл"
+msgstr "DOCX Templates"
+
+#: apps/templates_manager/models.py:53
+msgid "Файл шаблона в формате DOCX с Jinja2-переменными."
+msgstr ""
+
+#: apps/templates_manager/models.py:57 templates/documents/detail.html:119
+#: templates/templates_manager/list.html:27
+msgid "Версия"
+msgstr ""
+
+#: apps/templates_manager/models.py:58
+msgid "Порядковый номер версии шаблона."
+msgstr ""
+
+#: apps/templates_manager/models.py:64 templates/core/dashboard.html:71
+#: templates/documents/detail.html:121 templates/generation/list.html:27
+#: templates/templates_manager/list.html:28
+msgid "Статус"
+msgstr "Status"
+
+#: apps/templates_manager/models.py:69 templates/documents/list.html:26
+msgid "Описание"
+msgstr "Description"
+
+#: apps/templates_manager/models.py:74 templates/documents/detail.html:122
+#: templates/templates_manager/list.html:29
+#, fuzzy
+#| msgid "Загруженные DOCX шаблоны"
+msgid "Обнаруженные переменные"
+msgstr "Uploaded DOCX Templates"
+
+#: apps/templates_manager/models.py:75
+msgid "Список плейсхолдеров, извлечённых из шаблона."
+msgstr ""
+
+#: apps/templates_manager/models.py:79
+#, fuzzy
+#| msgid "Шаблоны документов"
+msgid "Шаблон документа"
+msgstr "Document Templates"
+
+#: apps/templates_manager/models.py:80 apps/templates_manager/views.py:31
+#: templates/documents/detail.html:4 templates/templates_manager/list.html:4
+msgid "Шаблоны документов"
+msgstr "Document Templates"
+
+#: apps/templates_manager/services.py:75
+#, python-format
+msgid "Размер файла превышает максимально допустимый лимит (%(max_mb)d МБ)."
+msgstr ""
+
+#: apps/templates_manager/services.py:80
+#, fuzzy
+#| msgid "Загруженные DOCX шаблоны"
+msgid "Загруженный файл пуст."
+msgstr "Uploaded DOCX Templates"
+
+#: apps/templates_manager/services.py:89
+#, python-format
+msgid "Недопустимое расширение файла '%(ext)s'. Разрешены только файлы .docx."
+msgstr ""
+
+#: apps/templates_manager/services.py:102
+msgid "Файл не является корректным DOCX-документом (неверная сигнатура ZIP)."
+msgstr ""
+
+#: apps/templates_manager/services.py:113
+msgid "Файл повреждён или не является валидным ZIP-архивом."
+msgstr ""
+
+#: apps/templates_manager/services.py:121
+#, python-format
+msgid "Архив шаблона повреждён (ошибка в элементе '%(name)s')."
+msgstr ""
+
+#: apps/templates_manager/services.py:131
+msgid ""
+"Файл не является документом Word DOCX: отсутствует компонент word/"
+"document.xml."
+msgstr ""
+
+#: apps/templates_manager/services.py:143
+#, python-format
+msgid "В архиве обнаружен недопустимый файл '%(name)s'."
+msgstr ""
+
+#: apps/templates_manager/services.py:150
+msgid "Общий распакованный объём документа превышает лимит безопасности."
+msgstr ""
+
+#: apps/templates_manager/services.py:156
+msgid "Обнаружен аномальный коэффициент сжатия (возможная zip-бомба)."
+msgstr ""
+
+#: apps/templates_manager/services.py:161
+#, python-format
+msgid "Не удалось прочитать DOCX архив: %(err)s"
+msgstr ""
+
+#: apps/templates_manager/services.py:197
+#, python-format
+msgid "Синтаксическая ошибка в Jinja2-разметке шаблона DOCX: %(err)s"
+msgstr ""
+
+#: apps/templates_manager/views.py:86
+#, python-format
+msgid ""
+"Шаблон «%(name)s» v%(ver)d успешно загружен. Обнаружено переменных: "
+"%(count)d (%(sample)s)."
+msgstr ""
+
+#: apps/templates_manager/views.py:99
+#, python-format
+msgid ""
+"Шаблон «%(name)s» v%(ver)d успешно загружен. В документе не обнаружено "
+"переменных."
+msgstr ""
+
+#: apps/templates_manager/views.py:109
+#, python-format
+msgid "Произошла непредвиденная ошибка при обработке файла: %(err)s"
+msgstr ""
+
+#: apps/templates_manager/views.py:124
+#, python-format
+msgid "Шаблон «%(name)s» v%(ver)d активирован."
+msgstr ""
+
+#: apps/templates_manager/views.py:139
+#, python-format
+msgid "Шаблон «%(name)s» v%(ver)d перемещён в архив."
+msgstr ""
+
+#: apps/templates_manager/views.py:152
+msgid "Файл шаблона не найден на диске."
+msgstr ""
+
+#: templates/accounts/login.html:4
+msgid "Вход в систему"
+msgstr "Sign In"
+
+#: templates/accounts/login.html:47
+msgid "Вход в Flowdow"
+msgstr "Sign in to Flowdow"
+
+#: templates/accounts/login.html:48 templates/base.html:7
+msgid "Автоматизация подготовки документов"
+msgstr "Document Automation Platform"
+
+#: templates/accounts/login.html:53
+msgid "Неверное имя пользователя или пароль. Попробуйте еще раз."
+msgstr "Invalid username or password. Please try again."
+
+#: templates/accounts/login.html:60
+msgid "Имя пользователя"
+msgstr "Username"
+
+#: templates/accounts/login.html:65
+msgid "Пароль"
+msgstr "Password"
+
+#: templates/accounts/login.html:70
+msgid "Войти"
+msgstr "Sign In"
+
+#: templates/accounts/login.html:75
+msgid "Self-hosted платформа"
+msgstr "Self-hosted platform"
+
+#: templates/accounts/profile.html:4
+msgid "Профиль пользователя"
+msgstr "User Profile"
+
+#: templates/accounts/profile.html:11
+msgid "Данные профиля"
+msgstr "Profile Details"
+
+#: templates/accounts/profile.html:19
+msgid "Имя"
+msgstr "First Name"
+
+#: templates/accounts/profile.html:23
+msgid "Фамилия"
+msgstr "Last Name"
+
+#: templates/accounts/profile.html:27
+msgid "Email"
+msgstr "Email"
+
+#: templates/accounts/profile.html:31
+msgid "Должность"
+msgstr "Job Title"
+
+#: templates/accounts/profile.html:35 templates/organizations/settings.html:34
+msgid "Телефон"
+msgstr "Phone"
+
+#: templates/accounts/profile.html:42
+msgid "Сохранить изменения"
+msgstr "Save Changes"
+
+#: templates/base.html:35
+msgid "Работает на"
+msgstr "Powered by"
+
+#: templates/components/navbar.html:7
+msgid "Обзор"
+msgstr "Overview"
+
+#: templates/components/navbar.html:14
+msgid "Сменить язык"
+msgstr "Change Language"
+
+#: templates/components/navbar.html:58
+msgid "Вы вошли как"
+msgstr "Signed in as"
+
+#: templates/components/navbar.html:64
+msgid "Мой профиль"
+msgstr "My Profile"
+
+#: templates/components/navbar.html:69 templates/organizations/settings.html:4
+msgid "Настройки организации"
+msgstr "Organization Settings"
+
+#: templates/components/navbar.html:77 templates/components/sidebar.html:59
+msgid "Выйти"
+msgstr "Sign Out"
+
+#: templates/components/sidebar.html:12
+msgid "Операции"
+msgstr "Operations"
+
+#: templates/components/sidebar.html:16 templates/core/dashboard.html:4
+msgid "Панель управления"
+msgstr "Dashboard"
+
+#: templates/components/sidebar.html:20
+msgid "Документы"
+msgstr "Documents"
+
+#: templates/components/sidebar.html:24 templates/documents/list.html:64
+msgid "Шаблоны"
+msgstr "Templates"
+
+#: templates/components/sidebar.html:28 templates/core/dashboard.html:27
+#: templates/data_sources/list.html:4
+msgid "Источники данных"
+msgstr "Data Sources"
+
+#: templates/components/sidebar.html:32 templates/mapping/list.html:4
+msgid "Сопоставление полей"
+msgstr "Field Mapping"
+
+#: templates/components/sidebar.html:36 templates/generation/list.html:4
+msgid "История генераций"
+msgstr "Generation History"
+
+#: templates/components/sidebar.html:40
+msgid "Конфигурация"
+msgstr "Configuration"
+
+#: templates/components/sidebar.html:44
+msgid "Настройки"
+msgstr "Settings"
+
+#: templates/core/dashboard.html:15 templates/templates_manager/list.html:9
+msgid "DOCX Шаблоны"
+msgstr "DOCX Templates"
+
+#: templates/core/dashboard.html:39
+msgid "Запуски генераций"
+msgstr "Generation Runs"
+
+#: templates/core/dashboard.html:62
+msgid "Последние генерации"
+msgstr "Recent Generations"
+
+#: templates/core/dashboard.html:63
+msgid "Смотреть все"
+msgstr "View All"
+
+#: templates/core/dashboard.html:70 templates/generation/list.html:23
+msgid "Шаблон"
+msgstr "Template"
+
+#: templates/core/dashboard.html:72
+msgid "Записи"
+msgstr "Records"
+
+#: templates/core/dashboard.html:73
+msgid "Дата запуска"
+msgstr "Started At"
+
+#: templates/core/dashboard.html:93 templates/generation/list.html:57
+msgid "Генерации документов пока не производились."
+msgstr "No document generations recorded yet."
+
+#: templates/core/dashboard.html:107
+msgid "Журнал аудита"
+msgstr "Audit Trail"
+
+#: templates/core/dashboard.html:117 templates/generation/list.html:37
+msgid "Система"
+msgstr "System"
+
+#: templates/core/dashboard.html:117
+msgid "назад"
+msgstr "ago"
+
+#: templates/core/dashboard.html:123
+msgid "Журнал аудита пуст."
+msgstr "No audit logs recorded yet."
+
+#: templates/data_sources/list.html:11
+msgid "Табличные наборы данных (CSV и XLSX)"
+msgstr "Tabular Datasets (CSV & XLSX)"
+
+#: templates/data_sources/list.html:14
+msgid "источников"
+msgstr "sources"
+
+#: templates/data_sources/list.html:22 templates/documents/list.html:25
+msgid "Наименование"
+msgstr "Name"
+
+#: templates/data_sources/list.html:23
+msgid "Формат"
+msgstr "Format"
+
+#: templates/data_sources/list.html:24
+msgid "Количество строк"
+msgstr "Row Count"
+
+#: templates/data_sources/list.html:25
+msgid "Распознанные колонки"
+msgstr "Detected Columns"
+
+#: templates/data_sources/list.html:26 templates/documents/detail.html:123
+#: templates/templates_manager/list.html:30
+msgid "Дата загрузки"
+msgstr "Uploaded At"
+
+#: templates/data_sources/list.html:36
+msgid "строк"
+msgstr "rows"
+
+#: templates/data_sources/list.html:38
+msgid "колонок"
+msgstr "columns"
+
+#: templates/data_sources/list.html:46
+msgid "Источники данных пока не загружены."
+msgstr "No data sources uploaded yet."
+
+#: templates/documents/create.html:4
+#, fuzzy
+#| msgid "Настроенные типы документов"
+msgid "Создание типа документа"
+msgstr "Configured Document Types"
+
+#: templates/documents/create.html:25
+#, fuzzy
+#| msgid "Настроенные типы документов"
+msgid "Наименование типа документа"
+msgstr "Configured Document Types"
+
+#: templates/documents/create.html:32
+msgid ""
+"Например: Трудовой договор, Договор подряда, Акт выполненных работ, Справка "
+"с места работы."
+msgstr ""
+
+#: templates/documents/create.html:38
+msgid "Описание и назначение"
+msgstr ""
+
+#: templates/documents/create.html:48 templates/documents/detail.html:274
+msgid "Отмена"
+msgstr ""
+
+#: templates/documents/create.html:51
+msgid "Создать и перейти к шаблонам"
+msgstr ""
+
+#: templates/documents/detail.html:28
+#, fuzzy
+#| msgid "Загруженные DOCX шаблоны"
+msgid "Загрузить новый шаблон"
+msgstr "Uploaded DOCX Templates"
+
+#: templates/documents/detail.html:48
+#, fuzzy
+#| msgid "Активен"
+msgid "Активная версия"
+msgstr "Active"
+
+#: templates/documents/detail.html:60 templates/documents/list.html:28
+msgid "Всего версий"
+msgstr ""
+
+#: templates/documents/detail.html:78
+msgid "Переменных в активном шаблоне"
+msgstr ""
+
+#: templates/documents/detail.html:89
+msgid "Переменные текущей активной версии (v"
+msgstr ""
+
+#: templates/documents/detail.html:91
+msgid "переменных"
+msgstr "variables"
+
+#: templates/documents/detail.html:110
+#, fuzzy
+#| msgid "История генераций"
+msgid "История версий шаблона"
+msgstr "Generation History"
+
+#: templates/documents/detail.html:112 templates/documents/list.html:58
+msgid "версий"
+msgstr ""
+
+#: templates/documents/detail.html:124 templates/documents/list.html:30
+#: templates/templates_manager/list.html:31
+msgid "Действия"
+msgstr ""
+
+#: templates/documents/detail.html:171 templates/templates_manager/list.html:87
+#, fuzzy
+#| msgid "переменных"
+msgid "Нет переменных"
+msgstr "variables"
+
+#: templates/documents/detail.html:177 templates/templates_manager/list.html:93
+msgid "Скачать DOCX"
+msgstr ""
+
+#: templates/documents/detail.html:184
+#, fuzzy
+#| msgid "Неактивен"
+msgid "Сделать активным"
+msgstr "Inactive"
+
+#: templates/documents/detail.html:185
+#, fuzzy
+#| msgid "Активен"
+msgid "Активировать"
+msgstr "Active"
+
+#: templates/documents/detail.html:192
+msgid "Переместить в архив"
+msgstr ""
+
+#: templates/documents/detail.html:205
+msgid "Для этого типа документа ещё не загружено ни одного шаблона."
+msgstr ""
+
+#: templates/documents/detail.html:208
+#, fuzzy
+#| msgid "Загруженные DOCX шаблоны"
+msgid "Загрузить первый DOCX шаблон"
+msgstr "Uploaded DOCX Templates"
+
+#: templates/documents/detail.html:226
+#, fuzzy
+#| msgid "Загруженные DOCX шаблоны"
+msgid "Загрузка нового DOCX-шаблона"
+msgstr "Uploaded DOCX Templates"
+
+#: templates/documents/detail.html:235
+#, fuzzy
+#| msgid "Настроенные типы документов"
+msgid "Шаблон будет привязан к типу документа:"
+msgstr "Configured Document Types"
+
+#: templates/documents/detail.html:236
+msgid "Система автоматически присвоит следующую версию (v"
+msgstr ""
+
+#: templates/documents/detail.html:241
+msgid "Файл DOCX"
+msgstr ""
+
+#: templates/documents/detail.html:245
+msgid ""
+"Поддерживаются переменные вида {{ full_name }}, {{ group }}, "
+"{{ specialty }}, {{ issue_date }}. Максимальный размер: 10 МБ."
+msgstr ""
+
+#: templates/documents/detail.html:251
+msgid "Название шаблона (необязательно)"
+msgstr ""
+
+#: templates/documents/detail.html:258
+msgid "Начальный статус"
+msgstr ""
+
+#: templates/documents/detail.html:262
+msgid ""
+"При выборе «Активен» предыдущие активные шаблоны этого типа будут перемещены "
+"в архив."
+msgstr ""
+
+#: templates/documents/detail.html:268
+msgid "Описание изменений в этой версии"
+msgstr ""
+
+#: templates/documents/detail.html:276
+msgid "Загрузить и проанализировать"
+msgstr ""
+
+#: templates/documents/list.html:10
+msgid "Классификация документов организации и привязанные DOCX-шаблоны"
+msgstr ""
+
+#: templates/documents/list.html:15
+#, fuzzy
+#| msgid "Тип документа"
+msgid "Добавить тип документа"
+msgstr "Document Type"
+
+#: templates/documents/list.html:27
+#, fuzzy
+#| msgid "Целевой шаблон"
+msgid "Активный шаблон"
+msgstr "Target Template"
+
+#: templates/documents/list.html:29
+#, fuzzy
+#| msgid "Дата загрузки"
+msgid "Дата создания"
+msgstr "Uploaded At"
+
+#: templates/documents/list.html:52
+#, fuzzy
+#| msgid "Целевой шаблон"
+msgid "Нет активного шаблона"
+msgstr "Target Template"
+
+#: templates/documents/list.html:72
+msgid "Типы документов пока не зарегистрированы."
+msgstr "No document types registered yet."
+
+#: templates/documents/list.html:75
+#, fuzzy
+#| msgid "Настроенные типы документов"
+msgid "Создать первый тип документа"
+msgstr "Configured Document Types"
+
+#: templates/generation/list.html:11
+msgid "Пакеты сформированных документов"
+msgstr "Generated Document Batches"
+
+#: templates/generation/list.html:14
+msgid "пакетов"
+msgstr "batches"
+
+#: templates/generation/list.html:24 templates/mapping/list.html:24
+msgid "Источник данных"
+msgstr "Data Source"
+
+#: templates/generation/list.html:25
+msgid "Инициатор"
+msgstr "Initiated By"
+
+#: templates/generation/list.html:26
+msgid "Прогресс"
+msgstr "Progress"
+
+#: templates/generation/list.html:28
+msgid "Дата и время"
+msgstr "Timestamp"
+
+#: templates/generation/list.html:36
+msgid "Прямой ввод"
+msgstr "Direct Input"
+
+#: templates/mapping/list.html:11
+msgid "Схемы маппинга полей"
+msgstr "Field Mapping Schemas"
+
+#: templates/mapping/list.html:14
+msgid "схем"
+msgstr "schemas"
+
+#: templates/mapping/list.html:22
+msgid "Название схемы"
+msgstr "Mapping Name"
+
+#: templates/mapping/list.html:23
+msgid "Целевой шаблон"
+msgstr "Target Template"
+
+#: templates/mapping/list.html:25
+msgid "Создан"
+msgstr "Created"
+
+#: templates/mapping/list.html:40
+msgid "Схемы сопоставления полей пока не созданы."
+msgstr "No field mapping schemas created yet."
+
+#: templates/organizations/settings.html:13
+msgid "Реквизиты организации"
+msgstr "Organization Details"
+
+#: templates/organizations/settings.html:18
+msgid "Название воркспейса"
+msgstr "Workspace Name"
+
+#: templates/organizations/settings.html:22
+msgid "Юридическое наименование"
+msgstr "Legal Entity Name"
+
+#: templates/organizations/settings.html:26
+msgid "ИНН / ОГРН / Рег. номер"
+msgstr "Tax ID / Registration Number"
+
+#: templates/organizations/settings.html:30
+msgid "Контактный Email"
+msgstr "Contact Email"
+
+#: templates/organizations/settings.html:38
+msgid "Веб-сайт"
+msgstr "Website"
+
+#: templates/organizations/settings.html:42
+msgid "Юридический адрес"
+msgstr "Office Address"
+
+#: templates/organizations/settings.html:51
+msgid "Форматирование документов"
+msgstr "Document Defaults"
+
+#: templates/organizations/settings.html:56
+msgid "Формат даты"
+msgstr "Date Format"
+
+#: templates/organizations/settings.html:60
+msgid "Валюта по умолчанию"
+msgstr "Default Currency"
+
+#: templates/organizations/settings.html:64
+msgid "Срок хранения файлов (дней)"
+msgstr "File Retention Period (Days)"
+
+#: templates/organizations/settings.html:71
+msgid "Сохранить настройки"
+msgstr "Save Settings"
+
+#: templates/organizations/settings.html:82
+msgid "Single-Tenant режим"
+msgstr "Single-Tenant Mode"
+
+#: templates/organizations/settings.html:85
+msgid "Данная установка Flowdow работает в режиме изолированной организации."
+msgstr ""
+"This Flowdow deployment operates in dedicated single-organization mode."
+
+#: templates/organizations/settings.html:86
+msgid ""
+"Все шаблоны документов, наборы данных и сгенерированные файлы принадлежат "
+"исключительно вашей компании."
+msgstr ""
+"All templates, datasets, and generated documents belong exclusively to your "
+"company."
+
+#: templates/templates_manager/list.html:10
+msgid "Все загруженные версии шаблонов по типам документов"
+msgstr ""
+
+#: templates/templates_manager/list.html:15
+#, fuzzy
+#| msgid "Форматирование документов"
+msgid "Перейти к типам документов"
+msgstr "Document Defaults"
+
+#: templates/templates_manager/list.html:25
+msgid "Название"
+msgstr "Title"
+
+#: templates/templates_manager/list.html:96
+#, fuzzy
+#| msgid "Тип документа"
+msgid "Открыть тип документа"
+msgstr "Document Type"
+
+#: templates/templates_manager/list.html:106
+msgid "Шаблоны DOCX пока не загружены."
+msgstr "No DOCX templates uploaded yet."
+
+#: templates/templates_manager/list.html:108
+msgid "Выбрать тип документа для загрузки шаблона"
+msgstr ""
+
+#~ msgid "типов"
+#~ msgstr "types"
+
+#~ msgid "Идентификатор (Slug)"
+#~ msgstr "Identifier (Slug)"
+
+#~ msgid "шаблонов"
+#~ msgstr "templates"
+
+#~ msgid "Переменные"
+#~ msgstr "Variables"

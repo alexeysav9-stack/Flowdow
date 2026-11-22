@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ doc_type.name }} — {% trans "Шаблоны документов" %}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{% url 'documents:list' %}" class="text-decoration-none">{% trans "Типы документов" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ doc_type.name }}</li>
+  </ol>
+</nav>
+
+<!-- Document Type Header -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <div class="d-flex align-items-center gap-2">
+      <h4 class="fw-bold mb-0 text-dark">{{ doc_type.name }}</h4>
+      <span class="badge bg-light text-dark border"><code>{{ doc_type.slug }}</code></span>
+    </div>
+    {% if doc_type.description %}
+      <p class="text-muted small mt-1 mb-0">{{ doc_type.description }}</p>
+    {% endif %}
+  </div>
+  {% if user.role != "VIEWER" %}
+    <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#uploadTemplateModal">
+      <i class="bi bi-cloud-arrow-up"></i>
+      <span>{% trans "Загрузить новый шаблон" %}</span>
+    </button>
+  {% endif %}
+</div>
+
+<!-- Summary Metrics Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-md-4">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-success-subtle text-success">
+        <i class="bi bi-check-circle"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">
+          {% if doc_type.active_template %}
+            v{{ doc_type.active_template.version }}
+          {% else %}
+            —
+          {% endif %}
+        </div>
+        <div class="fd-stat-label">{% trans "Активная версия" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-4">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-primary-subtle text-primary">
+        <i class="bi bi-layers"></i>
+      </div>
+      <div>
+        <div class="fd-stat-number">{{ templates|length }}</div>
+        <div class="fd-stat-label">{% trans "Всего версий" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-12 col-md-4">
+    <div class="fd-stat-card d-flex align-items-center gap-3">
+      <div class="fd-stat-icon bg-info-subtle text-info">
+        <i class="bi bi-code-slash"></i>
+      </div>
+      <div class="overflow-hidden">
+        <div class="fd-stat-number">
+          {% if doc_type.active_template %}
+            {{ doc_type.active_template.detected_variables|length }}
+          {% else %}
+            0
+          {% endif %}
+        </div>
+        <div class="fd-stat-label">{% trans "Переменных в активном шаблоне" %}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Active Template Variables Highlight -->
+{% if doc_type.active_template and doc_type.active_template.detected_variables %}
+  <div class="fd-card mb-4 border-primary-subtle">
+    <div class="fd-card-header bg-light-subtle d-flex align-items-center justify-content-between py-2">
+      <span class="small fw-semibold text-primary">
+        <i class="bi bi-cpu me-1"></i> {% trans "Переменные текущей активной версии (v" %}{{ doc_type.active_template.version }}):
+      </span>
+      <span class="badge bg-primary-subtle text-primary">{{ doc_type.active_template.detected_variables|length }} {% trans "переменных" %}</span>
+    </div>
+    <div class="p-3">
+      <div class="d-flex flex-wrap gap-2">
+        {% for var in doc_type.active_template.detected_variables %}
+          <span class="badge bg-light text-dark border font-monospace py-2 px-2" style="font-size: 0.85rem;">
+            <span class="text-primary fw-bold">&#123;&#123;</span> {{ var }} <span class="text-primary fw-bold">&#125;&#125;</span>
+          </span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<!-- Template Versions Table -->
+<div class="fd-card">
+  <div class="fd-card-header d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-clock-history text-primary"></i>
+      <span>{% trans "История версий шаблона" %}</span>
+    </div>
+    <span class="badge bg-light text-dark border">{{ templates|length }} {% trans "версий" %}</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th style="width: 90px;">{% trans "Версия" %}</th>
+          <th>{% trans "Название шаблона" %}</th>
+          <th style="width: 120px;">{% trans "Статус" %}</th>
+          <th>{% trans "Обнаруженные переменные" %}</th>
+          <th>{% trans "Дата загрузки" %}</th>
+          <th class="text-end">{% trans "Действия" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tpl in templates %}
+          <tr>
+            <td>
+              <span class="badge bg-light text-dark border font-monospace fs-6 px-2 py-1">
+                v{{ tpl.version }}
+              </span>
+            </td>
+            <td>
+              <div class="fw-semibold text-dark">{{ tpl.name }}</div>
+              {% if tpl.description %}
+                <div class="text-muted small" style="font-size: 0.775rem;">{{ tpl.description }}</div>
+              {% endif %}
+            </td>
+            <td>
+              {% if tpl.status == "active" %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                  <i class="bi bi-check-circle me-1"></i>{% trans "Активен" %}
+                </span>
+              {% elif tpl.status == "draft" %}
+                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
+                  {% trans "Черновик" %}
+                </span>
+              {% else %}
+                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
+                  {% trans "В архиве" %}
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              {% if tpl.detected_variables %}
+                <div class="d-flex flex-wrap gap-1 align-items-center">
+                  {% for var in tpl.detected_variables|slice:":5" %}
+                    <span class="badge bg-light text-dark border font-monospace small" style="font-size: 0.75rem;">
+                      &#123;&#123; {{ var }} &#125;&#125;
+                    </span>
+                  {% endfor %}
+                  {% if tpl.detected_variables|length > 5 %}
+                    <span class="badge bg-secondary-subtle text-secondary small" title="{{ tpl.detected_variables|join:', ' }}">
+                      +{{ tpl.detected_variables|length|add:"-5" }}
+                    </span>
+                  {% endif %}
+                </div>
+              {% else %}
+                <span class="text-muted small fst-italic">{% trans "Нет переменных" %}</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ tpl.created_at|date:"d.m.Y H:i" }}</td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <a href="{% url 'templates_manager:download' tpl.pk %}" class="btn btn-outline-secondary" title="{% trans 'Скачать DOCX' %}">
+                  <i class="bi bi-download"></i>
+                </a>
+                {% if user.role != "VIEWER" %}
+                  {% if tpl.status != "active" %}
+                    <form method="post" action="{% url 'templates_manager:activate' tpl.pk %}" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-outline-success" title="{% trans 'Сделать активным' %}">
+                        <i class="bi bi-check-lg"></i> {% trans "Активировать" %}
+                      </button>
+                    </form>
+                  {% endif %}
+                  {% if tpl.status != "archived" %}
+                    <form method="post" action="{% url 'templates_manager:archive' tpl.pk %}" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-outline-danger" title="{% trans 'Переместить в архив' %}">
+                        <i class="bi bi-archive"></i>
+                      </button>
+                    </form>
+                  {% endif %}
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-center py-5 text-muted">
+              <i class="bi bi-file-earmark-plus d-block fs-1 mb-2 text-secondary"></i>
+              <p class="mb-2">{% trans "Для этого типа документа ещё не загружено ни одного шаблона." %}</p>
+              {% if user.role != "VIEWER" %}
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#uploadTemplateModal">
+                  <i class="bi bi-cloud-arrow-up me-1"></i> {% trans "Загрузить первый DOCX шаблон" %}
+                </button>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Upload Template Modal -->
+{% if user.role != "VIEWER" %}
+<div class="modal fade" id="uploadTemplateModal" tabindex="-1" aria-labelledby="uploadTemplateModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="uploadTemplateModalLabel">
+          <i class="bi bi-cloud-arrow-up text-primary me-2"></i>{% trans "Загрузка нового DOCX-шаблона" %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="{% url 'documents:template_upload' doc_type.pk %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="alert alert-info py-2 small mb-3">
+            <i class="bi bi-info-circle me-1"></i>
+            {% trans "Шаблон будет привязан к типу документа:" %} <strong>{{ doc_type.name }}</strong>.
+            {% trans "Система автоматически присвоит следующую версию (v" %}{{ doc_type.total_templates|add:1 }}).
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ upload_form.file.id_for_label }}" class="form-label small fw-semibold">
+              {% trans "Файл DOCX" %} <span class="text-danger">*</span>
+            </label>
+            {{ upload_form.file }}
+            <div class="form-text small">
+              {% trans "Поддерживаются переменные вида {{ full_name }}, {{ group }}, {{ specialty }}, {{ issue_date }}. Максимальный размер: 10 МБ." %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ upload_form.name.id_for_label }}" class="form-label small fw-semibold">
+              {% trans "Название шаблона (необязательно)" %}
+            </label>
+            {{ upload_form.name }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ upload_form.status.id_for_label }}" class="form-label small fw-semibold">
+              {% trans "Начальный статус" %}
+            </label>
+            {{ upload_form.status }}
+            <div class="form-text small">
+              {% trans "При выборе «Активен» предыдущие активные шаблоны этого типа будут перемещены в архив." %}
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label for="{{ upload_form.description.id_for_label }}" class="form-label small fw-semibold">
+              {% trans "Описание изменений в этой версии" %}
+            </label>
+            {{ upload_form.description }}
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Отмена" %}</button>
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-upload me-1"></i> {% trans "Загрузить и проанализировать" %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+

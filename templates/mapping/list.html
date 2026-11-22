@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Сопоставление полей" %} — Flowdow{% endblock %}
+
+{% block content %}
+<div class="fd-card">
+  <div class="fd-card-header">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-diagram-3 text-primary"></i>
+      <span>{% trans "Схемы маппинга полей" %}</span>
+    </div>
+    <div>
+      <span class="badge bg-light text-dark border">{{ mappings|length }} {% trans "схем" %}</span>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>{% trans "Название схемы" %}</th>
+          <th>{% trans "Целевой шаблон" %}</th>
+          <th>{% trans "Источник данных" %}</th>
+          <th>{% trans "Создан" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mapping in mappings %}
+          <tr>
+            <td class="fw-semibold text-dark">{{ mapping.name }}</td>
+            <td>{{ mapping.template.title }}</td>
+            <td>{{ mapping.data_source.name|default:"—" }}</td>
+            <td class="text-muted small">{{ mapping.created_at|date:"d.m.Y" }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="text-center py-5 text-muted">
+              <i class="bi bi-link-45deg d-block fs-2 mb-2 text-secondary"></i>
+              {% trans "Схемы сопоставления полей пока не созданы." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

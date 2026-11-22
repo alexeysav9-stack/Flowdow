@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Типы документов" %} — Flowdow{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <div>
+    <h4 class="fw-bold mb-1">{% trans "Типы документов" %}</h4>
+    <p class="text-muted small mb-0">{% trans "Классификация документов организации и привязанные DOCX-шаблоны" %}</p>
+  </div>
+  {% if user.role != "VIEWER" %}
+    <a href="{% url 'documents:create' %}" class="btn btn-primary d-inline-flex align-items-center gap-2">
+      <i class="bi bi-plus-lg"></i>
+      <span>{% trans "Добавить тип документа" %}</span>
+    </a>
+  {% endif %}
+</div>
+
+<div class="fd-card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>{% trans "Наименование" %}</th>
+          <th>{% trans "Описание" %}</th>
+          <th>{% trans "Активный шаблон" %}</th>
+          <th>{% trans "Всего версий" %}</th>
+          <th>{% trans "Дата создания" %}</th>
+          <th class="text-end">{% trans "Действия" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for doc_type in document_types %}
+          <tr>
+            <td>
+              <a href="{% url 'documents:detail' doc_type.pk %}" class="fw-semibold text-dark text-decoration-none">
+                <i class="bi bi-file-earmark-text text-primary me-2"></i>{{ doc_type.name }}
+              </a>
+            </td>
+            <td class="text-muted small">
+              {{ doc_type.description|default:"—"|truncatechars:70 }}
+            </td>
+            <td>
+              {% if doc_type.active_template %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle d-inline-flex align-items-center gap-1">
+                  <i class="bi bi-check-circle-fill" style="font-size: 0.75rem;"></i>
+                  v{{ doc_type.active_template.version }} &bull; {{ doc_type.active_template.name|truncatechars:20 }}
+                </span>
+              {% else %}
+                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                  {% trans "Нет активного шаблона" %}
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border">
+                {{ doc_type.total_templates }} {% trans "версий" %}
+              </span>
+            </td>
+            <td class="text-muted small">{{ doc_type.created_at|date:"d.m.Y" }}</td>
+            <td class="text-end">
+              <a href="{% url 'documents:detail' doc_type.pk %}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-folder2-open me-1"></i> {% trans "Шаблоны" %}
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-center py-5 text-muted">
+              <i class="bi bi-folder2-open d-block fs-1 mb-2 text-secondary"></i>
+              <p class="mb-2">{% trans "Типы документов пока не зарегистрированы." %}</p>
+              {% if user.role != "VIEWER" %}
+                <a href="{% url 'documents:create' %}" class="btn btn-sm btn-primary">
+                  <i class="bi bi-plus-lg me-1"></i> {% trans "Создать первый тип документа" %}
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

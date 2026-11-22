@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Загрузка источника данных" %} — Flowdow{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{% url 'data_sources:list' %}" class="text-decoration-none">{% trans "Источники данных" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Новый источник данных" %}</li>
+  </ol>
+</nav>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="fd-card">
+      <div class="fd-card-header">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-cloud-arrow-up text-primary"></i>
+          <span class="fw-semibold">{% trans "Импорт таблицы CSV или Excel" %}</span>
+        </div>
+      </div>
+      <div class="p-4">
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger mb-3" role="alert">
+              {% for error in form.non_field_errors %}
+                <div><i class="bi bi-exclamation-triangle-fill me-1"></i>{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label for="{{ form.file.id_for_label }}" class="form-label fw-semibold">
+              {{ form.file.label }} <span class="text-danger">*</span>
+            </label>
+            {{ form.file }}
+            {% if form.file.help_text %}
+              <div class="form-text text-muted">{{ form.file.help_text }}</div>
+            {% endif %}
+            {% if form.file.errors %}
+              <div class="text-danger small mt-1">{{ form.file.errors|first }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">
+              {{ form.name.label }}
+            </label>
+            {{ form.name }}
+            {% if form.name.help_text %}
+              <div class="form-text text-muted">{{ form.name.help_text }}</div>
+            {% endif %}
+            {% if form.name.errors %}
+              <div class="text-danger small mt-1">{{ form.name.errors|first }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.sheet_name.id_for_label }}" class="form-label fw-semibold">
+              {{ form.sheet_name.label }}
+            </label>
+            {{ form.sheet_name }}
+            {% if form.sheet_name.help_text %}
+              <div class="form-text text-muted">{{ form.sheet_name.help_text }}</div>
+            {% endif %}
+            {% if form.sheet_name.errors %}
+              <div class="text-danger small mt-1">{{ form.sheet_name.errors|first }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
+              {{ form.description.label }}
+            </label>
+            {{ form.description }}
+            {% if form.description.errors %}
+              <div class="text-danger small mt-1">{{ form.description.errors|first }}</div>
+            {% endif %}
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+              <i class="bi bi-upload"></i>
+              <span>{% trans "Импортировать таблицу" %}</span>
+            </button>
+            <a href="{% url 'data_sources:list' %}" class="btn btn-outline-secondary">
+              {% trans "Отмена" %}
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="fd-card mb-3">
+      <div class="fd-card-header">
+        <i class="bi bi-info-circle text-primary me-2"></i>
+        <span>{% trans "Требования к таблицам" %}</span>
+      </div>
+      <div class="p-3 small text-muted">
+        <h6 class="fw-bold text-dark mb-2">{% trans "Форматы файлов" %}</h6>
+        <ul class="ps-3 mb-3">
+          <li><strong>CSV:</strong> {% trans "UTF-8 или UTF-8 с BOM. Разделители определяются автоматически (запятая, точка с запятой, табуляция, пайп)." %}</li>
+          <li><strong>XLSX:</strong> {% trans "Таблицы Excel (SpreadsheetML). Возможность указать конкретный лист." %}</li>
+        </ul>
+
+        <h6 class="fw-bold text-dark mb-2">{% trans "Структура заголовков" %}</h6>
+        <ul class="ps-3 mb-3">
+          <li>{% trans "Первая непустая строка файла считается строкой заголовков колонок." %}</li>
+          <li>{% trans "Все названия колонок должны быть непустыми и уникальными." %}</li>
+          <li>{% trans "Пустые строки в начале, середине и конце файла пропускаются автоматически." %}</li>
+        </ul>
+
+        <h6 class="fw-bold text-dark mb-2">{% trans "Системные лимиты" %}</h6>
+        <ul class="ps-3 mb-0">
+          <li>{% trans "Максимальный размер файла:" %} <strong>20 МБ</strong></li>
+          <li>{% trans "Максимум колонок:" %} <strong>200</strong></li>
+          <li>{% trans "Максимум строк:" %} <strong>50 000</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "История генераций" %} — Flowdow{% endblock %}
+
+{% block content %}
+<div class="fd-card">
+  <div class="fd-card-header">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-clock-history text-primary"></i>
+      <span>{% trans "Пакеты сформированных документов" %}</span>
+    </div>
+    <div>
+      <span class="badge bg-light text-dark border">{{ batches|length }} {% trans "пакетов" %}</span>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>{% trans "Шаблон" %}</th>
+          <th>{% trans "Источник данных" %}</th>
+          <th>{% trans "Инициатор" %}</th>
+          <th>{% trans "Прогресс" %}</th>
+          <th>{% trans "Статус" %}</th>
+          <th>{% trans "Дата и время" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for batch in batches %}
+          <tr>
+            <td class="fw-semibold">#{{ batch.id }}</td>
+            <td>{{ batch.template.title }}</td>
+            <td>{{ batch.data_source.name|default:_("Прямой ввод") }}</td>
+            <td>{{ batch.initiated_by.username|default:_("Система") }}</td>
+            <td style="min-width: 140px;">
+              <div class="progress" style="height: 6px;">
+                <div class="progress-bar {% if batch.status == 'COMPLETED' %}bg-success{% elif batch.status == 'FAILED' %}bg-danger{% else %}bg-primary{% endif %}" role="progressbar" style="width: {{ batch.progress_percent }}%;" aria-valuenow="{{ batch.progress_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              <div class="small text-muted mt-1" style="font-size: 0.725rem;">
+                {{ batch.processed_records }} / {{ batch.total_records }} ({{ batch.progress_percent }}%)
+              </div>
+            </td>
+            <td>
+              <span class="badge badge-status-{{ batch.status|lower }} px-2 py-1">
+                {{ batch.get_status_display }}
+              </span>
+            </td>
+            <td class="text-muted small">{{ batch.created_at|date:"d.m.Y H:i" }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox d-block fs-2 mb-2 text-secondary"></i>
+              {% trans "Генерации документов пока не производились." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

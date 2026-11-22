@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Шаблоны документов" %} — Flowdow{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <div>
+    <h4 class="fw-bold mb-1">{% trans "DOCX Шаблоны" %}</h4>
+    <p class="text-muted small mb-0">{% trans "Все загруженные версии шаблонов по типам документов" %}</p>
+  </div>
+  {% if user.role != "VIEWER" %}
+    <a href="{% url 'documents:list' %}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
+      <i class="bi bi-folder2-open"></i>
+      <span>{% trans "Перейти к типам документов" %}</span>
+    </a>
+  {% endif %}
+</div>
+
+<div class="fd-card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>{% trans "Название" %}</th>
+          <th>{% trans "Тип документа" %}</th>
+          <th style="width: 90px;">{% trans "Версия" %}</th>
+          <th style="width: 120px;">{% trans "Статус" %}</th>
+          <th>{% trans "Обнаруженные переменные" %}</th>
+          <th>{% trans "Дата загрузки" %}</th>
+          <th class="text-end">{% trans "Действия" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for template in templates %}
+          <tr>
+            <td>
+              <div class="fw-semibold text-dark">{{ template.name }}</div>
+              {% if template.description %}
+                <div class="text-muted small" style="font-size: 0.775rem;">{{ template.description|truncatechars:60 }}</div>
+              {% endif %}
+            </td>
+            <td>
+              {% if template.document_type %}
+                <a href="{% url 'documents:detail' template.document_type.pk %}" class="badge bg-light text-dark border text-decoration-none">
+                  {{ template.document_type.name }}
+                </a>
+              {% else %}
+                <span class="text-muted small">—</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border font-monospace">
+                v{{ template.version }}
+              </span>
+            </td>
+            <td>
+              {% if template.status == "active" %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                  <i class="bi bi-check-circle me-1"></i>{% trans "Активен" %}
+                </span>
+              {% elif template.status == "draft" %}
+                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                  {% trans "Черновик" %}
+                </span>
+              {% else %}
+                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                  {% trans "В архиве" %}
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              {% if template.detected_variables %}
+                <div class="d-flex flex-wrap gap-1 align-items-center">
+                  {% for var in template.detected_variables|slice:":4" %}
+                    <span class="badge bg-light text-dark border font-monospace small" style="font-size: 0.75rem;">
+                      &#123;&#123; {{ var }} &#125;&#125;
+                    </span>
+                  {% endfor %}
+                  {% if template.detected_variables|length > 4 %}
+                    <span class="badge bg-primary-subtle text-primary small">
+                      +{{ template.detected_variables|length|add:"-4" }}
+                    </span>
+                  {% endif %}
+                </div>
+              {% else %}
+                <span class="text-muted small fst-italic">{% trans "Нет переменных" %}</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ template.created_at|date:"d.m.Y H:i" }}</td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <a href="{% url 'templates_manager:download' template.pk %}" class="btn btn-outline-secondary" title="{% trans 'Скачать DOCX' %}">
+                  <i class="bi bi-download"></i>
+                </a>
+                <a href="{% url 'documents:detail' template.document_type.pk %}" class="btn btn-outline-primary" title="{% trans 'Открыть тип документа' %}">
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="bi bi-file-earmark-word d-block fs-1 mb-2 text-secondary"></i>
+              <p class="mb-2">{% trans "Шаблоны DOCX пока не загружены." %}</p>
+              <a href="{% url 'documents:list' %}" class="btn btn-sm btn-primary">
+                {% trans "Выбрать тип документа для загрузки шаблона" %}
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

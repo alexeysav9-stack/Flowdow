@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Настройки организации" %} — Flowdow{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <form method="post">
+      {% csrf_token %}
+      <div class="fd-card">
+        <div class="fd-card-header">
+          <span><i class="bi bi-building me-2 text-primary"></i>{% trans "Реквизиты организации" %}</span>
+        </div>
+        <div class="p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">{% trans "Название воркспейса" %}</label>
+              {{ org_form.name }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">{% trans "Юридическое наименование" %}</label>
+              {{ org_form.legal_name }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">{% trans "ИНН / ОГРН / Рег. номер" %}</label>
+              {{ org_form.tax_id }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">{% trans "Контактный Email" %}</label>
+              {{ org_form.email }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">{% trans "Телефон" %}</label>
+              {{ org_form.phone }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">{% trans "Веб-сайт" %}</label>
+              {{ org_form.website }}
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-semibold">{% trans "Юридический адрес" %}</label>
+              {{ org_form.address }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fd-card">
+        <div class="fd-card-header">
+          <span><i class="bi bi-sliders me-2 text-primary"></i>{% trans "Форматирование документов" %}</span>
+        </div>
+        <div class="p-4">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label small fw-semibold">{% trans "Формат даты" %}</label>
+              {{ settings_form.default_date_format }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-semibold">{% trans "Валюта по умолчанию" %}</label>
+              {{ settings_form.default_currency }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-semibold">{% trans "Срок хранения файлов (дней)" %}</label>
+              {{ settings_form.retention_days }}
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary px-4">
+              <i class="bi bi-check2 me-1"></i> {% trans "Сохранить настройки" %}
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="fd-card">
+      <div class="fd-card-header">
+        <span><i class="bi bi-info-circle me-2 text-secondary"></i>{% trans "Single-Tenant режим" %}</span>
+      </div>
+      <div class="p-3 text-muted small">
+        <p>{% trans "Данная установка Flowdow работает в режиме изолированной организации." %}</p>
+        <p class="mb-0">{% trans "Все шаблоны документов, наборы данных и сгенерированные файлы принадлежат исключительно вашей компании." %}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

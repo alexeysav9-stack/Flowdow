@@ -1,0 +1,65 @@
+{% load i18n %}
+<aside class="fd-sidebar" id="sidebar">
+  <a href="{% url 'core:dashboard' %}" class="fd-brand">
+    <span class="fd-brand-badge">
+      <i class="bi bi-file-earmark-diff"></i>
+    </span>
+    <span>Flowdow</span>
+  </a>
+
+  <nav class="fd-nav">
+    <div class="text-uppercase small fw-bold px-3 mb-2" style="font-size: 0.72rem; color: #64748b; letter-spacing: 0.05em;">
+      {% trans "Операции" %}
+    </div>
+    <a href="{% url 'core:dashboard' %}" class="fd-nav-item {% if active_nav == 'dashboard' %}active{% endif %}">
+      <i class="bi bi-grid-1x2"></i>
+      <span>{% trans "Панель управления" %}</span>
+    </a>
+    <a href="{% url 'documents:list' %}" class="fd-nav-item {% if active_nav == 'documents' %}active{% endif %}">
+      <i class="bi bi-file-earmark-text"></i>
+      <span>{% trans "Документы" %}</span>
+    </a>
+    <a href="{% url 'templates_manager:list' %}" class="fd-nav-item {% if active_nav == 'templates' %}active{% endif %}">
+      <i class="bi bi-file-earmark-word"></i>
+      <span>{% trans "Шаблоны" %}</span>
+    </a>
+    <a href="{% url 'data_sources:list' %}" class="fd-nav-item {% if active_nav == 'data_sources' %}active{% endif %}">
+      <i class="bi bi-table"></i>
+      <span>{% trans "Источники данных" %}</span>
+    </a>
+    <a href="{% url 'mapping:list' %}" class="fd-nav-item {% if active_nav == 'mapping' %}active{% endif %}">
+      <i class="bi bi-diagram-3"></i>
+      <span>{% trans "Сопоставление полей" %}</span>
+    </a>
+    <a href="{% url 'generation:history' %}" class="fd-nav-item {% if active_nav == 'generation' %}active{% endif %}">
+      <i class="bi bi-clock-history"></i>
+      <span>{% trans "История генераций" %}</span>
+    </a>
+
+    <div class="text-uppercase small fw-bold px-3 mt-4 mb-2" style="font-size: 0.72rem; color: #64748b; letter-spacing: 0.05em;">
+      {% trans "Конфигурация" %}
+    </div>
+    <a href="{% url 'organizations:settings' %}" class="fd-nav-item {% if active_nav == 'settings' %}active{% endif %}">
+      <i class="bi bi-gear"></i>
+      <span>{% trans "Настройки" %}</span>
+    </a>
+  </nav>
+
+  <div class="fd-sidebar-footer">
+    <div class="fd-user-pill">
+      <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
+        <i class="bi bi-person"></i>
+      </div>
+      <div class="flex-grow-1 overflow-hidden" style="line-height: 1.2;">
+        <div class="text-white text-truncate fw-medium small">{{ user.get_full_name|default:user.username }}</div>
+        <div class="text-muted text-truncate" style="font-size: 0.75rem;">{{ user.get_role_display|default:user.role }}</div>
+      </div>
+      <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-link text-secondary p-0" title="{% trans 'Выйти' %}">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+</aside>
