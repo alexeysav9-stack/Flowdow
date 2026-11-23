@@ -130,9 +130,15 @@ cp .env.example .env
 
 ### 4. Database Migrations & Initial Setup
 ```bash
+# With PostgreSQL (default):
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
+
+# Or standalone with SQLite (zero database setup required):
+DB_ENGINE=django.db.backends.sqlite3 python manage.py migrate
+DB_ENGINE=django.db.backends.sqlite3 python manage.py createsuperuser
+DB_ENGINE=django.db.backends.sqlite3 python manage.py runserver
 ```
 
 Open **http://127.0.0.1:8000** in your browser.
@@ -172,6 +178,7 @@ Flowdow/
 │   ├── generation/     # Single & batch document generation
 │   └── audit/          # System audit trails
 ├── examples/           # Ready-to-use sample templates & datasets
+├── locale/             # Gettext translation catalogs (RU / EN)
 ├── static/             # Static CSS and JavaScript assets
 ├── templates/          # Bootstrap 5 server-rendered HTML templates
 ├── tests/              # Pytest test suite (100+ tests)
