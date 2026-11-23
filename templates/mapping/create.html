@@ -103,29 +103,34 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for var in template_variables %}
+                  {% for item in variable_rows %}
                     <tr>
                       <td>
                         <span class="badge bg-light text-dark border p-2">
-                          <code>&#123;&#123; {{ var }} &#125;&#125;</code>
+                          <code>&#123;&#123; {{ item.name }} &#125;&#125;</code>
                         </span>
+                        {% if item.is_system %}
+                          <span class="badge bg-info-subtle text-info border border-info-subtle ms-1" title="{% trans 'Системная переменная — вычисляется автоматически' %}">
+                            <i class="bi bi-cpu me-1"></i>{% trans "Системная" %}
+                          </span>
+                        {% endif %}
                       </td>
                       <td>
-                        <select name="col_{{ var }}" class="form-select form-select-sm">
+                        <select name="col_{{ item.name }}" class="form-select form-select-sm">
                           <option value="">{% trans "— Не привязано (по умолчанию / системное) —" %}</option>
                           {% for col in data_columns %}
-                            <option value="{{ col }}" {% if col == var %}selected{% endif %}>
+                            <option value="{{ col }}" {% if col == item.source_column %}selected{% endif %}>
                               {{ col }}
                             </option>
                           {% endfor %}
                         </select>
                       </td>
                       <td>
-                        <input type="text" name="def_{{ var }}" class="form-control form-control-sm" placeholder="{% trans 'По умолчанию...' %}">
+                        <input type="text" name="def_{{ item.name }}" class="form-control form-control-sm" placeholder="{% trans 'По умолчанию...' %}" value="{{ item.default_value }}">
                       </td>
                       <td class="text-center">
                         <div class="form-check form-switch d-inline-block">
-                          <input class="form-check-input" type="checkbox" name="req_{{ var }}" id="req_{{ var }}" checked>
+                          <input class="form-check-input" type="checkbox" name="req_{{ item.name }}" id="req_{{ item.name }}" {% if item.required %}checked{% endif %}>
                         </div>
                       </td>
                     </tr>
@@ -195,12 +200,33 @@
 function reloadWithSelection() {
   const tmpl = document.getElementById("id_template").value;
   const ds = document.getElementById("id_data_source").value;
-  const name = document.getElementById("id_name").value;
+  const nameInput = document.getElementById("id_name");
+  const descInput = document.getElementById("id_description");
+  const name = nameInput ? nameInput.value : "";
+  const desc = descInput ? descInput.value : "";
+
   let url = "{% url 'mapping:create' %}?";
   if (tmpl) url += "template_id=" + encodeURIComponent(tmpl) + "&";
-  if (ds) url += "data_source_id=" + encodeURIComponent(ds);
+  if (ds) url += "data_source_id=" + encodeURIComponent(ds) + "&";
+  if (name) url += "name=" + encodeURIComponent(name) + "&";
+  if (desc) url += "description=" + encodeURIComponent(desc);
   window.location.href = url;
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+  const tmplSelect = document.getElementById("id_template");
+  const dsSelect = document.getElementById("id_data_source");
+  function checkAutoReload() {
+    if (tmplSelect && dsSelect && tmplSelect.value && dsSelect.value) {
+      const table = document.querySelector(".table-responsive");
+      if (!table) {
+        reloadWithSelection();
+      }
+    }
+  }
+  if (tmplSelect) tmplSelect.addEventListener("change", checkAutoReload);
+  if (dsSelect) dsSelect.addEventListener("change", checkAutoReload);
+});
 </script>
 {% endblock %}
 

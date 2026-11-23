@@ -104,6 +104,8 @@ class MappingValidationService:
             if target_col and target_col not in available_columns:
                 errors.append(f"Variable '{var}' maps to unknown column '{target_col}'.")
             elif not target_col and not default_val and is_required:
+                if var in system_vars:
+                    continue
                 errors.append(
                     f"Required variable '{var}' has neither a column mapping nor a default value."
                 )
@@ -180,6 +182,8 @@ class MappingValidationService:
                     % {"var": var, "col": src_col}
                 )
             elif not src_col and not def_val and is_req:
+                if var in system_vars:
+                    continue
                 errors.append(
                     _(
                         "Обязательная переменная «%(var)s» не имеет привязки к колонке или значения по умолчанию."

@@ -110,3 +110,26 @@ def test_viewer_cannot_create_or_delete_mapping(client, viewer_user, mapping_set
     res_delete = client.post(reverse("mapping:delete", kwargs={"pk": mapping.pk}))
     assert res_delete.status_code == 403
     assert MappingConfig.objects.filter(pk=mapping.pk).exists()
+
+
+@pytest.mark.django_db
+def test_mapping_create_view_auto_generates_name_when_empty(client, admin_user, mapping_setup):
+    """Verifies that submitting empty name auto-generates a name instead of failing."""
+    tmpl, ds, _ = mapping_setup
+    client.force_login(admin_user)
+    res = client.post(
+        reverse("mapping:create"),
+        {
+            "name": "",
+            "template": tmpl.id,
+            "data_source": ds.id,
+            "col_client_name": "Клиент",
+            "req_client_name": "on",
+            "col_amount": "Сумма",
+            "req_amount": "on",
+        },
+    )
+    assert res.status_code == 302
+    created = MappingConfig.objects.filter(data_source=ds, template=tmpl).order_by("-id").first()
+    assert created is not None
+    assert "Маппинг:" in created.name

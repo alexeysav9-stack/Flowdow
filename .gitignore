@@ -55,3 +55,8 @@ staticfiles/
 htmlcov/
 .ruff_cache/
 
+# Office temporary lock files
+.~lock.*#
+~$*
+
+

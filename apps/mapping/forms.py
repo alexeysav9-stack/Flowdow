@@ -11,6 +11,19 @@ from apps.templates_manager.models import Template, TemplateStatus
 class MappingConfigForm(forms.ModelForm):
     """Form for creating or editing the top-level MappingConfig entity."""
 
+    name = forms.CharField(
+        max_length=200,
+        required=False,
+        label=_("Название схемы маппинга"),
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": _("Например: Маппинг договора подряда 2026"),
+            }
+        ),
+        help_text=_("Если не заполнено, будет сформировано автоматически."),
+    )
+
     template = forms.ModelChoiceField(
         queryset=Template.objects.filter(status=TemplateStatus.ACTIVE).select_related(
             "document_type"
@@ -30,12 +43,6 @@ class MappingConfigForm(forms.ModelForm):
         model = MappingConfig
         fields = ["name", "template", "data_source", "description"]
         widgets = {
-            "name": forms.TextInput(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": _("Например: Маппинг договора подряда 2026"),
-                }
-            ),
             "description": forms.Textarea(
                 attrs={
                     "class": "form-control",
@@ -44,3 +51,22 @@ class MappingConfigForm(forms.ModelForm):
                 }
             ),
         }
+
+    def clean(self) -> dict:
+        cleaned_data = super().clean()
+        name = (cleaned_data.get("name") or "").strip()
+        template = cleaned_data.get("template")
+        data_source = cleaned_data.get("data_source")
+
+        if not name:
+            if template and data_source:
+                doc_type_name = getattr(
+                    getattr(template, "document_type", None), "name", template.name
+                )
+                cleaned_data["name"] = f"Маппинг: {doc_type_name} — {data_source.name}"
+            else:
+                self.add_error("name", _("Укажите наименование схемы сопоставления."))
+        else:
+            cleaned_data["name"] = name
+
+        return cleaned_data

@@ -48,6 +48,8 @@ class MappingCreateView(LoginRequiredMixin, MappingPermissionMixin, View):
     def get(self, request: HttpRequest) -> HttpResponse:
         template_id = request.GET.get("template_id")
         data_source_id = request.GET.get("data_source_id")
+        name = request.GET.get("name", "").strip()
+        description = request.GET.get("description", "").strip()
 
         selected_template = None
         selected_data_source = None
@@ -62,8 +64,16 @@ class MappingCreateView(LoginRequiredMixin, MappingPermissionMixin, View):
                 pk=int(data_source_id), status=DataSourceStatus.READY
             ).first()
 
+        if not name and selected_template and selected_data_source:
+            doc_type_name = getattr(
+                getattr(selected_template, "document_type", None), "name", selected_template.name
+            )
+            name = f"Маппинг: {doc_type_name} — {selected_data_source.name}"
+
         form = MappingConfigForm(
             initial={
+                "name": name,
+                "description": description,
                 "template": selected_template,
                 "data_source": selected_data_source,
             }
@@ -72,6 +82,19 @@ class MappingCreateView(LoginRequiredMixin, MappingPermissionMixin, View):
         template_variables = selected_template.detected_variables if selected_template else []
         data_columns = selected_data_source.headers if selected_data_source else []
         system_vars = get_system_variables()
+
+        variable_rows = []
+        for var in template_variables:
+            is_sys = var in system_vars
+            variable_rows.append(
+                {
+                    "name": var,
+                    "is_system": is_sys,
+                    "source_column": var if var in data_columns else "",
+                    "default_value": "",
+                    "required": not is_sys,
+                }
+            )
 
         return render(
             request,
@@ -83,6 +106,7 @@ class MappingCreateView(LoginRequiredMixin, MappingPermissionMixin, View):
                 "selected_template": selected_template,
                 "selected_data_source": selected_data_source,
                 "template_variables": template_variables,
+                "variable_rows": variable_rows,
                 "data_columns": data_columns,
                 "system_vars": system_vars,
             },
@@ -91,6 +115,41 @@ class MappingCreateView(LoginRequiredMixin, MappingPermissionMixin, View):
     def post(self, request: HttpRequest) -> HttpResponse:
         form = MappingConfigForm(request.POST)
         if not form.is_valid():
+            template_id = request.POST.get("template")
+            data_source_id = request.POST.get("data_source")
+
+            selected_template = None
+            selected_data_source = None
+
+            if template_id and str(template_id).isdigit():
+                selected_template = Template.objects.filter(
+                    pk=int(template_id), status=TemplateStatus.ACTIVE
+                ).first()
+
+            if data_source_id and str(data_source_id).isdigit():
+                selected_data_source = DataSource.objects.filter(
+                    pk=int(data_source_id), status=DataSourceStatus.READY
+                ).first()
+
+            template_variables = selected_template.detected_variables if selected_template else []
+            data_columns = selected_data_source.headers if selected_data_source else []
+            system_vars = get_system_variables()
+
+            variable_rows = []
+            for var in template_variables:
+                col = request.POST.get(f"col_{var}", "").strip()
+                def_val = request.POST.get(f"def_{var}", "").strip()
+                is_req = request.POST.get(f"req_{var}") == "on"
+                variable_rows.append(
+                    {
+                        "name": var,
+                        "is_system": var in system_vars,
+                        "source_column": col,
+                        "default_value": def_val,
+                        "required": is_req,
+                    }
+                )
+
             return render(
                 request,
                 "mapping/create.html",
@@ -98,6 +157,12 @@ class MappingCreateView(LoginRequiredMixin, MappingPermissionMixin, View):
                     "title": _("Новая схема маппинга"),
                     "active_nav": "mapping",
                     "form": form,
+                    "selected_template": selected_template,
+                    "selected_data_source": selected_data_source,
+                    "template_variables": template_variables,
+                    "variable_rows": variable_rows,
+                    "data_columns": data_columns,
+                    "system_vars": system_vars,
                 },
             )
 

@@ -216,3 +216,28 @@ def test_system_variables_provider():
     assert "current_datetime" in sys_vars
     assert "current_year" in sys_vars
     assert sys_vars["system_platform"] == "Flowdow"
+
+
+@pytest.mark.django_db
+def test_system_variable_satisfies_required_rule(active_template, ready_data_source, admin_user):
+    """Verifies that a system variable like current_date is valid even if required=True and unmapped."""
+    rules_data = [
+        {"template_variable": "full_name", "source_column": "ФИО", "required": True},
+        {"template_variable": "group", "source_column": "Группа", "required": True},
+        {
+            "template_variable": "current_date",
+            "source_column": "",
+            "default_value": "",
+            "required": True,
+        },
+    ]
+    mapping = MappingService.create_or_update_mapping_config(
+        name="Авто-маппинг с датой",
+        template=active_template,
+        data_source=ready_data_source,
+        rules_data=rules_data,
+        user=admin_user,
+    )
+    is_valid, errors = MappingValidationService.validate_mapping_config(mapping)
+    assert is_valid is True
+    assert errors == []
