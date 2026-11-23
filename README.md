@@ -25,9 +25,9 @@ Pre-built sample files are provided in [`examples/`](examples/):
    docker compose exec web python manage.py createsuperuser
    ```
 2. Open **http://localhost:8000** and log in.
-3. **Upload Template:** Create document type `Employment Certificate` and upload [`examples/sample_certificate.docx`](examples/sample_certificate.docx). Flowdow automatically detects `full_name`, `position`, `department`, `salary`, and `current_date`.
-4. **Import Data:** Upload [`examples/sample_employees.csv`](examples/sample_employees.csv) or [`examples/sample_employees.xlsx`](examples/sample_employees.xlsx).
-5. **Create Mapping:** Map variables to table columns (`full_name` ➔ `ФИО`, etc.).
+3. **Upload Template:** Create document type `Employment Certificate` and upload [`examples/sample_certificate_eng.docx`](examples/sample_certificate_eng.docx) (or Russian [`examples/sample_certificate_ru.docx`](examples/sample_certificate_ru.docx)). Flowdow automatically detects `full_name`, `position`, `department`, `salary`, and `current_date`.
+4. **Import Data:** Upload English dataset [`examples/sample_employees_eng.csv`](examples/sample_employees_eng.csv) / `.xlsx` (or Russian [`examples/sample_employees_ru.csv`](examples/sample_employees_ru.csv) / `.xlsx`).
+5. **Create Mapping:** Map variables to table columns (`full_name` ➔ `Full Name` or `ФИО`, etc.).
 6. **Generate:** Generate certificates for all rows and download a single ZIP package containing personalized `.docx` files!
 
 See [`examples/README.md`](examples/README.md) for detailed step-by-step screenshots and guidelines.

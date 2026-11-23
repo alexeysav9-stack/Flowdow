@@ -6,20 +6,24 @@ This directory provides pre-configured sample files allowing you to test Flowdow
 
 ## 📁 Included Files
 
-1. **`sample_certificate.docx`**
-   - A standard Certificate of Employment template containing template placeholders:
-     - `{{ full_name }}`
-     - `{{ position }}`
-     - `{{ department }}`
-     - `{{ salary }}`
-     - `{{ current_date }}` (system variable)
+### 🇬🇧 English Samples (ENG)
+1. **`sample_certificate_eng.docx`** (also mirrored as `sample_certificate_en.docx`):
+   - Certificate of Employment template labeled **CERTIFICATE OF EMPLOYMENT (ENG)**.
+   - Placeholders: `{{ full_name }}`, `{{ position }}`, `{{ department }}`, `{{ salary }}`, `{{ current_date }}`.
+2. **`sample_employees_eng.csv`** (and `sample_employees_en.csv`):
+   - English employee dataset with columns: `Full Name`, `Position`, `Department`, `Salary`.
+3. **`sample_employees_eng.xlsx`** (and `sample_employees_en.xlsx`):
+   - Excel workbook with sheet `Employees (ENG)` matching the English dataset.
 
-2. **`sample_employees.csv`**
-   - A UTF-8 (with BOM) comma-separated spreadsheet containing 5 employee records:
-     - Columns: `ФИО`, `Должность`, `Отдел`, `Оклад`
+### 🇷🇺 Russian Samples (RU)
+1. **`sample_certificate_ru.docx`** (and default `sample_certificate.docx`):
+   - Template labeled **СПРАВКА С МЕСТА РАБОТЫ (RU)**.
+   - Placeholders: `{{ full_name }}`, `{{ position }}`, `{{ department }}`, `{{ salary }}`, `{{ current_date }}`.
+2. **`sample_employees_ru.csv`** (and default `sample_employees.csv`):
+   - Russian dataset with columns: `ФИО`, `Должность`, `Отдел`, `Оклад`.
+3. **`sample_employees_ru.xlsx`** (and default `sample_employees.xlsx`):
+   - Excel workbook with sheet `Сотрудники (RU)` matching the Russian dataset.
 
-3. **`sample_employees.xlsx`**
-   - Microsoft Excel workbook matching the employee records from the CSV file.
 
 ---
 
