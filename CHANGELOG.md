@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Added
 - **Core Architecture & Foundation:**
+  - Full support for Cyrillic / Russian variable names (e.g. `{{ фио }}`, `{{ должность }}`, `{{ сумма_договора }}`) in DOCX template inspection and generation.
   - Modular monolith architecture organized under `apps/` (`core`, `accounts`, `organizations`, `documents`, `templates_manager`, `data_sources`, `mapping`, `generation`, `audit`).
   - Custom User model (`accounts.User`) with role-based access control (`admin`, `editor`, `viewer`).
   - Strict Service Layer separation (business operations isolated from HTTP views).

@@ -75,3 +75,23 @@ def test_text_regex_inspection_fallback():
     text = "Agreement with {{ company }} on {{ signing_date | format_date }}."
     vars_found = TemplateInspectionService.extract_variables_from_text(text)
     assert vars_found == ["company", "signing_date"]
+
+
+def test_inspect_docx_with_cyrillic_variables():
+    """Verifies that Cyrillic template variables (e.g. {{ фио }}, {{ должность }}) are detected."""
+    docx_bytes = make_docx_bytes(
+        [
+            "Договор с сотрудником: {{ фио }}.",
+            "Должность: {{ должность }}, оклад: {{ оклад_руб }}.",
+        ]
+    )
+    buf = io.BytesIO(docx_bytes)
+    variables = TemplateInspectionService.inspect_file(buf, filename="cyrillic.docx")
+    assert variables == ["должность", "оклад_руб", "фио"]
+
+
+def test_text_regex_inspection_cyrillic():
+    """Verifies fallback regex extractor with Cyrillic variables."""
+    text = "Справка выдана {{ фио }} на должность {{ должность }}."
+    vars_found = TemplateInspectionService.extract_variables_from_text(text)
+    assert vars_found == ["должность", "фио"]

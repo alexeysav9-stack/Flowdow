@@ -17,9 +17,9 @@ from apps.audit.services import AuditService
 from apps.documents.models import DocumentType
 from apps.templates_manager.models import Template, TemplateStatus
 
-# Variable regex for basic placeholder matching: letters, numbers, underscore
-VALID_IDENTIFIER_REGEX = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
-PLACEHOLDER_REGEX = re.compile(r"\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)(?:\s*\|[^\}]+)?\s*\}\}")
+# Variable regex for basic placeholder matching: letters (including Cyrillic/Unicode), numbers, underscore
+VALID_IDENTIFIER_REGEX = re.compile(r"^[^\W\d]\w*$")
+PLACEHOLDER_REGEX = re.compile(r"\{\{\s*([^\W\d]\w*)(?:\s*\|[^\}]+)?\s*\}\}")
 
 # Default max file size: 10 MB
 MAX_TEMPLATE_FILE_SIZE = getattr(settings, "FLOWDOW_MAX_TEMPLATE_FILE_SIZE", 10 * 1024 * 1024)
@@ -206,7 +206,7 @@ class TemplateInspectionService:
             if (
                 var_str
                 and not var_str.startswith("__")
-                and VALID_IDENTIFIER_REGEX.match(var_str)
+                and (var_str.isidentifier() or bool(VALID_IDENTIFIER_REGEX.match(var_str)))
                 and not hasattr(__builtins__, var_str)
             ):
                 valid_variables.add(var_str)
