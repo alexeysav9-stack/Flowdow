@@ -53,3 +53,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - GitHub Actions CI pipeline testing code quality (`ruff check`, `ruff format`) and test suite (`pytest`) on Python 3.12.
   - Ready-to-use sample files and 60-second walkthrough in `examples/`.
 
+#### Fixed
+- **Variable Mapping & Pre-Flight Validation:**
+  - Auto-generation of descriptive configuration name (`Маппинг: <Шаблон> — <Источник данных>`) when the name field is left blank.
+  - Pre-flight validation recognizes built-in system variables (`current_date`, `current_datetime`, `current_year`, etc.) as automatically satisfied without requiring manual column binding or fallback values.
+  - Preservation of user-selected column mappings, fallback defaults, and required field toggles in the matrix table upon form validation errors.
+  - Automatic dynamic loading of template variables in the mapping UI as soon as both template and data source are selected.
+  - Retention of configuration name and description across dynamic variable reloads.
+- **Internationalization (i18n):**
+  - Full English translation coverage across all views, templates, and authentication forms, eliminating untranslated strings and cleaning fuzzy catalog entries.
+
+
