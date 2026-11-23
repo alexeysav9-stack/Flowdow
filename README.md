@@ -16,9 +16,11 @@ Designed for HR, legal, sales, finance, and operations teams, Flowdow empowers n
 
 Pre-built sample files are provided in [`examples/`](examples/):
 
+> **Prerequisite:** Make sure **Docker Desktop** (Windows / macOS) or Docker Engine (Linux) is running before starting containers.
+
 1. **Start the application** with Docker Compose:
    ```bash
-   cp .env.example .env
+   cp .env.example .env               # or: copy .env.example .env (Windows CMD)
    docker compose up -d --build
    docker compose exec web python manage.py createsuperuser
    ```
@@ -84,7 +86,17 @@ Flowdow processes Word `.docx` documents using `docxtpl`. Simple Jinja2 placehol
 
 ## Quickstart with Docker Compose
 
-The recommended way to deploy Flowdow in production or local evaluation:
+The recommended way to deploy Flowdow in production or local evaluation.
+
+### Prerequisites
+
+- **Windows / macOS:** Install and open **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**. Ensure the Docker engine is running (look for the green *Engine running* indicator in Docker Desktop). On Windows 10/11, the **WSL 2 backend** is strongly recommended.
+- **Linux:** Install Docker Engine and the Compose plugin (`docker compose version`):
+  ```bash
+  sudo apt install docker.io docker-compose-v2   # Debian / Ubuntu
+  ```
+
+### Steps
 
 ```bash
 # 1. Clone the repository
@@ -92,7 +104,8 @@ git clone https://github.com/flowdow/flowdow.git
 cd flowdow
 
 # 2. Copy the environment configuration
-cp .env.example .env
+cp .env.example .env               # Linux / macOS / Windows PowerShell
+# or: copy .env.example .env       # Windows Command Prompt (CMD)
 
 # 3. Start the application and database
 docker compose up -d --build

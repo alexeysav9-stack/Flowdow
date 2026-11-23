@@ -25,7 +25,7 @@ This directory provides pre-configured sample files allowing you to test Flowdow
 
 ## ⚡ 60-Second Walkthrough Guide
 
-Follow these simple steps in the web interface (at `http://localhost:8000`):
+Ensure Flowdow is running (e.g. via `docker compose up -d` with Docker Desktop running), then open **http://localhost:8000**:
 
 1. **Log in:**
    - Sign in using your administrator or editor account.
