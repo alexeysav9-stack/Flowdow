@@ -63,7 +63,13 @@ class MappingConfigForm(forms.ModelForm):
                 doc_type_name = getattr(
                     getattr(template, "document_type", None), "name", template.name
                 )
-                cleaned_data["name"] = f"Маппинг: {doc_type_name} — {data_source.name}"
+                cleaned_data["name"] = str(
+                    _("Маппинг: %(doc_type)s — %(data_source)s")
+                    % {
+                        "doc_type": doc_type_name,
+                        "data_source": data_source.name,
+                    }
+                )
             else:
                 self.add_error("name", _("Укажите наименование схемы сопоставления."))
         else:

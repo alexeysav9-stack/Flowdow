@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flowdow 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 22:25+0300\n"
+"POT-Creation-Date: 2026-11-24 21:05+0300\n"
 "PO-Revision-Date: 2026-11-22 19:24+0300\n"
 "Last-Translator: Flowdow Team\n"
 "Language-Team: English\n"
@@ -169,7 +169,7 @@ msgid "Кем загружен"
 msgstr "Uploaded By"
 
 #: apps/data_sources/models.py:107 apps/data_sources/models.py:140
-#: apps/generation/models.py:60 apps/mapping/forms.py:24
+#: apps/generation/models.py:60 apps/mapping/forms.py:37
 #: apps/mapping/models.py:32 templates/generation/list.html:37
 #: templates/mapping/list.html:37
 msgid "Источник данных"
@@ -361,7 +361,9 @@ msgstr "Upload Data Source"
 msgid ""
 "Источник данных «%(name)s» успешно импортирован. Загружено строк: %(rows)d, "
 "колонок: %(cols)d."
-msgstr "Data source '%(name)s' successfully imported. Rows loaded: %(rows)d, columns: %(cols)d."
+msgstr ""
+"Data source '%(name)s' successfully imported. Rows loaded: %(rows)d, "
+"columns: %(cols)d."
 
 #: apps/data_sources/views.py:99
 #, python-format
@@ -371,7 +373,8 @@ msgstr "File processing error: %(err)s"
 #: apps/data_sources/views.py:146
 #, python-format
 msgid "Источник данных «%(name)s» и все связанные записи успешно удалены."
-msgstr "Data source '%(name)s' and all associated records successfully deleted."
+msgstr ""
+"Data source '%(name)s' and all associated records successfully deleted."
 
 #: apps/data_sources/views.py:158
 msgid "Файл источника данных не найден на сервере."
@@ -389,7 +392,9 @@ msgstr "Brief purpose and scope of the document..."
 msgid ""
 "У вашей роли недостаточно прав для создания или изменения шаблонов и типов "
 "документов."
-msgstr "Your role does not have permission to create or modify templates and document types."
+msgstr ""
+"Your role does not have permission to create or modify templates and "
+"document types."
 
 #: apps/documents/views.py:25 templates/core/dashboard.html:51
 #: templates/documents/create.html:9 templates/documents/detail.html:9
@@ -512,7 +517,8 @@ msgstr "Template file is missing on the server."
 #: apps/generation/services.py:203
 #, python-format
 msgid "Шаблон «%(name)s» v%(ver)d не активен. Генерация невозможна."
-msgstr "Template '%(name)s' v%(ver)d is not active. Generation is not possible."
+msgstr ""
+"Template '%(name)s' v%(ver)d is not active. Generation is not possible."
 
 #: apps/generation/services.py:213
 msgid "Не выбрано ни одной записи для формирования документов."
@@ -545,7 +551,9 @@ msgstr "No data rows selected for generation."
 msgid ""
 "Пакетная генерация #%(batch_id)d завершена. Сформировано: %(success)d из "
 "%(total)d документов."
-msgstr "Batch generation #%(batch_id)d completed. Generated: %(success)d of %(total)d documents."
+msgstr ""
+"Batch generation #%(batch_id)d completed. Generated: %(success)d of "
+"%(total)d documents."
 
 #: apps/generation/views.py:138
 #, python-format
@@ -565,29 +573,42 @@ msgstr "Document archive is not generated or missing from server."
 msgid "Файл документа не найден на сервере."
 msgstr "Document file was not found on the server."
 
-#: apps/mapping/forms.py:18 templates/documents/list.html:27
-msgid "Активный шаблон"
-msgstr "Active Template"
+#: apps/mapping/forms.py:17 apps/mapping/models.py:19
+msgid "Название схемы маппинга"
+msgstr "Mapping Schema Name"
 
-#: apps/mapping/forms.py:20
-msgid "Отображаются только активные версии шаблонов."
-msgstr "Only active template versions are displayed."
-
-#: apps/mapping/forms.py:26
-msgid "Отображаются только готовые наборы данных (CSV / XLSX)."
-msgstr "Only ready datasets (CSV / XLSX) are displayed."
-
-#: apps/mapping/forms.py:36
+#: apps/mapping/forms.py:21
 msgid "Например: Маппинг договора подряда 2026"
 msgstr "e.g. Service Contract 2026 Mapping"
 
-#: apps/mapping/forms.py:43
+#: apps/mapping/forms.py:24
+msgid "Если не заполнено, будет сформировано автоматически."
+msgstr "If left blank, it will be generated automatically."
+
+#: apps/mapping/forms.py:31 templates/documents/list.html:27
+msgid "Активный шаблон"
+msgstr "Active Template"
+
+#: apps/mapping/forms.py:33
+msgid "Отображаются только активные версии шаблонов."
+msgstr "Only active template versions are displayed."
+
+#: apps/mapping/forms.py:39
+msgid "Отображаются только готовые наборы данных (CSV / XLSX)."
+msgstr "Only ready datasets (CSV / XLSX) are displayed."
+
+#: apps/mapping/forms.py:50
 msgid "Необязательное описание схемы сопоставления..."
 msgstr "Optional mapping schema description..."
 
-#: apps/mapping/models.py:19
-msgid "Название схемы маппинга"
-msgstr "Mapping Schema Name"
+#: apps/mapping/forms.py:67 apps/mapping/views.py:72
+#, python-format
+msgid "Маппинг: %(doc_type)s — %(data_source)s"
+msgstr "Mapping: %(doc_type)s — %(data_source)s"
+
+#: apps/mapping/forms.py:74
+msgid "Укажите наименование схемы сопоставления."
+msgstr "Please enter a mapping schema name."
 
 #: apps/mapping/models.py:20
 msgid "Понятное наименование конфигурации (например, Ведомость 2026)."
@@ -651,63 +672,66 @@ msgstr "Mapping Rules"
 #: apps/mapping/services.py:47
 msgid ""
 "У вашей роли недостаточно прав для создания или изменения схем сопоставления."
-msgstr "Your role does not have permission to create or modify mapping schemas."
+msgstr ""
+"Your role does not have permission to create or modify mapping schemas."
 
-#: apps/mapping/services.py:125
+#: apps/mapping/services.py:127
 msgid "В конфигурации маппинга отсутствует ссылка на шаблон."
 msgstr "Mapping configuration is missing a template reference."
 
-#: apps/mapping/services.py:130
+#: apps/mapping/services.py:132
 #, python-format
 msgid "Шаблон «%(name)s» v%(ver)d не активен (текущий статус: %(status)s)."
 msgstr "Template '%(name)s' v%(ver)d is not active (status: %(status)s)."
 
-#: apps/mapping/services.py:139
+#: apps/mapping/services.py:141
 msgid "Файл шаблона отсутствует."
 msgstr "Template file is missing."
 
-#: apps/mapping/services.py:143
+#: apps/mapping/services.py:145
 msgid "В конфигурации маппинга отсутствует источник данных."
 msgstr "Mapping configuration is missing a data source."
 
-#: apps/mapping/services.py:149
+#: apps/mapping/services.py:151
 #, python-format
 msgid ""
 "Источник данных «%(name)s» не готов к использованию (текущий статус: "
 "%(status)s)."
 msgstr "Data source '%(name)s' is not ready (status: %(status)s)."
 
-#: apps/mapping/services.py:166
+#: apps/mapping/services.py:168
 #, python-format
 msgid "Переменная шаблона «%(var)s» не имеет настроенного правила маппинга."
 msgstr "Template variable '%(var)s' does not have a configured mapping rule."
 
-#: apps/mapping/services.py:178
+#: apps/mapping/services.py:180
 #, python-format
 msgid ""
 "Переменная «%(var)s» сопоставлена с отсутствующей в источнике колонкой "
 "«%(col)s»."
 msgstr "Variable '%(var)s' is mapped to missing column '%(col)s'."
 
-#: apps/mapping/services.py:185
+#: apps/mapping/services.py:189
 #, python-format
 msgid ""
 "Обязательная переменная «%(var)s» не имеет привязки к колонке или значения "
 "по умолчанию."
-msgstr "Required variable '%(var)s' is not mapped to any column and has no default value."
+msgstr ""
+"Required variable '%(var)s' is not mapped to any column and has no default "
+"value."
 
-#: apps/mapping/services.py:215
+#: apps/mapping/services.py:219
 #, python-format
 msgid "Строка %(row)d: отсутствует правило для переменной «%(var)s»."
 msgstr "Row %(row)d: missing rule for variable '%(var)s'."
 
-#: apps/mapping/services.py:238
+#: apps/mapping/services.py:242
 #, python-format
 msgid ""
 "Строка %(row)d: обязательное поле «%(var)s» (колонка «%(col)s») не заполнено."
 msgstr "Row %(row)d: required field '%(var)s' (column '%(col)s') is empty."
 
-#: apps/mapping/services.py:240
+#: apps/mapping/services.py:244
 msgid "по умолчанию"
 msgstr "default"
 
@@ -715,16 +739,16 @@ msgstr "default"
 msgid "Схемы сопоставления полей"
 msgstr "Field Mapping Schemas"
 
-#: apps/mapping/views.py:80 apps/mapping/views.py:98
+#: apps/mapping/views.py:109 apps/mapping/views.py:163
 msgid "Новая схема маппинга"
 msgstr "New Mapping Schema"
 
-#: apps/mapping/views.py:136
+#: apps/mapping/views.py:207
 #, python-format
 msgid "Конфигурация маппинга «%(name)s» успешно сохранена."
 msgstr "Mapping configuration '%(name)s' successfully saved."
 
-#: apps/mapping/views.py:180
+#: apps/mapping/views.py:251
 #, python-format
 msgid "Схема маппинга «%(name)s» успешно удалена."
 msgstr "Mapping schema '%(name)s' successfully deleted."
@@ -860,14 +884,17 @@ msgstr "Syntax error in DOCX Jinja2 template markup: %(err)s"
 msgid ""
 "Шаблон «%(name)s» v%(ver)d успешно загружен. Обнаружено переменных: "
 "%(count)d (%(sample)s)."
-msgstr "Template '%(name)s' v%(ver)d successfully uploaded. Detected %(count)d variables (%(sample)s)."
+msgstr ""
+"Template '%(name)s' v%(ver)d successfully uploaded. Detected %(count)d "
+"variables (%(sample)s)."
 
 #: apps/templates_manager/views.py:99
 #, python-format
 msgid ""
 "Шаблон «%(name)s» v%(ver)d успешно загружен. В документе не обнаружено "
 "переменных."
-msgstr "Template '%(name)s' v%(ver)d successfully uploaded. No variables detected."
+msgstr ""
+"Template '%(name)s' v%(ver)d successfully uploaded. No variables detected."
 
 #: apps/templates_manager/views.py:109
 #, python-format
@@ -1170,7 +1197,7 @@ msgstr "records and the spreadsheet file will be deleted."
 #: templates/data_sources/detail.html:240 templates/data_sources/list.html:124
 #: templates/data_sources/upload.html:90 templates/documents/create.html:48
 #: templates/documents/detail.html:274 templates/generation/wizard.html:144
-#: templates/mapping/create.html:154 templates/mapping/detail.html:202
+#: templates/mapping/create.html:159 templates/mapping/detail.html:202
 #: templates/mapping/list.html:102
 msgid "Отмена"
 msgstr "Cancel"
@@ -1237,7 +1264,8 @@ msgstr "All associated records ("
 
 #: templates/data_sources/list.html:121
 msgid " записей) и исходный файл на сервере будут безвозвратно удалены."
-msgstr " records) and the source file on the server will be permanently deleted."
+msgstr ""
+" records) and the source file on the server will be permanently deleted."
 
 #: templates/data_sources/list.html:142
 msgid "Источники данных пока не загружены."
@@ -1271,11 +1299,14 @@ msgstr "File Formats"
 msgid ""
 "UTF-8 или UTF-8 с BOM. Разделители определяются автоматически (запятая, "
 "точка с запятой, табуляция, пайп)."
-msgstr "UTF-8 or UTF-8 with BOM. Delimiters are auto-detected (comma, semicolon, tab, pipe)."
+msgstr ""
+"UTF-8 or UTF-8 with BOM. Delimiters are auto-detected (comma, semicolon, "
+"tab, pipe)."
 
 #: templates/data_sources/upload.html:108
 msgid "Таблицы Excel (SpreadsheetML). Возможность указать конкретный лист."
-msgstr "Excel workbooks (SpreadsheetML). Ability to specify a specific worksheet."
+msgstr ""
+"Excel workbooks (SpreadsheetML). Ability to specify a specific worksheet."
 
 #: templates/data_sources/upload.html:111
 msgid "Структура заголовков"
@@ -1292,7 +1323,9 @@ msgstr "All column names must be non-empty and unique."
 #: templates/data_sources/upload.html:115
 msgid ""
 "Пустые строки в начале, середине и конце файла пропускаются автоматически."
-msgstr "Blank lines at the beginning, middle, and end of the file are skipped automatically."
+msgstr ""
+"Blank lines at the beginning, middle, and end of the file are skipped "
+"automatically."
 
 #: templates/data_sources/upload.html:118
 msgid "Системные лимиты"
@@ -1322,7 +1355,9 @@ msgstr "Document Type Name"
 msgid ""
 "Например: Трудовой договор, Договор подряда, Акт выполненных работ, Справка "
 "с места работы."
-msgstr "e.g. Employment Contract, Service Agreement, Acceptance Act, Proof of Employment."
+msgstr ""
+"e.g. Employment Contract, Service Agreement, Acceptance Act, Proof of "
+"Employment."
 
 #: templates/documents/create.html:38
 msgid "Описание и назначение"
@@ -1416,7 +1451,9 @@ msgstr "DOCX File"
 msgid ""
 "Поддерживаются переменные вида {{ full_name }}, {{ group }}, "
 "{{ specialty }}, {{ issue_date }}. Максимальный размер: 10 МБ."
-msgstr "Supported placeholders: {{ full_name }}, {{ group }}, {{ specialty }}, {{ issue_date }}. Maximum size: 10 MB."
+msgstr ""
+"Supported placeholders: {{ full_name }}, {{ group }}, {{ specialty }}, "
+"{{ issue_date }}. Maximum size: 10 MB."
 
 #: templates/documents/detail.html:251
 msgid "Название шаблона (необязательно)"
@@ -1430,7 +1467,9 @@ msgstr "Initial Status"
 msgid ""
 "При выборе «Активен» предыдущие активные шаблоны этого типа будут перемещены "
 "в архив."
-msgstr "When selecting 'Active', previous active templates of this type will be archived."
+msgstr ""
+"When selecting 'Active', previous active templates of this type will be "
+"archived."
 
 #: templates/documents/detail.html:268
 msgid "Описание изменений в этой версии"
@@ -1576,7 +1615,9 @@ msgstr "Batch Document Generation Wizard"
 msgid ""
 "Выберите схему сопоставления, укажите строки таблицы и сформируйте пакет "
 "DOCX-файлов."
-msgstr "Select a mapping schema, specify table rows, and generate a batch of DOCX files."
+msgstr ""
+"Select a mapping schema, specify table rows, and generate a batch of DOCX "
+"files."
 
 #: templates/generation/wizard.html:26
 msgid "Шаг 1: Выбор схемы сопоставления (Mapping)"
@@ -1658,7 +1699,9 @@ msgstr "Variable Mapping Rules"
 msgid ""
 "Для каждой переменной выберите колонку источника данных или задайте "
 "фиксированное значение по умолчанию."
-msgstr "For each variable, select a data source column or specify a fixed default value."
+msgstr ""
+"For each variable, select a data source column or specify a fixed default "
+"value."
 
 #: templates/mapping/create.html:100
 msgid "Колонка источника данных"
@@ -1668,67 +1711,83 @@ msgstr "Data Source Column"
 msgid "Обязательное"
 msgstr "Required"
 
-#: templates/mapping/create.html:115
+#: templates/mapping/create.html:113
+msgid "Системная переменная — вычисляется автоматически"
+msgstr "System variable — computed automatically"
+
+#: templates/mapping/create.html:114
+msgid "Системная"
+msgstr "System"
+
+#: templates/mapping/create.html:120
 msgid "— Не привязано (по умолчанию / системное) —"
 msgstr "— Not mapped (default / system) —"
 
-#: templates/mapping/create.html:124
+#: templates/mapping/create.html:129
 msgid "По умолчанию..."
 msgstr "Default..."
 
-#: templates/mapping/create.html:139
+#: templates/mapping/create.html:144
 msgid ""
 "Выберите шаблон и источник данных выше, затем нажмите кнопку «Обновить "
 "переменные» для настройки полей."
-msgstr "Select a template and data source above, then click 'Reload Variables' to configure fields."
+msgstr ""
+"Select a template and data source above, then click 'Reload Variables' to "
+"configure fields."
 
-#: templates/mapping/create.html:148
+#: templates/mapping/create.html:153
 msgid "Сохранить схему сопоставления"
 msgstr "Save Mapping Schema"
 
-#: templates/mapping/create.html:151
+#: templates/mapping/create.html:156
 msgid "Обновить переменные"
 msgstr "Reload Variables"
 
-#: templates/mapping/create.html:164
+#: templates/mapping/create.html:169
 msgid "Системные переменные"
 msgstr "System Variables"
 
-#: templates/mapping/create.html:167
+#: templates/mapping/create.html:172
 msgid ""
 "Если в шаблоне присутствуют эти переменные, система вычисляет их "
 "автоматически при генерации:"
-msgstr "If present in the template, these variables are computed automatically during generation:"
+msgstr ""
+"If present in the template, these variables are computed automatically "
+"during generation:"
 
-#: templates/mapping/create.html:169
+#: templates/mapping/create.html:174
 msgid "Текущая дата (ДД.ММ.ГГГГ)"
 msgstr "Current date (DD.MM.YYYY)"
 
-#: templates/mapping/create.html:170
+#: templates/mapping/create.html:175
 msgid "Дата и время"
 msgstr "Timestamp"
 
-#: templates/mapping/create.html:171
+#: templates/mapping/create.html:176
 msgid "Текущий год"
 msgstr "Current year"
 
-#: templates/mapping/create.html:180
+#: templates/mapping/create.html:185
 msgid "Правила валидации"
 msgstr "Validation Rules"
 
-#: templates/mapping/create.html:184
+#: templates/mapping/create.html:189
 msgid ""
 "Обязательные поля должны иметь либо привязанную колонку с непустыми "
 "значениями, либо значение по умолчанию."
-msgstr "Required fields must have either a mapped column with non-empty values or a default value."
+msgstr ""
+"Required fields must have either a mapped column with non-empty values or a "
+"default value."
 
-#: templates/mapping/create.html:185
+#: templates/mapping/create.html:190
 msgid ""
 "Если колонка пуста в строке данных, автоматически подставляется значение по "
 "умолчанию."
-msgstr "If a column is empty in a data row, the default value is automatically substituted."
+msgstr ""
+"If a column is empty in a data row, the default value is automatically "
+"substituted."
 
-#: templates/mapping/create.html:186
+#: templates/mapping/create.html:191
 msgid "Не разрешается привязывать переменные к несуществующим колонкам."
 msgstr "Variables cannot be mapped to non-existent columns."
 
@@ -1748,7 +1807,9 @@ msgstr "Schema is ready for generation."
 msgid ""
 "Все переменные шаблона корректно сопоставлены с колонками или обеспечены "
 "значениями по умолчанию."
-msgstr "All template variables are correctly mapped to columns or provided with default values."
+msgstr ""
+"All template variables are correctly mapped to columns or provided with "
+"default values."
 
 #: templates/mapping/detail.html:52
 msgid "Обнаружены замечания в конфигурации маппинга"
@@ -1914,13 +1975,16 @@ msgstr "Single-Tenant Mode"
 
 #: templates/organizations/settings.html:85
 msgid "Данная установка Flowdow работает в режиме изолированной организации."
-msgstr "This Flowdow deployment operates in dedicated single-organization mode."
+msgstr ""
+"This Flowdow deployment operates in dedicated single-organization mode."
 
 #: templates/organizations/settings.html:86
 msgid ""
 "Все шаблоны документов, наборы данных и сгенерированные файлы принадлежат "
 "исключительно вашей компании."
-msgstr "All templates, datasets, and generated documents belong exclusively to your company."
+msgstr ""
+"All templates, datasets, and generated documents belong exclusively to your "
+"company."
 
 #: templates/templates_manager/list.html:10
 msgid "Все загруженные версии шаблонов по типам документов"
@@ -1945,19 +2009,3 @@ msgstr "No DOCX templates uploaded yet."
 #: templates/templates_manager/list.html:108
 msgid "Выбрать тип документа для загрузки шаблона"
 msgstr "Select Document Type to Upload Template"
-
-#~ msgid "Прогресс"
-#~ msgstr "Progress"
-
-#~ msgid "Прямой ввод"
-#~ msgstr "Direct Input"
-
-#~ msgid "типов"
-#~ msgstr "types"
-
-#~ msgid "шаблонов"
-#~ msgstr "templates"
-
-#~ msgid "Переменные"
-#~ msgstr "Variables"
-

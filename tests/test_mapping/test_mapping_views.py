@@ -133,3 +133,53 @@ def test_mapping_create_view_auto_generates_name_when_empty(client, admin_user, 
     created = MappingConfig.objects.filter(data_source=ds, template=tmpl).order_by("-id").first()
     assert created is not None
     assert "Маппинг:" in created.name
+
+
+@pytest.mark.django_db
+def test_mapping_create_view_english_localization(client, admin_user):
+    """Verifies mapping create GET prefill and POST auto-name use English in en locale."""
+    doc_type = DocumentType.objects.create(name="Contract")
+    tmpl = TemplateService.create_template_version(
+        document_type=doc_type,
+        file_obj=make_uploaded_docx(
+            filename="contract_en.docx",
+            paragraphs=["Contract for {{ client_name }} on {{ current_date }}"],
+        ),
+        name="Contract Template",
+    )
+    ds = DataSourceService.create_data_source(
+        name="Clients",
+        uploaded_file=make_uploaded_csv(
+            filename="clients_en.csv",
+            rows=[["Client"], ["Acme Corp"]],
+        ),
+        user=admin_user,
+    )
+
+    client.force_login(admin_user)
+    client.cookies["django_language"] = "en"
+
+    get_res = client.get(
+        f"{reverse('mapping:create')}?template_id={tmpl.id}&data_source_id={ds.id}"
+    )
+    assert get_res.status_code == 200
+    html = get_res.content.decode("utf-8")
+    assert "Mapping: Contract — Clients" in html
+    assert "Маппинг:" not in html
+    assert "System variable — computed automatically" in html
+    assert "Системная" not in html
+
+    post_res = client.post(
+        reverse("mapping:create"),
+        {
+            "name": "",
+            "template": tmpl.id,
+            "data_source": ds.id,
+            "col_client_name": "Client",
+            "req_client_name": "on",
+        },
+    )
+    assert post_res.status_code == 302
+    created = MappingConfig.objects.filter(data_source=ds, template=tmpl).order_by("-id").first()
+    assert created is not None
+    assert created.name == "Mapping: Contract — Clients"

@@ -68,7 +68,13 @@ class MappingCreateView(LoginRequiredMixin, MappingPermissionMixin, View):
             doc_type_name = getattr(
                 getattr(selected_template, "document_type", None), "name", selected_template.name
             )
-            name = f"Маппинг: {doc_type_name} — {selected_data_source.name}"
+            name = str(
+                _("Маппинг: %(doc_type)s — %(data_source)s")
+                % {
+                    "doc_type": doc_type_name,
+                    "data_source": selected_data_source.name,
+                }
+            )
 
         form = MappingConfigForm(
             initial={
