@@ -1,5 +1,6 @@
 """Views for uploading, versioning, inspecting, and managing DOCX templates."""
 
+import logging
 import os
 
 from django.contrib import messages
@@ -17,6 +18,8 @@ from apps.templates_manager.services import (
     TemplateService,
     TemplateValidationError,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class TemplateListView(LoginRequiredMixin, View):
@@ -103,11 +106,11 @@ class TemplateUploadView(LoginRequiredMixin, DocumentManagementPermissionMixin, 
 
         except TemplateValidationError as exc:
             messages.error(request, str(exc))
-        except Exception as exc:
+        except Exception:
+            logger.exception("Unexpected error during template upload for doc_type #%s", pk)
             messages.error(
                 request,
-                _("Произошла непредвиденная ошибка при обработке файла: %(err)s")
-                % {"err": str(exc)},
+                _("Произошла непредвиденная ошибка при обработке файла шаблона."),
             )
 
         return redirect("documents:detail", pk=doc_type.pk)

@@ -2,8 +2,11 @@
 
 import io
 
+import pytest
+
 from apps.templates_manager.services import (
     TemplateInspectionService,
+    TemplateValidationError,
 )
 from tests.conftest import make_docx_bytes
 
@@ -64,10 +67,8 @@ def test_inspect_docx_filters_unsupported_or_malicious_constructs():
         ]
     )
     buf = io.BytesIO(docx_bytes)
-    variables = TemplateInspectionService.inspect_file(buf, filename="filter_test.docx")
-    assert "employee_name" in variables
-    assert "salary" in variables
-    assert "__class__" not in variables
+    with pytest.raises(TemplateValidationError):
+        TemplateInspectionService.inspect_file(buf, filename="filter_test.docx")
 
 
 def test_text_regex_inspection_fallback():

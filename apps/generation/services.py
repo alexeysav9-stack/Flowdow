@@ -1,6 +1,7 @@
 """Service layer for single and batch document generation via docxtpl."""
 
 import io
+import logging
 import os
 import re
 import zipfile
@@ -13,10 +14,14 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from docxtpl import DocxTemplate
 
 from apps.accounts.models import UserRole
 from apps.audit.services import AuditService
+from apps.core.template_security import (
+    TemplateError,
+    TemplateSecurityError,
+    render_docx_safely,
+)
 from apps.data_sources.models import DataRecord
 from apps.generation.models import (
     BatchStatus,
@@ -27,6 +32,8 @@ from apps.generation.models import (
 from apps.mapping.models import MappingConfig
 from apps.mapping.services import MappingValidationService
 from apps.templates_manager.models import Template, TemplateStatus
+
+logger = logging.getLogger(__name__)
 
 UserModel = get_user_model()
 
@@ -105,13 +112,23 @@ class DocumentGenerationService:
         template_path: str,
         context: dict[str, Any],
     ) -> io.BytesIO:
-        """Renders docxtpl template with given context dictionary into in-memory stream."""
-        doc = DocxTemplate(template_path)
-        doc.render(context)
-        output_stream = io.BytesIO()
-        doc.save(output_stream)
-        output_stream.seek(0)
-        return output_stream
+        """Validates and renders a docxtpl template inside the hardened Jinja2 sandbox."""
+        try:
+            return render_docx_safely(template_path, context)
+        except TemplateSecurityError as exc:
+            logger.warning("Blocked unsafe template during rendering: %s", exc)
+            raise GenerationError(str(exc)) from exc
+        except TemplateError as exc:
+            logger.warning("Template rendering syntax/runtime error: %s", type(exc).__name__)
+            raise GenerationError(
+                _("Ошибка в разметке Jinja2 шаблона DOCX. Генерация отклонена.")
+            ) from exc
+        except OSError as exc:
+            logger.exception("Failed to read DOCX template file during rendering")
+            raise GenerationError(_("Не удалось прочитать файл шаблона для генерации.")) from exc
+        except Exception as exc:
+            logger.exception("Unexpected error while rendering DOCX template")
+            raise GenerationError(_("Ошибка при генерации документа из шаблона.")) from exc
 
     @classmethod
     def generate_single_document(
@@ -173,12 +190,21 @@ class DocumentGenerationService:
             doc_record.file.save(doc_filename, ContentFile(rendered_stream.getvalue()), save=True)
             return doc_record
 
-        except Exception as err:
+        except GenerationError as err:
             return GeneratedDocument.objects.create(
                 batch=batch,
                 data_record=data_record,
                 status=GenerationDocumentStatus.FAILED,
                 error_message=str(err),
+                record_identifier=record_id_str,
+            )
+        except Exception:
+            logger.exception("Unexpected failure generating document for batch #%s", batch.id)
+            return GeneratedDocument.objects.create(
+                batch=batch,
+                data_record=data_record,
+                status=GenerationDocumentStatus.FAILED,
+                error_message=_("Внутренняя ошибка при формировании документа."),
                 record_identifier=record_id_str,
             )
 

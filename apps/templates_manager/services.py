@@ -1,6 +1,7 @@
 """Service layer for inspecting, validating, and managing DOCX templates."""
 
 import io
+import logging
 import os
 import re
 import zipfile
@@ -14,11 +15,17 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models import User
 from apps.audit.services import AuditService
+from apps.core.template_security import (
+    TemplateError,
+    TemplateSecurityError,
+    inspect_and_validate_docx,
+)
 from apps.documents.models import DocumentType
 from apps.templates_manager.models import Template, TemplateStatus
 
-# Variable regex for basic placeholder matching: letters (including Cyrillic/Unicode), numbers, underscore
-VALID_IDENTIFIER_REGEX = re.compile(r"^[^\W\d]\w*$")
+logger = logging.getLogger(__name__)
+
+# Regex for basic placeholder matching in legacy plain-text helper
 PLACEHOLDER_REGEX = re.compile(r"\{\{\s*([^\W\d]\w*)(?:\s*\|[^\}]+)?\s*\}\}")
 
 # Default max file size: 10 MB
@@ -157,17 +164,18 @@ class DocxSecurityValidator:
                     )
 
         except zipfile.BadZipFile as exc:
+            logger.warning("Rejected corrupted DOCX archive")
             raise TemplateValidationError(
-                _("Не удалось прочитать DOCX архив: %(err)s") % {"err": str(exc)}
+                _("Файл повреждён или не является валидным ZIP-архивом.")
             ) from exc
 
 
 class TemplateInspectionService:
-    """Discovers and parses template placeholders using docxtpl and Jinja2 AST."""
+    """Discovers and validates template placeholders using docxtpl and strict Jinja2 AST rules."""
 
     @classmethod
     def extract_variables_from_text(cls, content: str) -> list[str]:
-        """Extracts unique placeholder variable names from template text (fallback/unit tests)."""
+        """Extracts unique placeholder variable names from template text (legacy regex helper)."""
         matches: set[str] = set(PLACEHOLDER_REGEX.findall(content))
         return sorted(matches)
 
@@ -175,43 +183,34 @@ class TemplateInspectionService:
     def inspect_file(cls, file_source: Any, filename: str = "") -> list[str]:
         """Inspects DOCX template and returns a unique sorted list of discovered variable names.
 
-        Handles Word's internal split XML runs gracefully using docxtpl/Jinja2 AST.
-        Rejects arbitrary Python execution and allows only safe identifiers.
+        Handles Word's internal split XML runs gracefully using docxtpl and enforces the
+        unified strict Jinja2 AST allowlist across all rendered DOCX parts.
         """
-        # 1. Run security validation first
+        # 1. Run structural and archive security validation first
         DocxSecurityValidator.validate_file(file_source, filename=filename)
 
-        # 2. Extract undeclared variables via docxtpl
+        # 2. Parse, AST-validate, and extract variables via unified safe Jinja2 engine
         try:
             if hasattr(file_source, "seek"):
                 file_source.seek(0)
-                # docxtpl accepts file path or file-like object
-                doc = docxtpl.DocxTemplate(file_source)
-                file_source.seek(0)
-            else:
-                doc = docxtpl.DocxTemplate(file_source)
-
-            raw_variables = doc.get_undeclared_template_variables()
-        except Exception as exc:
+            doc = docxtpl.DocxTemplate(file_source)
+            return inspect_and_validate_docx(doc)
+        except TemplateSecurityError as exc:
+            logger.warning("Rejected unsafe DOCX template syntax: %s", exc)
+            raise TemplateValidationError(str(exc)) from exc
+        except TemplateError as exc:
+            logger.warning("Rejected invalid DOCX Jinja2 syntax: %s", type(exc).__name__)
             raise TemplateValidationError(
-                _("Синтаксическая ошибка в Jinja2-разметке шаблона DOCX: %(err)s")
-                % {"err": str(exc)}
+                _("Синтаксическая ошибка в Jinja2-разметке шаблона DOCX.")
             ) from exc
-
-        # 3. Filter and validate variable names: must be valid identifiers
-        valid_variables: set[str] = set()
-        for var in raw_variables:
-            var_str = str(var).strip()
-            # Do not allow dunder variables or non-identifiers
-            if (
-                var_str
-                and not var_str.startswith("__")
-                and (var_str.isidentifier() or bool(VALID_IDENTIFIER_REGEX.match(var_str)))
-                and not hasattr(__builtins__, var_str)
-            ):
-                valid_variables.add(var_str)
-
-        return sorted(valid_variables)
+        except Exception as exc:
+            logger.exception("Unexpected error during DOCX template inspection")
+            raise TemplateValidationError(
+                _("Не удалось проверить шаблон DOCX. Проверьте корректность файла.")
+            ) from exc
+        finally:
+            if hasattr(file_source, "seek"):
+                file_source.seek(0)
 
 
 class TemplateService:

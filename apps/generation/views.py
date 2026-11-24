@@ -1,5 +1,6 @@
 """Views for document generation wizard, batch execution, and history."""
 
+import logging
 import os
 
 from django.contrib import messages
@@ -18,6 +19,8 @@ from apps.generation.services import (
 )
 from apps.mapping.models import MappingConfig
 from apps.mapping.services import MappingValidationService
+
+logger = logging.getLogger(__name__)
 
 
 class GenerationHistoryView(LoginRequiredMixin, View):
@@ -134,8 +137,12 @@ class GenerationWizardView(LoginRequiredMixin, GenerationPermissionMixin, View):
         except GenerationValidationError as err:
             messages.error(request, str(err))
             return redirect(f"{redirect('generation:wizard').url}?mapping_id={mapping_id}")
-        except Exception as err:
-            messages.error(request, _("Сбой при запуске генерации: %(err)s") % {"err": str(err)})
+        except Exception:
+            logger.exception("Unexpected error launching generation for mapping #%s", mapping_id)
+            messages.error(
+                request,
+                _("Произошла непредвиденная ошибка при запуске генерации документов."),
+            )
             return redirect(f"{redirect('generation:wizard').url}?mapping_id={mapping_id}")
 
 
