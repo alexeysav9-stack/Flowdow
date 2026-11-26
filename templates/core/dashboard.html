@@ -55,8 +55,9 @@
 </div>
 
 <div class="row g-4">
+  {% if user_permissions.can_generate_documents %}
   <!-- Recent Document Generations -->
-  <div class="col-lg-8">
+  <div class="{% if user_permissions.can_view_audit_logs %}col-lg-8{% else %}col-12{% endif %}">
     <div class="fd-card">
       <div class="fd-card-header">
         <span><i class="bi bi-clock-history me-2 text-primary"></i>{% trans "Последние генерации" %}</span>
@@ -99,7 +100,9 @@
       </div>
     </div>
   </div>
+  {% endif %}
 
+  {% if user_permissions.can_view_audit_logs %}
   <!-- Recent System Audit / Activity -->
   <div class="col-lg-4">
     <div class="fd-card">
@@ -127,5 +130,6 @@
       </div>
     </div>
   </div>
+  {% endif %}
 </div>
 {% endblock %}

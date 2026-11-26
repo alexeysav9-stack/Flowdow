@@ -3,14 +3,18 @@
 from typing import Any
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from apps.accounts.models import UserRole
 from apps.audit.services import AuditService
+from apps.core.permissions import (
+    MappingPermissionMixin,
+    can_delete_mapping_config,
+    can_manage_mappings,
+    can_view_data_source,
+    require_permission,
+)
 from apps.data_sources.models import DataSource, DataSourceStatus
 from apps.mapping.models import MappingConfig, MappingRule
 from apps.templates_manager.models import Template, TemplateStatus
@@ -24,28 +28,13 @@ class MappingValidationError(Exception):
     pass
 
 
-def can_manage_mappings(user: Any) -> bool:
-    """Checks whether the user has rights to configure or edit mappings."""
-    if not user or not getattr(user, "is_authenticated", False):
-        return False
-    if getattr(user, "is_superuser", False) or getattr(user, "is_staff", False):
-        return True
-    user_role = getattr(user, "role", None)
-    return user_role in {UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR}
-
-
-class MappingPermissionMixin(UserPassesTestMixin):
-    """View mixin enforcing mapping modification rights."""
-
-    def test_func(self) -> bool:
-        return can_manage_mappings(self.request.user)
-
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return super().handle_no_permission()
-        raise PermissionDenied(
-            _("У вашей роли недостаточно прав для создания или изменения схем сопоставления.")
-        )
+__all__ = [
+    "MappingPermissionMixin",
+    "MappingService",
+    "MappingValidationError",
+    "can_manage_mappings",
+    "get_system_variables",
+]
 
 
 def get_system_variables(extra_context: dict[str, Any] | None = None) -> dict[str, str]:
@@ -264,9 +253,24 @@ class MappingService:
         config_id: int | None = None,
     ) -> MappingConfig:
         """Saves a MappingConfig and its associated MappingRules in an atomic transaction."""
+        if user is not None:
+            require_permission(
+                can_manage_mappings(user),
+                _("У вашей роли недостаточно прав для создания или изменения схем сопоставления."),
+            )
+            require_permission(
+                can_view_data_source(user, data_source),
+                _("Недостаточно прав для использования выбранного источника данных."),
+            )
+
         with transaction.atomic():
             if config_id:
                 mapping_config = MappingConfig.objects.get(pk=config_id)
+                if user is not None:
+                    require_permission(
+                        can_delete_mapping_config(user, mapping_config),
+                        _("Недостаточно прав для изменения этой схемы сопоставления."),
+                    )
                 mapping_config.name = name
                 mapping_config.template = template
                 mapping_config.data_source = data_source
@@ -323,6 +327,11 @@ class MappingService:
         config = MappingConfig.objects.filter(pk=config_id).first()
         if not config:
             return False
+        if user is not None:
+            require_permission(
+                can_delete_mapping_config(user, config),
+                _("Недостаточно прав для удаления этой схемы сопоставления."),
+            )
 
         name = config.name
         with transaction.atomic():

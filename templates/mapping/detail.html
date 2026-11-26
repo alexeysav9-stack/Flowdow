@@ -23,11 +23,13 @@
     {% endif %}
   </div>
   <div class="d-flex align-items-center gap-2">
-    {% if user.role != "VIEWER" %}
+    {% if user_permissions.can_generate_documents %}
       <a href="{% url 'generation:wizard' %}?mapping_id={{ mapping_config.pk }}" class="btn btn-primary d-inline-flex align-items-center gap-2 btn-sm">
         <i class="bi bi-play-circle"></i>
         <span>{% trans "Перейти к генерации" %}</span>
       </a>
+    {% endif %}
+    {% if user_permissions.can_manage_mappings %}
       <button type="button" class="btn btn-outline-danger d-inline-flex align-items-center gap-2 btn-sm" data-bs-toggle="modal" data-bs-target="#deleteMappingModal">
         <i class="bi bi-trash"></i>
         <span>{% trans "Удалить" %}</span>
@@ -185,7 +187,7 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-{% if user.role != "VIEWER" %}
+{% if user_permissions.can_manage_mappings %}
   <div class="modal fade" id="deleteMappingModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">

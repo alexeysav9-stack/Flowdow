@@ -9,7 +9,7 @@
     <h4 class="fw-bold mb-1">{% trans "Типы документов" %}</h4>
     <p class="text-muted small mb-0">{% trans "Классификация документов организации и привязанные DOCX-шаблоны" %}</p>
   </div>
-  {% if user.role != "VIEWER" %}
+  {% if user_permissions.can_manage_documents %}
     <a href="{% url 'documents:create' %}" class="btn btn-primary d-inline-flex align-items-center gap-2">
       <i class="bi bi-plus-lg"></i>
       <span>{% trans "Добавить тип документа" %}</span>
@@ -70,7 +70,7 @@
             <td colspan="6" class="text-center py-5 text-muted">
               <i class="bi bi-folder2-open d-block fs-1 mb-2 text-secondary"></i>
               <p class="mb-2">{% trans "Типы документов пока не зарегистрированы." %}</p>
-              {% if user.role != "VIEWER" %}
+              {% if user_permissions.can_manage_documents %}
                 <a href="{% url 'documents:create' %}" class="btn btn-sm btn-primary">
                   <i class="bi bi-plus-lg me-1"></i> {% trans "Создать первый тип документа" %}
                 </a>

@@ -1,42 +1,22 @@
 """Service layer for Document Types and Document Taxonomy."""
 
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
 from django.db.models import QuerySet
 from django.utils.translation import gettext_lazy as _
 
-from apps.accounts.models import User, UserRole
+from apps.accounts.models import User
 from apps.audit.services import AuditService
+from apps.core.permissions import (
+    DocumentManagementPermissionMixin,
+    can_manage_documents,
+    require_permission,
+)
 from apps.documents.models import DocumentType
 
-
-def can_manage_documents(user: User | None) -> bool:
-    """Checks whether the given user has permissions to create or mutate documents and templates.
-
-    Admins, Managers, and Operators have full management permissions.
-    Viewers have read-only access.
-    """
-    if not user or not user.is_authenticated:
-        return False
-    if user.is_superuser or user.is_staff:
-        return True
-    return user.role in (UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR)
-
-
-class DocumentManagementPermissionMixin(UserPassesTestMixin):
-    """Mixin enforcing document modification rights on views."""
-
-    def test_func(self) -> bool:
-        return can_manage_documents(self.request.user)
-
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return super().handle_no_permission()
-        raise PermissionDenied(
-            _(
-                "У вашей роли недостаточно прав для создания или изменения шаблонов и типов документов."
-            )
-        )
+__all__ = [
+    "DocumentManagementPermissionMixin",
+    "DocumentTypeService",
+    "can_manage_documents",
+]
 
 
 class DocumentTypeService:
@@ -60,6 +40,11 @@ class DocumentTypeService:
         user: User | None = None,
     ) -> DocumentType:
         """Creates a new document type."""
+        if user is not None:
+            require_permission(
+                can_manage_documents(user),
+                _("У вашей роли недостаточно прав для создания типов документов."),
+            )
         doc_type = DocumentType.objects.create(
             name=name.strip(),
             description=description.strip(),
@@ -82,6 +67,11 @@ class DocumentTypeService:
         user: User | None = None,
     ) -> DocumentType:
         """Updates document type metadata."""
+        if user is not None:
+            require_permission(
+                can_manage_documents(user),
+                _("У вашей роли недостаточно прав для изменения типов документов."),
+            )
         doc_type.name = name.strip()
         doc_type.description = description.strip()
         doc_type.save()

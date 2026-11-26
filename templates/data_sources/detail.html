@@ -26,13 +26,13 @@
     {% endif %}
   </div>
   <div class="d-flex align-items-center gap-2">
-    {% if data_source.file %}
+    {% if data_source.file and user_permissions.can_manage_data_sources %}
       <a href="{% url 'data_sources:download' data_source.pk %}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 btn-sm">
         <i class="bi bi-download"></i>
         <span>{% trans "Скачать файл" %}</span>
       </a>
     {% endif %}
-    {% if user.role != "VIEWER" %}
+    {% if user_permissions.can_manage_data_sources %}
       <button type="button" class="btn btn-outline-danger d-inline-flex align-items-center gap-2 btn-sm" data-bs-toggle="modal" data-bs-target="#deleteDsModal">
         <i class="bi bi-trash"></i>
         <span>{% trans "Удалить" %}</span>
@@ -219,7 +219,7 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-{% if user.role != "VIEWER" %}
+{% if user_permissions.can_manage_data_sources %}
   <div class="modal fade" id="deleteDsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">

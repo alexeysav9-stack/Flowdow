@@ -1,8 +1,11 @@
 """Forms for mapping configuration."""
 
+from typing import Any
+
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from apps.core.permissions import scope_data_sources
 from apps.data_sources.models import DataSource, DataSourceStatus
 from apps.mapping.models import MappingConfig
 from apps.templates_manager.models import Template, TemplateStatus
@@ -51,6 +54,12 @@ class MappingConfigForm(forms.ModelForm):
                 }
             ),
         }
+
+    def __init__(self, *args: Any, user: Any | None = None, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        if user is not None:
+            ready_sources = DataSource.objects.filter(status=DataSourceStatus.READY)
+            self.fields["data_source"].queryset = scope_data_sources(ready_sources, user)
 
     def clean(self) -> dict:
         cleaned_data = super().clean()

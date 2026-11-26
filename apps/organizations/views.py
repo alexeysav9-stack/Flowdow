@@ -1,18 +1,18 @@
 """Views for Organization and Settings management."""
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.views import View
 
 from apps.audit.services import AuditService
+from apps.core.permissions import AdminRequiredMixin
 from apps.organizations.forms import OrganizationForm, OrganizationSettingsForm
 from apps.organizations.services import OrganizationService
 
 
-class OrganizationSettingsView(LoginRequiredMixin, View):
-    """Configuration view for organization identity and formatting settings."""
+class OrganizationSettingsView(AdminRequiredMixin, View):
+    """Configuration view for organization identity and formatting settings (ADMIN only)."""
 
     def get(self, request: HttpRequest) -> HttpResponse:
         org = OrganizationService.get_or_create_default()
@@ -37,8 +37,11 @@ class OrganizationSettingsView(LoginRequiredMixin, View):
         settings_form = OrganizationSettingsForm(request.POST, instance=org.settings)
 
         if org_form.is_valid() and settings_form.is_valid():
-            org_form.save()
-            settings_form.save()
+            OrganizationService.save_settings_forms(
+                org_form=org_form,
+                settings_form=settings_form,
+                user=request.user,
+            )
 
             AuditService.log(
                 action="SETTINGS_UPDATED",

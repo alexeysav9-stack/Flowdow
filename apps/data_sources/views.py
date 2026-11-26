@@ -1,30 +1,41 @@
 """Views for Data Sources module."""
 
+import logging
 import os
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import FileResponse, Http404, HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 
+from apps.core.archive_security import build_safe_file_response
+from apps.core.permissions import (
+    DataSourcePermissionMixin,
+    can_delete_data_source,
+    can_download_data_source,
+    can_view_data_source,
+    require_permission,
+    scope_data_sources,
+)
 from apps.data_sources.forms import DataSourceUploadForm
 from apps.data_sources.models import DataSource
 from apps.data_sources.services import (
-    DataSourcePermissionMixin,
     DataSourceService,
     DataSourceValidationError,
 )
 
+logger = logging.getLogger(__name__)
 
-class DataSourceListView(LoginRequiredMixin, View):
-    """Lists all uploaded tabular datasets."""
+
+class DataSourceListView(DataSourcePermissionMixin, View):
+    """Lists uploaded tabular datasets accessible to the current user."""
 
     def get(self, request: HttpRequest) -> HttpResponse:
-        data_sources = (
-            DataSource.objects.all().select_related("uploaded_by").order_by("-created_at")
-        )
+        data_sources = scope_data_sources(
+            DataSource.objects.select_related("uploaded_by"),
+            request.user,
+        ).order_by("-created_at")
         return render(
             request,
             "data_sources/list.html",
@@ -36,7 +47,7 @@ class DataSourceListView(LoginRequiredMixin, View):
         )
 
 
-class DataSourceUploadView(LoginRequiredMixin, DataSourcePermissionMixin, View):
+class DataSourceUploadView(DataSourcePermissionMixin, View):
     """Handles upload and ingestion of CSV/XLSX datasets."""
 
     def get(self, request: HttpRequest) -> HttpResponse:
@@ -95,8 +106,12 @@ class DataSourceUploadView(LoginRequiredMixin, DataSourcePermissionMixin, View):
                     "form": form,
                 },
             )
-        except Exception as err:
-            messages.error(request, _("Ошибка обработки файла: %(err)s") % {"err": str(err)})
+        except Exception:
+            logger.exception("Unexpected error during data source upload")
+            messages.error(
+                request,
+                _("Произошла внутренняя ошибка при обработке файла данных."),
+            )
             return render(
                 request,
                 "data_sources/upload.html",
@@ -108,13 +123,17 @@ class DataSourceUploadView(LoginRequiredMixin, DataSourcePermissionMixin, View):
             )
 
 
-class DataSourceDetailView(LoginRequiredMixin, View):
+class DataSourceDetailView(DataSourcePermissionMixin, View):
     """Displays dataset details and paginated records preview."""
 
     def get(self, request: HttpRequest, pk: int) -> HttpResponse:
         data_source = get_object_or_404(
             DataSource.objects.select_related("uploaded_by"),
             pk=pk,
+        )
+        require_permission(
+            can_view_data_source(request.user, data_source),
+            _("У вас нет прав на просмотр данного источника данных."),
         )
         page_number = request.GET.get("page", 1)
         records_page = DataSourceService.get_paginated_records(
@@ -134,11 +153,15 @@ class DataSourceDetailView(LoginRequiredMixin, View):
         )
 
 
-class DataSourceDeleteView(LoginRequiredMixin, DataSourcePermissionMixin, View):
+class DataSourceDeleteView(DataSourcePermissionMixin, View):
     """Deletes a DataSource along with all its DataRecords."""
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
         data_source = get_object_or_404(DataSource, pk=pk)
+        require_permission(
+            can_delete_data_source(request.user, data_source),
+            _("У вас нет прав на удаление данного источника данных."),
+        )
         name = data_source.name
         DataSourceService.delete_data_source(data_source_id=pk, user=request.user)
         messages.info(
@@ -149,17 +172,24 @@ class DataSourceDeleteView(LoginRequiredMixin, DataSourcePermissionMixin, View):
         return redirect("data_sources:list")
 
 
-class DataSourceDownloadView(LoginRequiredMixin, View):
-    """Downloads the original uploaded data file."""
+class DataSourceDownloadView(DataSourcePermissionMixin, View):
+    """Downloads the original uploaded data file with strict ownership enforcement."""
 
     def get(self, request: HttpRequest, pk: int) -> HttpResponse:
         data_source = get_object_or_404(DataSource, pk=pk)
-        if not data_source.file or not os.path.exists(data_source.file.path):
-            raise Http404(_("Файл источника данных не найден на сервере."))
-
-        filename = os.path.basename(data_source.file.name)
-        return FileResponse(
-            open(data_source.file.path, "rb"),
-            as_attachment=True,
-            filename=filename,
+        require_permission(
+            can_download_data_source(request.user, data_source),
+            _("У вас нет прав на скачивание данного источника данных."),
+        )
+        filename = os.path.basename(data_source.file.name) if data_source.file else "dataset"
+        content_type = (
+            "text/csv"
+            if filename.lower().endswith(".csv")
+            else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        return build_safe_file_response(
+            data_source.file,
+            download_name=filename,
+            content_type=content_type,
+            not_found_message=_("Файл источника данных не найден на сервере."),
         )

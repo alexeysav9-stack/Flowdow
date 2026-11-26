@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Доступ запрещён (403)" %} — Flowdow{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+      <div class="fd-card p-4 p-md-5 text-center">
+        <div class="mb-3 text-danger">
+          <i class="bi bi-shield-exclamation fs-1"></i>
+        </div>
+        <h3 class="fw-bold mb-2">403 — {% trans "Доступ запрещён" %}</h3>
+        <p class="text-muted mb-4">
+          {% trans "У вашей учётной записи недостаточно прав для просмотра этой страницы или выполнения выбранного действия." %}
+        </p>
+        <a href="{% url 'core:dashboard' %}" class="btn btn-primary">
+          <i class="bi bi-house-door me-1"></i> {% trans "Вернуться на главную" %}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block auth_content %}
+<div class="card border-0 shadow-sm p-4 text-center" style="max-width: 460px;">
+  <div class="card-body">
+    <div class="mb-3 text-danger">
+      <i class="bi bi-shield-exclamation fs-1"></i>
+    </div>
+    <h4 class="fw-bold mb-2">403 — {% trans "Доступ запрещён" %}</h4>
+    <p class="text-muted mb-4">
+      {% trans "У вас нет прав для доступа к запрашиваемому ресурсу." %}
+    </p>
+    <a href="{% url 'accounts:login' %}" class="btn btn-primary">{% trans "Войти в систему" %}</a>
+  </div>
+</div>
+{% endblock %}
+

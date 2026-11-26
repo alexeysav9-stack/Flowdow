@@ -5,11 +5,20 @@ import os
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import FileResponse, Http404, HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 
+from apps.core.archive_security import build_safe_file_response
+from apps.core.permissions import (
+    can_download_generated_document,
+    can_view_generation_batch,
+    can_view_mapping_config,
+    require_permission,
+    scope_generation_batches,
+    scope_mapping_configs,
+)
 from apps.data_sources.models import DataRecord
 from apps.generation.models import GeneratedDocument, GenerationBatch
 from apps.generation.services import (
@@ -23,17 +32,16 @@ from apps.mapping.services import MappingValidationService
 logger = logging.getLogger(__name__)
 
 
-class GenerationHistoryView(LoginRequiredMixin, View):
+class GenerationHistoryView(LoginRequiredMixin, GenerationPermissionMixin, View):
     """Displays history of all document generation batches."""
 
     def get(self, request: HttpRequest) -> HttpResponse:
-        batches = (
+        batches = scope_generation_batches(
             GenerationBatch.objects.select_related(
                 "template", "data_source", "initiated_by", "mapping_config"
-            )
-            .all()
-            .order_by("-created_at")
-        )
+            ).all(),
+            request.user,
+        ).order_by("-created_at")
         return render(
             request,
             "generation/list.html",
@@ -55,9 +63,10 @@ class GenerationWizardView(LoginRequiredMixin, GenerationPermissionMixin, View):
         is_valid = True
         validation_errors = []
 
-        mappings = MappingConfig.objects.select_related("template", "data_source").order_by(
-            "-created_at"
-        )
+        mappings = scope_mapping_configs(
+            MappingConfig.objects.select_related("template", "data_source").all(),
+            request.user,
+        ).order_by("-created_at")
 
         if mapping_id and str(mapping_id).isdigit():
             selected_mapping = (
@@ -67,6 +76,10 @@ class GenerationWizardView(LoginRequiredMixin, GenerationPermissionMixin, View):
                 .first()
             )
             if selected_mapping:
+                require_permission(
+                    can_view_mapping_config(request.user, selected_mapping),
+                    _("Недостаточно прав для использования выбранной схемы маппинга."),
+                )
                 is_valid, validation_errors = MappingValidationService.validate_mapping_config(
                     selected_mapping
                 )
@@ -97,6 +110,10 @@ class GenerationWizardView(LoginRequiredMixin, GenerationPermissionMixin, View):
             MappingConfig.objects.select_related("template", "data_source"),
             pk=int(mapping_id),
         )
+        require_permission(
+            can_view_mapping_config(request.user, mapping_config),
+            _("Недостаточно прав для запуска генерации по выбранной схеме маппинга."),
+        )
 
         record_ids = request.POST.getlist("record_ids")
         select_all = request.POST.get("select_all") == "1"
@@ -105,10 +122,11 @@ class GenerationWizardView(LoginRequiredMixin, GenerationPermissionMixin, View):
             # If select all or no individual IDs chosen, take all records of the data source
             data_records = list(mapping_config.data_source.records.all().order_by("row_number"))
         else:
+            valid_record_ids = [int(rid) for rid in record_ids if str(rid).isdigit()]
             data_records = list(
                 DataRecord.objects.filter(
                     data_source=mapping_config.data_source,
-                    pk__in=record_ids,
+                    pk__in=valid_record_ids,
                 ).order_by("row_number")
             )
 
@@ -146,7 +164,7 @@ class GenerationWizardView(LoginRequiredMixin, GenerationPermissionMixin, View):
             return redirect(f"{redirect('generation:wizard').url}?mapping_id={mapping_id}")
 
 
-class GenerationDetailView(LoginRequiredMixin, View):
+class GenerationDetailView(LoginRequiredMixin, GenerationPermissionMixin, View):
     """Displays detailed batch results, generated documents, and error diagnostics."""
 
     def get(self, request: HttpRequest, pk: int) -> HttpResponse:
@@ -155,6 +173,10 @@ class GenerationDetailView(LoginRequiredMixin, View):
                 "template", "data_source", "initiated_by", "mapping_config"
             ),
             pk=pk,
+        )
+        require_permission(
+            can_view_generation_batch(request.user, batch),
+            _("Недостаточно прав для просмотра этого пакета генерации."),
         )
         documents = batch.documents.select_related("data_record").all().order_by("id")
 
@@ -170,33 +192,37 @@ class GenerationDetailView(LoginRequiredMixin, View):
         )
 
 
-class GenerationBatchDownloadView(LoginRequiredMixin, View):
+class GenerationBatchDownloadView(LoginRequiredMixin, GenerationPermissionMixin, View):
     """Downloads the compiled ZIP archive of all successfully created documents."""
 
     def get(self, request: HttpRequest, pk: int) -> HttpResponse:
         batch = get_object_or_404(GenerationBatch, pk=pk)
-        if not batch.output_file or not os.path.exists(batch.output_file.path):
-            raise Http404(_("Архив документов не сформирован или отсутствует на сервере."))
-
-        filename = os.path.basename(batch.output_file.name)
-        return FileResponse(
-            open(batch.output_file.path, "rb"),
-            as_attachment=True,
-            filename=filename,
+        require_permission(
+            can_view_generation_batch(request.user, batch),
+            _("Недостаточно прав для скачивания архива этого пакета генерации."),
+        )
+        filename = os.path.basename(batch.output_file.name) if batch.output_file else ""
+        return build_safe_file_response(
+            batch.output_file,
+            download_name=filename,
+            content_type="application/zip",
+            not_found_message=_("Архив документов не сформирован или отсутствует на сервере."),
         )
 
 
-class GeneratedDocumentDownloadView(LoginRequiredMixin, View):
+class GeneratedDocumentDownloadView(LoginRequiredMixin, GenerationPermissionMixin, View):
     """Downloads an individual generated DOCX document."""
 
     def get(self, request: HttpRequest, pk: int) -> HttpResponse:
-        doc = get_object_or_404(GeneratedDocument, pk=pk)
-        if not doc.file or not os.path.exists(doc.file.path):
-            raise Http404(_("Файл документа не найден на сервере."))
-
-        filename = os.path.basename(doc.file.name)
-        return FileResponse(
-            open(doc.file.path, "rb"),
-            as_attachment=True,
-            filename=filename,
+        doc = get_object_or_404(GeneratedDocument.objects.select_related("batch"), pk=pk)
+        require_permission(
+            can_download_generated_document(request.user, doc),
+            _("Недостаточно прав для скачивания этого документа."),
+        )
+        filename = os.path.basename(doc.file.name) if doc.file else ""
+        return build_safe_file_response(
+            doc.file,
+            download_name=filename,
+            content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            not_found_message=_("Файл документа не найден на сервере."),
         )

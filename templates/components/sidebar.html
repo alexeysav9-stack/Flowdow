@@ -23,19 +23,26 @@
       <i class="bi bi-file-earmark-word"></i>
       <span>{% trans "Шаблоны" %}</span>
     </a>
+    {% if user_permissions.can_manage_data_sources %}
     <a href="{% url 'data_sources:list' %}" class="fd-nav-item {% if active_nav == 'data_sources' %}active{% endif %}">
       <i class="bi bi-table"></i>
       <span>{% trans "Источники данных" %}</span>
     </a>
+    {% endif %}
+    {% if user_permissions.can_manage_mappings %}
     <a href="{% url 'mapping:list' %}" class="fd-nav-item {% if active_nav == 'mapping' %}active{% endif %}">
       <i class="bi bi-diagram-3"></i>
       <span>{% trans "Сопоставление полей" %}</span>
     </a>
+    {% endif %}
+    {% if user_permissions.can_generate_documents %}
     <a href="{% url 'generation:history' %}" class="fd-nav-item {% if active_nav == 'generation' %}active{% endif %}">
       <i class="bi bi-clock-history"></i>
       <span>{% trans "История генераций" %}</span>
     </a>
+    {% endif %}
 
+    {% if user_permissions.can_manage_settings %}
     <div class="text-uppercase small fw-bold px-3 mt-4 mb-2" style="font-size: 0.72rem; color: #64748b; letter-spacing: 0.05em;">
       {% trans "Конфигурация" %}
     </div>
@@ -43,6 +50,7 @@
       <i class="bi bi-gear"></i>
       <span>{% trans "Настройки" %}</span>
     </a>
+    {% endif %}
   </nav>
 
   <div class="fd-sidebar-footer">

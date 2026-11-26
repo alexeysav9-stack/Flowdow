@@ -3,6 +3,8 @@
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -11,21 +13,96 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load environment variables from .env file
 load_dotenv(BASE_DIR / ".env")
 
-# Security settings
-SECRET_KEY = os.getenv(
-    "SECRET_KEY",
-    "flowdow-dev-secret-key-insecure-replace-in-production-min-50-chars-here",
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    """Parses a boolean environment variable safely."""
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in ("true", "1", "yes", "on")
+
+
+INSECURE_SECRET_KEYS: frozenset[str] = frozenset(
+    {
+        "",
+        "flowdow-dev-secret-key-insecure-replace-in-production-min-50-chars-here",
+        "django-insecure-change-me",
+        "change-me",
+        "changeme",
+        "secret",
+    }
+)
+INSECURE_DB_PASSWORDS: frozenset[str] = frozenset(
+    {
+        "",
+        "flowdow_secure_password",
+        "flowdow",
+        "postgres",
+        "password",
+        "changeme",
+        "admin",
+    }
 )
 
-DEBUG = os.getenv("DEBUG", "True").lower() in ("true", "1", "yes")
 
+def validate_production_settings(
+    *,
+    debug: bool,
+    secret_key: str,
+    allowed_hosts: list[str],
+    db_engine: str,
+    db_password: str,
+) -> None:
+    """Rejects unsafe secrets, hosts, or default DB credentials when DEBUG=False."""
+    if debug:
+        return
+
+    cleaned_secret = (secret_key or "").strip()
+    if (
+        cleaned_secret in INSECURE_SECRET_KEYS
+        or cleaned_secret.startswith("django-insecure-")
+        or len(cleaned_secret) < 50
+        or len(set(cleaned_secret)) < 5
+    ):
+        raise ImproperlyConfigured(
+            "Production mode (DEBUG=False) requires a strong SECRET_KEY (>= 50 random chars)."
+        )
+
+    if not allowed_hosts or "*" in allowed_hosts or "0.0.0.0" in allowed_hosts:
+        raise ImproperlyConfigured(
+            "Production mode (DEBUG=False) requires explicit ALLOWED_HOSTS without '*' or '0.0.0.0'."
+        )
+
+    if "postgresql" in db_engine and (db_password or "").strip() in INSECURE_DB_PASSWORDS:
+        raise ImproperlyConfigured(
+            "Production mode (DEBUG=False) requires a non-default DB_PASSWORD for PostgreSQL."
+        )
+
+
+# Security settings: default DEBUG to False; enable explicitly in local .env/dev environments.
+DEBUG = _env_bool("DEBUG", default=False)
+
+_raw_secret_key = os.getenv("SECRET_KEY", "").strip()
+if _raw_secret_key:
+    SECRET_KEY = _raw_secret_key
+elif DEBUG:
+    # Ephemeral development secret avoids shipping any static fallback credential in code.
+    SECRET_KEY = get_random_secret_key()
+else:
+    SECRET_KEY = ""
+
+_default_allowed_hosts = "localhost,127.0.0.1" if DEBUG else ""
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0,testserver").split(",")
+    for host in os.getenv("ALLOWED_HOSTS", _default_allowed_hosts).split(",")
     if host.strip()
 ]
-if "testserver" not in ALLOWED_HOSTS:
+if DEBUG and "testserver" not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append("testserver")
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -89,9 +166,17 @@ ASGI_APPLICATION = "config.asgi.application"
 DB_ENGINE = os.getenv("DB_ENGINE", "django.db.backends.postgresql")
 DB_NAME = os.getenv("DB_NAME", "flowdow")
 DB_USER = os.getenv("DB_USER", "flowdow")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "flowdow_secure_password")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
+
+validate_production_settings(
+    debug=DEBUG,
+    secret_key=SECRET_KEY,
+    allowed_hosts=ALLOWED_HOSTS,
+    db_engine=DB_ENGINE,
+    db_password=DB_PASSWORD,
+)
 
 if "sqlite3" in DB_ENGINE:
     DATABASES = {
@@ -151,6 +236,30 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Upload memory thresholds (bounded above app-level file validators to prevent body DoS)
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv("DATA_UPLOAD_MAX_MEMORY_SIZE", str(30 * 1024 * 1024)))
+FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv("FILE_UPLOAD_MAX_MEMORY_SIZE", str(10 * 1024 * 1024)))
+
+# Browser, Cookie, and Transport Security Headers
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+SECURE_REFERRER_POLICY = "same-origin"
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+
+if not DEBUG:
+    SESSION_COOKIE_SECURE = _env_bool("SESSION_COOKIE_SECURE", default=True)
+    CSRF_COOKIE_SECURE = _env_bool("CSRF_COOKIE_SECURE", default=True)
+    SECURE_SSL_REDIRECT = _env_bool("SECURE_SSL_REDIRECT", default=True)
+    SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True)
+    SECURE_HSTS_PRELOAD = _env_bool("SECURE_HSTS_PRELOAD", default=False)
+    if _env_bool("USE_X_FORWARDED_PROTO", default=False):
+        SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Flowdow Application Settings
 FLOWDOW_ORGANIZATION_NAME = os.getenv("FLOWDOW_ORGANIZATION_NAME", "Flowdow Workspace")

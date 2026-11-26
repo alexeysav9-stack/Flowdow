@@ -1,10 +1,8 @@
 """Service layer for inspecting, validating, and managing DOCX templates."""
 
-import io
 import logging
 import os
 import re
-import zipfile
 from typing import Any
 
 import docxtpl
@@ -15,6 +13,8 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models import User
 from apps.audit.services import AuditService
+from apps.core.archive_security import get_actual_stream_size, validate_docx_archive
+from apps.core.permissions import can_manage_documents, require_permission
 from apps.core.template_security import (
     TemplateError,
     TemplateSecurityError,
@@ -41,52 +41,25 @@ class TemplateValidationError(ValidationError):
 
 
 class DocxSecurityValidator:
-    """Security validation engine for uploaded DOCX templates.
-
-    Guarantees that files:
-    1. Do not exceed file size limits.
-    2. Have valid .docx extension.
-    3. Start with ZIP magic header (PK\x03\x04).
-    4. Are well-formed OpenXML archives containing word/document.xml.
-    5. Are not decompression bombs (zip bombs).
-    6. Do not contain dangerous executable payloads.
-    """
-
-    DANGEROUS_EXTENSIONS = {
-        ".exe",
-        ".bat",
-        ".cmd",
-        ".vbs",
-        ".sh",
-        ".bin",
-        ".msi",
-        ".jar",
-        ".ps1",
-    }
+    """Security validation engine for uploaded DOCX templates."""
 
     @classmethod
     def validate_file(cls, file_obj: Any, filename: str = "") -> None:
-        """Validates file integrity and security."""
-        # 1. File size check
-        size = getattr(file_obj, "size", None)
-        if size is None:
-            if hasattr(file_obj, "seek") and hasattr(file_obj, "tell"):
-                pos = file_obj.tell()
-                file_obj.seek(0, os.SEEK_END)
-                size = file_obj.tell()
-                file_obj.seek(pos)
+        """Validates file size, extension, ZIP/OOXML structure, zip-bomb bounds, and XML safety."""
+        declared_size = getattr(file_obj, "size", None)
+        actual_size = get_actual_stream_size(file_obj)
+        size = max(actual_size, int(declared_size or 0))
 
-        if size and size > MAX_TEMPLATE_FILE_SIZE:
+        if size == 0:
+            raise TemplateValidationError(_("Загруженный файл пуст."))
+
+        if size > MAX_TEMPLATE_FILE_SIZE:
             max_mb = MAX_TEMPLATE_FILE_SIZE // (1024 * 1024)
             raise TemplateValidationError(
                 _("Размер файла превышает максимально допустимый лимит (%(max_mb)d МБ).")
                 % {"max_mb": max_mb}
             )
 
-        if size == 0:
-            raise TemplateValidationError(_("Загруженный файл пуст."))
-
-        # 2. Extension check
         name_to_check = filename or getattr(file_obj, "name", "")
         if name_to_check:
             clean_name = os.path.basename(name_to_check)
@@ -97,77 +70,13 @@ class DocxSecurityValidator:
                     % {"ext": ext}
                 )
 
-        # 3. Magic bytes check (ZIP header PK\x03\x04)
-        if hasattr(file_obj, "seek") and hasattr(file_obj, "read"):
-            initial_pos = file_obj.tell()
-            file_obj.seek(0)
-            magic = file_obj.read(4)
-            file_obj.seek(initial_pos)
-
-            if magic != b"PK\x03\x04":
-                raise TemplateValidationError(
-                    _("Файл не является корректным DOCX-документом (неверная сигнатура ZIP).")
-                )
-
-        # 4. ZIP container and structural integrity
-        target = file_obj
-        if hasattr(file_obj, "seek"):
-            file_obj.seek(0)
-            target = io.BytesIO(file_obj.read())
-            file_obj.seek(0)
-
-        if not zipfile.is_zipfile(target):
-            raise TemplateValidationError(_("Файл повреждён или не является валидным ZIP-архивом."))
-
-        try:
-            with zipfile.ZipFile(target, "r") as archive:
-                # Test archive integrity
-                bad_file = archive.testzip()
-                if bad_file:
-                    raise TemplateValidationError(
-                        _("Архив шаблона повреждён (ошибка в элементе '%(name)s').")
-                        % {"name": bad_file}
-                    )
-
-                namelist = archive.namelist()
-
-                # Verify OpenXML standard entry
-                if "word/document.xml" not in namelist:
-                    raise TemplateValidationError(
-                        _(
-                            "Файл не является документом Word DOCX: отсутствует компонент word/document.xml."
-                        )
-                    )
-
-                # Check for zip bomb and prohibited payloads
-                total_uncompressed = 0
-                compressed_size = size or 1
-
-                for info in archive.infolist():
-                    _entry_root, entry_ext = os.path.splitext(info.filename)
-                    if entry_ext.lower() in cls.DANGEROUS_EXTENSIONS:
-                        raise TemplateValidationError(
-                            _("В архиве обнаружен недопустимый файл '%(name)s'.")
-                            % {"name": info.filename}
-                        )
-
-                    total_uncompressed += info.file_size
-                    if total_uncompressed > MAX_TOTAL_UNCOMPRESSED_SIZE:
-                        raise TemplateValidationError(
-                            _("Общий распакованный объём документа превышает лимит безопасности.")
-                        )
-
-                ratio = total_uncompressed / max(compressed_size, 1)
-                if ratio > MAX_UNCOMPRESSED_RATIO:
-                    raise TemplateValidationError(
-                        _("Обнаружен аномальный коэффициент сжатия (возможная zip-бомба).")
-                    )
-
-        except zipfile.BadZipFile as exc:
-            logger.warning("Rejected corrupted DOCX archive")
-            raise TemplateValidationError(
-                _("Файл повреждён или не является валидным ZIP-архивом.")
-            ) from exc
+        validate_docx_archive(
+            file_obj,
+            max_file_size=MAX_TEMPLATE_FILE_SIZE,
+            max_uncompressed_size=MAX_TOTAL_UNCOMPRESSED_SIZE,
+            max_decompression_ratio=MAX_UNCOMPRESSED_RATIO,
+            error_cls=TemplateValidationError,
+        )
 
 
 class TemplateInspectionService:
@@ -239,10 +148,15 @@ class TemplateService:
         """
         if file_obj is None and "uploaded_file" in kwargs:
             file_obj = kwargs["uploaded_file"]
+        if user is not None:
+            require_permission(
+                can_manage_documents(user),
+                _("У вашей роли недостаточно прав для загрузки шаблонов."),
+            )
         original_name = getattr(file_obj, "name", "template.docx")
         if not name:
             clean_name = os.path.basename(original_name)
-            name, _ = os.path.splitext(clean_name)
+            name, _ext = os.path.splitext(clean_name)
             name = name.replace("_", " ").title()
 
         # 1. Inspect and extract variables (validates security inside)
@@ -286,6 +200,11 @@ class TemplateService:
     @classmethod
     def activate_template(cls, template: Template, user: User | None = None) -> Template:
         """Activates template and archives any other active versions for the document type."""
+        if user is not None:
+            require_permission(
+                can_manage_documents(user),
+                _("У вашей роли недостаточно прав для активации шаблонов."),
+            )
         with transaction.atomic():
             Template.objects.filter(
                 document_type=template.document_type, status=TemplateStatus.ACTIVE
@@ -309,6 +228,11 @@ class TemplateService:
     @classmethod
     def archive_template(cls, template: Template, user: User | None = None) -> Template:
         """Transitions template to archived status."""
+        if user is not None:
+            require_permission(
+                can_manage_documents(user),
+                _("У вашей роли недостаточно прав для архивации шаблонов."),
+            )
         template.status = TemplateStatus.ARCHIVED
         template.save(update_fields=["status", "updated_at"])
 

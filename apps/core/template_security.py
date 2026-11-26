@@ -7,6 +7,7 @@ import unicodedata
 from dataclasses import dataclass
 from typing import Any
 
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from docxtpl import DocxTemplate
 from jinja2 import Undefined, meta, nodes
@@ -24,6 +25,8 @@ from jinja2.lexer import (
     TOKEN_RAW_END,
 )
 from jinja2.sandbox import ImmutableSandboxedEnvironment
+
+from apps.core.archive_security import validate_docx_archive
 
 VALID_IDENTIFIER_REGEX = re.compile(r"^[^\W\d]\w*$")
 
@@ -381,7 +384,13 @@ def inspect_and_validate_docx(
 
 
 def render_docx_safely(template_source: Any, context: dict[str, Any]) -> io.BytesIO:
-    """Validates and renders a DOCX template inside the hardened Jinja2 environment."""
+    """Validates archive, XML, and Jinja2 AST before rendering a DOCX in the sandbox."""
+    max_template_size = getattr(settings, "FLOWDOW_MAX_TEMPLATE_FILE_SIZE", 10 * 1024 * 1024)
+    validate_docx_archive(
+        template_source,
+        max_file_size=max_template_size,
+        error_cls=TemplateSecurityError,
+    )
     safe_env = create_safe_jinja_environment()
     doc = DocxTemplate(template_source)
     inspect_and_validate_docx(doc, jinja_env=safe_env)

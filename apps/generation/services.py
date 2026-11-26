@@ -8,15 +8,18 @@ import zipfile
 from typing import Any
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from apps.accounts.models import UserRole
 from apps.audit.services import AuditService
+from apps.core.permissions import (
+    GenerationPermissionMixin,
+    can_generate_documents,
+    can_view_mapping_config,
+    require_permission,
+)
 from apps.core.template_security import (
     TemplateError,
     TemplateSecurityError,
@@ -50,28 +53,14 @@ class GenerationValidationError(Exception):
     pass
 
 
-def can_generate_documents(user: Any) -> bool:
-    """Checks whether the user has rights to execute document generation."""
-    if not user or not getattr(user, "is_authenticated", False):
-        return False
-    if getattr(user, "is_superuser", False) or getattr(user, "is_staff", False):
-        return True
-    user_role = getattr(user, "role", None)
-    return user_role in {UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR}
-
-
-class GenerationPermissionMixin(UserPassesTestMixin):
-    """View mixin enforcing document generation permissions."""
-
-    def test_func(self) -> bool:
-        return can_generate_documents(self.request.user)
-
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return super().handle_no_permission()
-        raise PermissionDenied(
-            _("У вашей роли недостаточно прав для запуска генерации документов.")
-        )
+__all__ = [
+    "DocumentGenerationService",
+    "GenerationError",
+    "GenerationPermissionMixin",
+    "GenerationValidationError",
+    "can_generate_documents",
+    "sanitize_filename",
+]
 
 
 def sanitize_filename(name: str, fallback: str = "document") -> str:
@@ -94,6 +83,16 @@ class DocumentGenerationService:
         total_records: int = 1,
     ) -> GenerationBatch:
         """Initializes a new generation batch record (preserves backward compatibility)."""
+        if user is not None:
+            require_permission(
+                can_generate_documents(user),
+                _("У вашей роли недостаточно прав для запуска генерации документов."),
+            )
+            if mapping_config is not None:
+                require_permission(
+                    can_view_mapping_config(user, mapping_config),
+                    _("Недостаточно прав для запуска генерации по выбранной схеме маппинга."),
+                )
         with transaction.atomic():
             batch = GenerationBatch.objects.create(
                 template=template,
@@ -220,6 +219,16 @@ class DocumentGenerationService:
         Produces individual DOCX files, captures isolated record errors, and compiles
         a ZIP archive of all successfully created documents.
         """
+        if user is not None:
+            require_permission(
+                can_generate_documents(user),
+                _("У вашей роли недостаточно прав для запуска генерации документов."),
+            )
+            require_permission(
+                can_view_mapping_config(user, mapping_config),
+                _("Недостаточно прав для запуска генерации по выбранной схеме маппинга."),
+            )
+
         template = mapping_config.template
         data_source = mapping_config.data_source
 
@@ -237,6 +246,11 @@ class DocumentGenerationService:
         if not data_records:
             raise GenerationValidationError(
                 _("Не выбрано ни одной записи для формирования документов.")
+            )
+
+        if any(record.data_source_id != data_source.id for record in data_records):
+            raise GenerationValidationError(
+                _("Обнаружены записи, не принадлежащие выбранному источнику данных.")
             )
 
         # 2. Create batch record in PROCESSING status

@@ -3,21 +3,25 @@
 import csv
 import datetime
 import io
+import logging
 import os
-import zipfile
 from collections import Counter
 from typing import Any
 
 import openpyxl
 from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
 from django.core.paginator import Page, Paginator
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
-from apps.accounts.models import UserRole
 from apps.audit.services import AuditService
+from apps.core.archive_security import get_actual_stream_size, validate_xlsx_archive
+from apps.core.permissions import (
+    DataSourcePermissionMixin,
+    can_delete_data_source,
+    can_manage_data_sources,
+    require_permission,
+)
 from apps.data_sources.constants import (
     ALLOWED_DATA_EXTENSIONS,
     CSV_CANDIDATE_DELIMITERS,
@@ -29,6 +33,7 @@ from apps.data_sources.constants import (
 )
 from apps.data_sources.models import DataRecord, DataSource, DataSourceFormat, DataSourceStatus
 
+logger = logging.getLogger(__name__)
 UserModel = get_user_model()
 
 
@@ -44,28 +49,17 @@ class DataSourceImportError(Exception):
     pass
 
 
-def can_manage_data_sources(user: Any) -> bool:
-    """Checks whether the user has privileges to upload or delete data sources."""
-    if not user or not getattr(user, "is_authenticated", False):
-        return False
-    if getattr(user, "is_superuser", False) or getattr(user, "is_staff", False):
-        return True
-    user_role = getattr(user, "role", None)
-    return user_role in {UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR}
-
-
-class DataSourcePermissionMixin(UserPassesTestMixin):
-    """View mixin enforcing data source modification permissions."""
-
-    def test_func(self) -> bool:
-        return can_manage_data_sources(self.request.user)
-
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return super().handle_no_permission()
-        raise PermissionDenied(
-            _("У вашей роли недостаточно прав для загрузки или удаления источников данных.")
-        )
+__all__ = [
+    "CsvImportService",
+    "DataSourceImportError",
+    "DataSourceParserService",
+    "DataSourcePermissionMixin",
+    "DataSourceSecurityValidator",
+    "DataSourceService",
+    "DataSourceValidationError",
+    "XlsxImportService",
+    "can_manage_data_sources",
+]
 
 
 class DataSourceSecurityValidator:
@@ -77,11 +71,9 @@ class DataSourceSecurityValidator:
 
         Returns detected format ('csv' or 'xlsx').
         """
-        size = getattr(uploaded_file, "size", None)
-        if size is None:
-            uploaded_file.seek(0, os.SEEK_END)
-            size = uploaded_file.tell()
-            uploaded_file.seek(0)
+        declared_size = getattr(uploaded_file, "size", None)
+        actual_size = get_actual_stream_size(uploaded_file)
+        size = max(actual_size, int(declared_size or 0))
 
         if size == 0:
             raise DataSourceValidationError(_("Загруженный файл пуст (0 байт)."))
@@ -113,55 +105,17 @@ class DataSourceSecurityValidator:
 
     @classmethod
     def _validate_xlsx_archive(cls, file_obj: Any) -> None:
-        file_obj.seek(0)
-        magic = file_obj.read(4)
-        file_obj.seek(0)
-
-        if magic != b"PK\x03\x04":
-            raise DataSourceValidationError(
-                _("Файл не является корректным архивом Excel SpreadsheetML (.xlsx).")
-            )
-
         try:
-            with zipfile.ZipFile(file_obj, "r") as zf:
-                namelist = zf.namelist()
-                has_workbook = any(name.startswith("xl/workbook") for name in namelist)
-                has_content_types = "[Content_Types].xml" in namelist
-                if not (has_workbook or has_content_types):
-                    raise DataSourceValidationError(
-                        _("Архив XLSX не содержит структуры рабочей книги Excel.")
-                    )
-
-                for name in namelist:
-                    lower = name.lower()
-                    if lower.endswith((".exe", ".sh", ".bat", ".vbs", ".cmd", ".ps1", ".py")):
-                        raise DataSourceValidationError(
-                            _("В архиве обнаружен недопустимый файл %(name)s.") % {"name": name}
-                        )
-
-                total_uncompressed = 0
-                total_compressed = 0
-                for info in zf.infolist():
-                    total_uncompressed += info.file_size
-                    total_compressed += info.compress_size
-
-                if total_uncompressed > MAX_XLSX_UNCOMPRESSED_SIZE:
-                    raise DataSourceValidationError(
-                        _("Размер распакованных данных превышает лимит безопасности (100 МБ).")
-                    )
-
-                if total_compressed > 0:
-                    ratio = total_uncompressed / total_compressed
-                    if ratio > MAX_XLSX_DECOMPRESSION_RATIO:
-                        raise DataSourceValidationError(
-                            _("Подозрительно высокий коэффициент сжатия (возможная zip-бомба).")
-                        )
-        except zipfile.BadZipFile as err:
-            raise DataSourceValidationError(
-                _("Файл повреждён или не является валидным ZIP-контейнером.")
-            ) from err
+            validate_xlsx_archive(
+                file_obj,
+                max_file_size=MAX_DATA_SOURCE_FILE_SIZE,
+                max_uncompressed_size=MAX_XLSX_UNCOMPRESSED_SIZE,
+                max_decompression_ratio=MAX_XLSX_DECOMPRESSION_RATIO,
+                error_cls=DataSourceValidationError,
+            )
         finally:
-            file_obj.seek(0)
+            if hasattr(file_obj, "seek"):
+                file_obj.seek(0)
 
     @classmethod
     def _validate_csv_content(cls, prefix: bytes) -> None:
@@ -306,7 +260,8 @@ class XlsxImportService:
 
     @classmethod
     def get_sheet_names(cls, file_obj_or_path: Any) -> list[str]:
-        """Returns the list of worksheet names from the workbook."""
+        """Returns the list of worksheet names from the workbook after archive/XML validation."""
+        DataSourceSecurityValidator._validate_xlsx_archive(file_obj_or_path)
         wb = openpyxl.load_workbook(file_obj_or_path, read_only=True)
         try:
             return list(wb.sheetnames)
@@ -320,10 +275,11 @@ class XlsxImportService:
         sheet_name: str | None = None,
         max_rows: int = MAX_DATA_SOURCE_ROWS,
     ) -> tuple[list[str], list[dict[str, Any]], str]:
-        """Parses an XLSX file using openpyxl in streaming mode.
+        """Parses an XLSX file using openpyxl in streaming mode after archive/XML validation.
 
         Returns (headers, rows, sheet_name_used).
         """
+        DataSourceSecurityValidator._validate_xlsx_archive(file_obj_or_path)
         wb = openpyxl.load_workbook(file_obj_or_path, read_only=True, data_only=True)
         try:
             available_sheets = wb.sheetnames
@@ -462,6 +418,11 @@ class DataSourceService:
         description: str = "",
     ) -> DataSource:
         """Validates, parses, and persists a DataSource along with its DataRecords."""
+        if user is not None:
+            require_permission(
+                can_manage_data_sources(user),
+                _("У вашей роли недостаточно прав для загрузки источников данных."),
+            )
         detected_format = DataSourceSecurityValidator.validate_file(uploaded_file)
 
         # 1. Create model instance in PENDING status
@@ -536,7 +497,7 @@ class DataSourceService:
             )
             return data_source
 
-        except Exception as err:
+        except DataSourceValidationError as err:
             data_source.status = DataSourceStatus.ERROR
             data_source.error_message = str(err)
             data_source.save(update_fields=["status", "error_message", "updated_at"])
@@ -548,11 +509,24 @@ class DataSourceService:
                 user=user,
                 details={"name": data_source.name, "error": str(err)},
             )
-            if isinstance(err, DataSourceValidationError):
-                raise
-            raise DataSourceImportError(
-                _("Сбой при обработке набора данных: %(msg)s") % {"msg": str(err)}
-            ) from err
+            raise
+        except Exception as err:
+            logger.exception("Unexpected failure importing data source #%s", data_source.id)
+            safe_error = _(
+                "Не удалось обработать файл набора данных. Проверьте корректность структуры файла."
+            )
+            data_source.status = DataSourceStatus.ERROR
+            data_source.error_message = str(safe_error)
+            data_source.save(update_fields=["status", "error_message", "updated_at"])
+
+            AuditService.log(
+                action="DATA_SOURCE_IMPORT_FAILED",
+                resource_type="DataSource",
+                resource_id=str(data_source.id),
+                user=user,
+                details={"name": data_source.name, "error": type(err).__name__},
+            )
+            raise DataSourceImportError(safe_error) from err
 
     @classmethod
     def delete_data_source(cls, data_source_id: int, user: Any | None = None) -> bool:
@@ -560,6 +534,12 @@ class DataSourceService:
         data_source = DataSource.objects.filter(pk=data_source_id).first()
         if not data_source:
             return False
+
+        if user is not None:
+            require_permission(
+                can_delete_data_source(user, data_source),
+                _("У вас нет прав на удаление данного источника данных."),
+            )
 
         file_path = None
         if data_source.file:

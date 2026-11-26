@@ -1,17 +1,18 @@
 """Views for uploading, versioning, inspecting, and managing DOCX templates."""
 
 import logging
-import os
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import FileResponse, Http404, HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 
+from apps.core.archive_security import build_safe_file_response
+from apps.core.permissions import DocumentManagementPermissionMixin, get_safe_redirect_url
 from apps.documents.models import DocumentType
-from apps.documents.services import DocumentManagementPermissionMixin
 from apps.templates_manager.forms import TemplateUploadForm
 from apps.templates_manager.models import Template
 from apps.templates_manager.services import (
@@ -116,7 +117,7 @@ class TemplateUploadView(LoginRequiredMixin, DocumentManagementPermissionMixin, 
         return redirect("documents:detail", pk=doc_type.pk)
 
 
-class TemplateActivateView(LoginRequiredMixin, DocumentManagementPermissionMixin, View):
+class TemplateActivateView(DocumentManagementPermissionMixin, View):
     """Sets a specific template version as active for its document type."""
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
@@ -127,11 +128,16 @@ class TemplateActivateView(LoginRequiredMixin, DocumentManagementPermissionMixin
             _("Шаблон «%(name)s» v%(ver)d активирован.")
             % {"name": template.name, "ver": template.version},
         )
-        next_url = request.POST.get("next") or request.META.get("HTTP_REFERER")
-        return redirect(next_url or "documents:detail", pk=template.document_type_id)
+        fallback_url = reverse("documents:detail", kwargs={"pk": template.document_type_id})
+        target_url = get_safe_redirect_url(
+            request,
+            request.POST.get("next") or request.GET.get("next") or request.META.get("HTTP_REFERER"),
+            fallback_url,
+        )
+        return redirect(target_url)
 
 
-class TemplateArchiveView(LoginRequiredMixin, DocumentManagementPermissionMixin, View):
+class TemplateArchiveView(DocumentManagementPermissionMixin, View):
     """Moves a template version to the archived state."""
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
@@ -142,23 +148,24 @@ class TemplateArchiveView(LoginRequiredMixin, DocumentManagementPermissionMixin,
             _("Шаблон «%(name)s» v%(ver)d перемещён в архив.")
             % {"name": template.name, "ver": template.version},
         )
-        next_url = request.POST.get("next") or request.META.get("HTTP_REFERER")
-        return redirect(next_url or "documents:detail", pk=template.document_type_id)
+        fallback_url = reverse("documents:detail", kwargs={"pk": template.document_type_id})
+        target_url = get_safe_redirect_url(
+            request,
+            request.POST.get("next") or request.GET.get("next") or request.META.get("HTTP_REFERER"),
+            fallback_url,
+        )
+        return redirect(target_url)
 
 
-class TemplateDownloadView(LoginRequiredMixin, View):
-    """Safely downloads the DOCX template file."""
+class TemplateDownloadView(DocumentManagementPermissionMixin, View):
+    """Safely downloads the DOCX template file (operational roles only)."""
 
     def get(self, request: HttpRequest, pk: int) -> HttpResponse:
         template = get_object_or_404(Template, pk=pk)
-        if not template.file or not os.path.exists(template.file.path):
-            raise Http404(_("Файл шаблона не найден на диске."))
-
         download_name = f"{template.name}_v{template.version}.docx"
-        response = FileResponse(
-            open(template.file.path, "rb"),
-            as_attachment=True,
-            filename=download_name,
+        return build_safe_file_response(
+            template.file,
+            download_name=download_name,
             content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            not_found_message=_("Файл шаблона не найден на диске."),
         )
-        return response

@@ -7,6 +7,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 
+from apps.core.permissions import (
+    can_delete_mapping_config,
+    can_view_data_source,
+    can_view_mapping_config,
+    require_permission,
+    scope_mapping_configs,
+)
 from apps.data_sources.models import DataSource, DataSourceStatus
 from apps.mapping.forms import MappingConfigForm
 from apps.mapping.models import MappingConfig
@@ -19,18 +26,18 @@ from apps.mapping.services import (
 from apps.templates_manager.models import Template, TemplateStatus
 
 
-class MappingListView(LoginRequiredMixin, View):
+class MappingListView(LoginRequiredMixin, MappingPermissionMixin, View):
     """Lists existing field mapping configurations."""
 
     def get(self, request: HttpRequest) -> HttpResponse:
-        mappings = (
+        mappings = scope_mapping_configs(
             MappingConfig.objects.select_related(
                 "template", "data_source", "template__document_type", "created_by"
             )
             .prefetch_related("rules")
-            .all()
-            .order_by("-created_at")
-        )
+            .all(),
+            request.user,
+        ).order_by("-created_at")
         return render(
             request,
             "mapping/list.html",
@@ -60,9 +67,14 @@ class MappingCreateView(LoginRequiredMixin, MappingPermissionMixin, View):
             ).first()
 
         if data_source_id and str(data_source_id).isdigit():
-            selected_data_source = DataSource.objects.filter(
-                pk=int(data_source_id), status=DataSourceStatus.READY
-            ).first()
+            ds_candidate = DataSource.objects.filter(pk=int(data_source_id)).first()
+            if ds_candidate is not None:
+                require_permission(
+                    can_view_data_source(request.user, ds_candidate),
+                    _("Недостаточно прав для использования выбранного источника данных."),
+                )
+                if ds_candidate.status == DataSourceStatus.READY:
+                    selected_data_source = ds_candidate
 
         if not name and selected_template and selected_data_source:
             doc_type_name = getattr(
@@ -82,7 +94,8 @@ class MappingCreateView(LoginRequiredMixin, MappingPermissionMixin, View):
                 "description": description,
                 "template": selected_template,
                 "data_source": selected_data_source,
-            }
+            },
+            user=request.user,
         )
 
         template_variables = selected_template.detected_variables if selected_template else []
@@ -119,7 +132,16 @@ class MappingCreateView(LoginRequiredMixin, MappingPermissionMixin, View):
         )
 
     def post(self, request: HttpRequest) -> HttpResponse:
-        form = MappingConfigForm(request.POST)
+        raw_ds_id = request.POST.get("data_source")
+        if raw_ds_id and str(raw_ds_id).isdigit():
+            ds_candidate = DataSource.objects.filter(pk=int(raw_ds_id)).first()
+            if ds_candidate is not None:
+                require_permission(
+                    can_view_data_source(request.user, ds_candidate),
+                    _("Недостаточно прав для использования выбранного источника данных."),
+                )
+
+        form = MappingConfigForm(request.POST, user=request.user)
         if not form.is_valid():
             template_id = request.POST.get("template")
             data_source_id = request.POST.get("data_source")
@@ -209,7 +231,7 @@ class MappingCreateView(LoginRequiredMixin, MappingPermissionMixin, View):
         return redirect("mapping:detail", pk=config.pk)
 
 
-class MappingDetailView(LoginRequiredMixin, View):
+class MappingDetailView(LoginRequiredMixin, MappingPermissionMixin, View):
     """Displays detailed rule bindings and validation status for a MappingConfig."""
 
     def get(self, request: HttpRequest, pk: int) -> HttpResponse:
@@ -218,6 +240,10 @@ class MappingDetailView(LoginRequiredMixin, View):
                 "template", "data_source", "template__document_type", "created_by"
             ).prefetch_related("rules"),
             pk=pk,
+        )
+        require_permission(
+            can_view_mapping_config(request.user, mapping_config),
+            _("Недостаточно прав для просмотра этой схемы маппинга."),
         )
 
         is_valid, validation_errors = MappingValidationService.validate_mapping_config(
@@ -244,6 +270,10 @@ class MappingDeleteView(LoginRequiredMixin, MappingPermissionMixin, View):
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
         config = get_object_or_404(MappingConfig, pk=pk)
+        require_permission(
+            can_delete_mapping_config(request.user, config),
+            _("Недостаточно прав для удаления этой схемы маппинга."),
+        )
         name = config.name
         MappingService.delete_mapping_config(pk, user=request.user)
         messages.info(

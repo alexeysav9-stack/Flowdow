@@ -159,6 +159,32 @@ def viewer_user(db) -> User:
 
 
 @pytest.fixture
+def manager_user(db) -> User:
+    """Creates a manager user with org-wide operational access."""
+    return User.objects.create_user(
+        username="manageruser",
+        email="manager@flowdow.local",
+        password="managerpassword123",
+        role=UserRole.MANAGER,
+        first_name="Marina",
+        last_name="Manager",
+    )
+
+
+@pytest.fixture
+def other_operator_user(db) -> User:
+    """Creates a second operator user for object-level BOLA tests."""
+    return User.objects.create_user(
+        username="operator2",
+        email="operator2@flowdow.local",
+        password="operator2password123",
+        role=UserRole.OPERATOR,
+        first_name="Oleg",
+        last_name="Operator",
+    )
+
+
+@pytest.fixture
 def default_organization(db) -> Organization:
     """Creates default organization."""
     org = Organization.objects.create(

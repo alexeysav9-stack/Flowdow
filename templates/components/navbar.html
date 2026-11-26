@@ -64,11 +64,13 @@
             <i class="bi bi-person"></i> {% trans "Мой профиль" %}
           </a>
         </li>
+        {% if user_permissions.can_manage_settings %}
         <li>
           <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'organizations:settings' %}">
             <i class="bi bi-gear"></i> {% trans "Настройки организации" %}
           </a>
         </li>
+        {% endif %}
         <li><hr class="dropdown-divider"></li>
         <li>
           <form method="post" action="{% url 'accounts:logout' %}">

@@ -35,7 +35,9 @@ class UserLoginView(LoginView):
 
 
 class UserLogoutView(View):
-    """Handles logout for both POST and GET safely."""
+    """Handles logout strictly via CSRF-protected POST."""
+
+    http_method_names = ["post", "options"]
 
     def post(self, request: HttpRequest) -> HttpResponse:
         if request.user.is_authenticated:
@@ -49,9 +51,6 @@ class UserLogoutView(View):
             logout(request)
         messages.info(request, "You have been safely logged out.")
         return redirect("accounts:login")
-
-    def get(self, request: HttpRequest) -> HttpResponse:
-        return self.post(request)
 
 
 class UserProfileView(LoginRequiredMixin, View):

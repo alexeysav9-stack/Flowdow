@@ -50,13 +50,18 @@ def batch_fixture(db, admin_user):
 
 
 @pytest.mark.django_db
-def test_generation_history_view(client, standard_user, batch_fixture):
-    """Verifies generation history view for authenticated user."""
+def test_generation_history_view(client, admin_user, standard_user, batch_fixture):
+    """Verifies generation history view shows batches to admin/owner and hides foreign batches."""
     _mapping, batch = batch_fixture
-    client.force_login(standard_user)
+    client.force_login(admin_user)
     res = client.get(reverse("generation:list"))
     assert res.status_code == 200
     assert f"#{batch.id}" in res.content.decode("utf-8")
+
+    client.force_login(standard_user)
+    res_op = client.get(reverse("generation:list"))
+    assert res_op.status_code == 200
+    assert f"#{batch.id}" not in res_op.content.decode("utf-8")
 
 
 @pytest.mark.django_db
@@ -85,15 +90,19 @@ def test_generation_wizard_view_get_and_post(client, admin_user, batch_fixture):
 
 
 @pytest.mark.django_db
-def test_generation_detail_view(client, standard_user, batch_fixture):
-    """Verifies generation batch detail view with KPI cards and document list."""
+def test_generation_detail_view(client, admin_user, standard_user, batch_fixture):
+    """Verifies batch detail view for admin/owner and 403 BOLA denial for other operator."""
     _mapping, batch = batch_fixture
-    client.force_login(standard_user)
+    client.force_login(admin_user)
     res = client.get(reverse("generation:detail", kwargs={"pk": batch.pk}))
     assert res.status_code == 200
     content = res.content.decode("utf-8")
     assert f"Пакет генерации #{batch.id}" in content
     assert "Сформировано успешно" in content
+
+    client.force_login(standard_user)
+    res_denied = client.get(reverse("generation:detail", kwargs={"pk": batch.pk}))
+    assert res_denied.status_code == 403
 
 
 @pytest.mark.django_db

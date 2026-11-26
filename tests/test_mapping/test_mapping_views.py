@@ -44,13 +44,18 @@ def mapping_setup(db, admin_user):
 
 
 @pytest.mark.django_db
-def test_mapping_list_view(client, standard_user, mapping_setup):
-    """Verifies that authenticated user can view mappings list."""
+def test_mapping_list_view(client, admin_user, standard_user, mapping_setup):
+    """Verifies admin sees org mappings while operator sees only own mappings."""
     _tmpl, _ds, _mapping = mapping_setup
+    client.force_login(admin_user)
+    res_admin = client.get(reverse("mapping:list"))
+    assert res_admin.status_code == 200
+    assert "Маппинг клиентов" in res_admin.content.decode("utf-8")
+
     client.force_login(standard_user)
-    res = client.get(reverse("mapping:list"))
-    assert res.status_code == 200
-    assert "Маппинг клиентов" in res.content.decode("utf-8")
+    res_op = client.get(reverse("mapping:list"))
+    assert res_op.status_code == 200
+    assert "Маппинг клиентов" not in res_op.content.decode("utf-8")
 
 
 @pytest.mark.django_db
@@ -86,14 +91,18 @@ def test_mapping_create_view_get_and_post(client, admin_user, mapping_setup):
 
 
 @pytest.mark.django_db
-def test_mapping_detail_view(client, standard_user, mapping_setup):
-    """Verifies detail view of a mapping configuration."""
+def test_mapping_detail_view(client, admin_user, standard_user, mapping_setup):
+    """Verifies detail view for owner/admin and 403 BOLA denial for other operator."""
     _tmpl, _ds, mapping = mapping_setup
-    client.force_login(standard_user)
+    client.force_login(admin_user)
     res = client.get(reverse("mapping:detail", kwargs={"pk": mapping.pk}))
     assert res.status_code == 200
     assert "Маппинг клиентов" in res.content.decode("utf-8")
     assert "client_name" in res.content.decode("utf-8")
+
+    client.force_login(standard_user)
+    res_denied = client.get(reverse("mapping:detail", kwargs={"pk": mapping.pk}))
+    assert res_denied.status_code == 403
 
 
 @pytest.mark.django_db

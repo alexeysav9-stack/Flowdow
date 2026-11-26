@@ -22,7 +22,7 @@
       <p class="text-muted small mt-1 mb-0">{{ doc_type.description }}</p>
     {% endif %}
   </div>
-  {% if user.role != "VIEWER" %}
+  {% if user_permissions.can_manage_documents %}
     <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#uploadTemplateModal">
       <i class="bi bi-cloud-arrow-up"></i>
       <span>{% trans "Загрузить новый шаблон" %}</span>
@@ -174,10 +174,12 @@
             <td class="text-muted small">{{ tpl.created_at|date:"d.m.Y H:i" }}</td>
             <td class="text-end">
               <div class="btn-group btn-group-sm">
-                <a href="{% url 'templates_manager:download' tpl.pk %}" class="btn btn-outline-secondary" title="{% trans 'Скачать DOCX' %}">
-                  <i class="bi bi-download"></i>
-                </a>
-                {% if user.role != "VIEWER" %}
+                {% if user_permissions.can_download_templates %}
+                  <a href="{% url 'templates_manager:download' tpl.pk %}" class="btn btn-outline-secondary" title="{% trans 'Скачать DOCX' %}">
+                    <i class="bi bi-download"></i>
+                  </a>
+                {% endif %}
+                {% if user_permissions.can_manage_documents %}
                   {% if tpl.status != "active" %}
                     <form method="post" action="{% url 'templates_manager:activate' tpl.pk %}" class="d-inline">
                       {% csrf_token %}
@@ -203,7 +205,7 @@
             <td colspan="6" class="text-center py-5 text-muted">
               <i class="bi bi-file-earmark-plus d-block fs-1 mb-2 text-secondary"></i>
               <p class="mb-2">{% trans "Для этого типа документа ещё не загружено ни одного шаблона." %}</p>
-              {% if user.role != "VIEWER" %}
+              {% if user_permissions.can_manage_documents %}
                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#uploadTemplateModal">
                   <i class="bi bi-cloud-arrow-up me-1"></i> {% trans "Загрузить первый DOCX шаблон" %}
                 </button>
@@ -217,7 +219,7 @@
 </div>
 
 <!-- Upload Template Modal -->
-{% if user.role != "VIEWER" %}
+{% if user_permissions.can_manage_documents %}
 <div class="modal fade" id="uploadTemplateModal" tabindex="-1" aria-labelledby="uploadTemplateModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">

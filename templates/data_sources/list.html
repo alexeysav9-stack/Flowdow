@@ -9,7 +9,7 @@
     <h4 class="fw-bold mb-1 text-dark">{% trans "Источники данных" %}</h4>
     <p class="text-muted small mb-0">{% trans "Импортированные таблицы CSV и XLSX для автоматической подстановки в шаблоны документов." %}</p>
   </div>
-  {% if user.role != "VIEWER" %}
+  {% if user_permissions.can_manage_data_sources %}
     <a href="{% url 'data_sources:upload' %}" class="btn btn-primary d-inline-flex align-items-center gap-2">
       <i class="bi bi-cloud-arrow-up"></i>
       <span>{% trans "Загрузить таблицу" %}</span>
@@ -93,12 +93,12 @@
                 <a href="{% url 'data_sources:detail' ds.pk %}" class="btn btn-outline-secondary" title="{% trans 'Просмотр записей' %}">
                   <i class="bi bi-eye"></i>
                 </a>
-                {% if ds.file %}
+                {% if ds.file and user_permissions.can_manage_data_sources %}
                   <a href="{% url 'data_sources:download' ds.pk %}" class="btn btn-outline-secondary" title="{% trans 'Скачать исходный файл' %}">
                     <i class="bi bi-download"></i>
                   </a>
                 {% endif %}
-                {% if user.role != "VIEWER" %}
+                {% if user_permissions.can_manage_data_sources %}
                   <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteDsModal{{ ds.pk }}" title="{% trans 'Удалить' %}">
                     <i class="bi bi-trash"></i>
                   </button>
@@ -106,7 +106,7 @@
               </div>
 
               <!-- Delete Confirmation Modal -->
-              {% if user.role != "VIEWER" %}
+              {% if user_permissions.can_manage_data_sources %}
                 <div class="modal fade text-start" id="deleteDsModal{{ ds.pk }}" tabindex="-1" aria-hidden="true">
                   <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
@@ -140,7 +140,7 @@
             <td colspan="7" class="text-center py-5 text-muted">
               <i class="bi bi-file-earmark-spreadsheet d-block fs-1 mb-2 text-secondary"></i>
               <p class="mb-2">{% trans "Источники данных пока не загружены." %}</p>
-              {% if user.role != "VIEWER" %}
+              {% if user_permissions.can_manage_data_sources %}
                 <a href="{% url 'data_sources:upload' %}" class="btn btn-primary btn-sm">
                   <i class="bi bi-cloud-arrow-up me-1"></i>{% trans "Загрузить первую таблицу" %}
                 </a>

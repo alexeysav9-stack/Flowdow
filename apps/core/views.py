@@ -12,7 +12,7 @@ class DashboardView(LoginRequiredMixin, View):
     """Main dashboard presenting operations statistics and quick actions."""
 
     def get(self, request: HttpRequest) -> HttpResponse:
-        metrics = DashboardService.get_metrics()
+        metrics = DashboardService.get_metrics(user=request.user)
         context = {
             "title": "Dashboard",
             "active_nav": "dashboard",
